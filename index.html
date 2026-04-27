@@ -40,7 +40,7 @@
 
     /* Dragon */
     .scene-dragon{position:absolute;top:48px;right:0;bottom:28px;z-index:5;width:62%;pointer-events:none;display:flex;align-items:flex-end;justify-content:flex-end}
-    .scene-dragon img{width:100%;height:100%;object-fit:contain;object-position:right bottom;mix-blend-mode:multiply}
+    .scene-dragon img{width:100%;height:100%;object-fit:contain;object-position:right bottom}
 
     /* HUD bar at bottom of scene-top */
     .hud-bar{position:absolute;bottom:0;left:0;right:0;z-index:12;display:flex;align-items:center;justify-content:space-between;padding:5px 14px;background:rgba(0,0,0,.60);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-top:1px solid rgba(255,255,255,.06)}
@@ -205,7 +205,30 @@
 
     /* ── CHIPS (hidden, for compat) ── */
     .skill-chips{display:none}
+
+    /* ── WHITE BACKGROUND REMOVAL ── */
+    .scene-hero-col img{
+      filter:url(#remove-white) drop-shadow(0 0 8px rgba(68,255,136,.5));
+      image-rendering:pixelated;
+    }
+    .scene-dragon img{
+      filter:url(#remove-white) drop-shadow(0 0 14px rgba(255,80,80,.4));
+    }
   </style>
+
+  <!-- SVG filter to cut out near-white pixels -->
+  <svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <filter id="remove-white" color-interpolation-filters="sRGB" x="0" y="0" width="100%" height="100%">
+        <!-- alpha = -2R -2G -2B +7A -1  →  white→0, dark/color→opaque -->
+        <feColorMatrix type="matrix"
+          values="1 0 0 0 0
+                  0 1 0 0 0
+                  0 0 1 0 0
+                  -2 -2 -2 7 -1"/>
+      </filter>
+    </defs>
+  </svg>
 </head>
 <body>
 
@@ -480,7 +503,8 @@ var state = {
   boss:'', stats:{}, skills:{}, log:[],
   days:{}, chozetsuDate:null, lastDialogDate:null,
   grimoire:{STR:[],INT:[],CHA:[],VIT:[],DEX:[]},
-  quests:[], questDate:null
+  quests:[], questDate:null,
+  questRefreshCount:0, questRefreshDate:null
 };
 STATS.forEach(function(s){ state.stats[s.key]={level:1,xp:0}; });
 
@@ -497,8 +521,10 @@ function load(){
     if(d.lastDialogDate) state.lastDialogDate=d.lastDialogDate;
     if(d.grimoire){STATS.forEach(function(s){if(d.grimoire[s.key])state.grimoire[s.key]=d.grimoire[s.key];});}
     if(d.stats){STATS.forEach(function(s){if(d.stats[s.key])state.stats[s.key]=d.stats[s.key];});}
-    if(d.quests)    state.quests=d.quests;
-    if(d.questDate) state.questDate=d.questDate;
+    if(d.quests)             state.quests=d.quests;
+    if(d.questDate)          state.questDate=d.questDate;
+    if(d.questRefreshCount)  state.questRefreshCount=d.questRefreshCount;
+    if(d.questRefreshDate)   state.questRefreshDate=d.questRefreshDate;
   }catch(_){}
 }
 
@@ -832,6 +858,16 @@ var QUEST_DIFF_MULT=[0,0.8,1.2,1.6,2.2,3.0];
 function diffStars(d){return '⭐'.repeat(d)+'☆'.repeat(Math.max(0,5-d));}
 function questXp(diff){return Math.round(BASE_EXP*QUEST_DIFF_MULT[Math.min(5,Math.max(1,diff))]);}
 
+// ── QUEST REFRESH BUTTON STATE ──
+function updateQuestRefreshBtn(){
+  var btn=document.getElementById('quests-refresh');if(!btn)return;
+  var today=todayStr();
+  var count=state.questRefreshDate===today?state.questRefreshCount:0;
+  var remaining=3-count;
+  if(remaining>0){btn.textContent='🤖 あと'+remaining+'回';btn.disabled=false;btn.style.opacity='1';}
+  else{btn.textContent='🚫 本日終了';btn.disabled=true;btn.style.opacity='.4';}
+}
+
 // ── RENDER QUESTS ──
 function renderQuests(){
   var con=document.getElementById('quest-list');if(!con)return;
@@ -864,6 +900,7 @@ function renderQuests(){
     }
     con.appendChild(card);
   });
+  updateQuestRefreshBtn();
 }
 
 // ── GENERATE QUESTS (AI) ──
@@ -871,24 +908,43 @@ function generateQuests(){
   var btn=document.getElementById('quests-refresh');
   if(!apiKey){alert('クエスト生成にはAPIキーが必要です\n⚙ 設定からAPIキーを入力してください');return;}
   if(!state.boss){alert('先にラスボス（最終目標）を設定してください');return;}
-  if(btn){btn.textContent='…';btn.classList.add('loading');}
-  var statsInfo=STATS.map(function(s){return s.key+' Lv.'+state.stats[s.key].level;}).join(', ');
-  var prompt='あなたはRPGのクエストマスターです。以下のプレイヤー情報から今日挑戦すべきクエストを3つ提案してください。\n\n最終目標: "'+state.boss+'"\n現在のレベル: '+statsInfo+'\n\nルール:\n- 1日で完了できる具体的な行動\n- 最終目標の達成に直結するもの\n- 難易度1(簡単)〜5(超困難)で設定\n\nJSONのみ(マークダウン不要):\n[{"action":"具体的な行動(20文字以内)","stat":"STR|INT|CHA|VIT|DEX","difficulty":1-5,"reason":"目標との関連(20文字以内)"},...]';
+
+  // ── Daily limit: 3 times per day ──
+  var today=todayStr();
+  if(state.questRefreshDate!==today){state.questRefreshCount=0;state.questRefreshDate=today;}
+  if(state.questRefreshCount>=3){alert('クエスト更新は1日3回までです。明日また挑戦しよう！');return;}
+
+  if(btn){btn.textContent='生成中…';btn.classList.add('loading');}
+
+  var statsWithXp=STATS.map(function(s){
+    var st=state.stats[s.key];return s.key+' Lv.'+st.level+'('+xpPct(st)+'%)';
+  }).join(', ');
+  var recentLog=state.log.slice(-5).map(function(e){return e.text;}).join('、')||'なし';
+
+  var prompt='あなたはRPGのクエストマスターです。プレイヤーの最終目標達成を助ける今日のクエストを3つ生成してください。\n\n【プレイヤー状態】\n最終目標: "'+state.boss+'"\nステータス(レベル・XP%): '+statsWithXp+'\n最近の行動(直近5件): '+recentLog+'\n\n【生成ルール】\n1. 最終目標に直結する具体的な行動（動詞で終わる形式）\n2. 3つは必ず異なるステータスを対象にする\n3. XP%が低いステータスを優先して強化する\n4. 難易度の目安: 1=5分以内, 2=30分以内, 3=1〜2時間, 4=半日, 5=丸一日\n5. 最近の行動と重複しないこと\n\nJSONのみ(マークダウン・コードブロック不要):\n[{"action":"動詞で終わる具体的行動(20文字以内)","stat":"STR|INT|CHA|VIT|DEX","difficulty":1-5,"reason":"最終目標との関連(20文字以内)"},...]';
+
   fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
     headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:400,messages:[{role:'user',content:prompt}]})
+    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:500,temperature:0,messages:[{role:'user',content:prompt}]})
   }).then(function(r){return r.ok?r.json():null;}).then(function(d){
-    if(btn){btn.textContent='🤖';btn.classList.remove('loading');}
-    if(!d||!d.content||!d.content[0])return;
-    var m=d.content[0].text.match(/\[[\s\S]*?\]/);if(!m)return;
-    var quests=JSON.parse(m[0]);
-    state.quests=quests.slice(0,3).map(function(q){
-      return{action:q.action||'',stat:(['STR','INT','CHA','VIT','DEX'].indexOf(q.stat)!==-1?q.stat:'STR'),difficulty:Math.min(5,Math.max(1,parseInt(q.difficulty)||2)),reason:q.reason||'',done:false};
-    });
-    state.questDate=todayStr();save();renderQuests();
+    if(btn){btn.classList.remove('loading');}
+    if(!d||!d.content||!d.content[0]){updateQuestRefreshBtn();return;}
+    var raw=d.content[0].text.replace(/```[a-z]*\n?/g,'').trim();
+    var m=raw.match(/\[[\s\S]*\]/);if(!m){updateQuestRefreshBtn();return;}
+    try{
+      var quests=JSON.parse(m[0]);
+      state.quests=quests.slice(0,3).map(function(q){
+        return{action:q.action||'',stat:(['STR','INT','CHA','VIT','DEX'].indexOf(q.stat)!==-1?q.stat:'STR'),difficulty:Math.min(5,Math.max(1,parseInt(q.difficulty)||2)),reason:q.reason||'',done:false};
+      });
+      state.questDate=today;
+      state.questRefreshCount++;
+      state.questRefreshDate=today;
+      save();renderQuests();
+    }catch(e){updateQuestRefreshBtn();}
   }).catch(function(){
-    if(btn){btn.textContent='🤖';btn.classList.remove('loading');}
+    if(btn){btn.classList.remove('loading');}
+    updateQuestRefreshBtn();
   });
 }
 
@@ -1086,16 +1142,17 @@ function achieve(text,aiOverride){
 // ══════════════════════════════════════════
 function classifyWithAI(text){
   if(!apiKey)return Promise.resolve(null);
-  var prompt='あなたは生活ゲーム化RPGの行動分類AIです。\n\n5つのステータス:\n- STR (Action/行動量): 運動,筋トレ,ジム,走る,外出,スポーツ,現場作業,歩く\n- INT (Knowledge/知力): 読書,勉強,学習,研究,コード,プログラミング,分析,企画,論文\n- CHA (Social/魅力): 会話,SNS,面談,プレゼン,交流,ミーティング,投稿,ブログ,懇親\n- VIT (Wellness/生命力): 睡眠,食事,瞑想,休息,健康,ウォーキング,料理,サウナ,ストレッチ\n- DEX (Technique/技術): 作業,デザイン,整理,資料作成,完了,タスク,改善,修正,片付け\n\n入力テキスト: "'+text+'"\n\nJSONのみ返してください（マークダウン不要）:\n{"stat":"STR|INT|CHA|VIT|DEX","skill":"スキル名（2-8文字、日本語）","grimoire":true/false,"insight":"学びや気づきの要点（grimoireがtrueの場合のみ、30文字以内）"}';
+  var recentLog=state.log.slice(-3).map(function(e){return '['+e.stat+'] '+e.text;}).join('\n')||'なし';
+  var prompt='あなたはライフゲームRPGの行動分類専門AIです。プレイヤーの最終目標と行動履歴を踏まえて、入力テキストを最も適切なステータスに分類してください。\n\n【ステータス定義と分類例】\n- STR（行動力）: 激しい運動・スポーツ・外出・肉体労働\n  例: 筋トレ→STR, ジム→STR, マラソン→STR, 自転車→STR\n  ※散歩・ウォーキングはVIT優先\n- INT（知力）: 学習・調査・思考・企画・読書\n  例: 本を読んだ→INT, 勉強した→INT, 企画書→INT, 調べた→INT\n- CHA（魅力）: 対人交流・発信・コミュニケーション\n  例: 友達と会った→CHA, SNS投稿→CHA, プレゼン→CHA, 営業→CHA\n- VIT（生命力）: 睡眠・食事・健康・回復・軽い運動\n  例: 早寝→VIT, 野菜を食べた→VIT, 瞑想→VIT, 散歩→VIT, サウナ→VIT\n- DEX（技術）: 制作・作業・完成・ツール操作\n  例: コードを書いた→DEX, 資料作成→DEX, デザイン→DEX, 整理→DEX\n\n【プレイヤー情報】\n最終目標: "'+state.boss+'"\n直近の行動:\n'+recentLog+'\n\n【分類する行動】\n"'+text+'"\n\nJSONのみ返してください（マークダウン・説明不要）:\n{"stat":"STR|INT|CHA|VIT|DEX","skill":"スキル名(2-8文字・日本語)","grimoire":true/false,"insight":"気づきの要点(grimoireがtrueの場合のみ・30文字以内)"}';
   return fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
     headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:150,messages:[{role:'user',content:prompt}]})
+    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:150,temperature:0,messages:[{role:'user',content:prompt}]})
   }).then(function(resp){
     if(!resp.ok)return null;return resp.json();
   }).then(function(data){
     if(!data||!data.content||!data.content[0])return null;
-    var content=data.content[0].text;
+    var content=data.content[0].text.replace(/```[a-z]*\n?/g,'').trim();
     var match=content.match(/\{[\s\S]*?\}/);if(!match)return null;
     var result=JSON.parse(match[0]);
     if(['STR','INT','CHA','VIT','DEX'].indexOf(result.stat)===-1)return null;
