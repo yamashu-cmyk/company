@@ -368,7 +368,7 @@
     <div class="auth-logo">⚔ LIFE QUEST OS</div>
     <div class="auth-title">プレインターン卒業</div>
     <div class="auth-sub">プレイヤー名と暗証番号を設定してください</div>
-    <input class="auth-input" id="setup-name" type="text" placeholder="プレイヤー名（例: やましゅ）" maxlength="20" autocomplete="off">
+    <input class="auth-input" id="setup-name" type="text" placeholder="プレイヤー名を入力" maxlength="20" autocomplete="off">
     <input class="auth-input" id="setup-pin" type="password" inputmode="numeric" placeholder="暗証番号（4桁）" maxlength="4" pattern="[0-9]*" autocomplete="new-password">
     <input class="auth-input" id="setup-pin2" type="password" inputmode="numeric" placeholder="暗証番号（確認）" maxlength="4" pattern="[0-9]*" autocomplete="new-password">
     <button class="auth-btn" id="setup-btn">冒険を始める</button>
@@ -1358,11 +1358,7 @@ function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').repl
 if(location.search.includes('admin')){
   document.getElementById('app-shell').style.display='none';
   document.getElementById('auth-overlay').classList.add('hidden');
-  if(sessionStorage.getItem('lq_admin_auth')==='1'){
-    showDashboard();
-  } else {
-    showAdminAuth();
-  }
+  showDashboard();
 } else {
   load();
   state.boss='プレインターン卒業';
