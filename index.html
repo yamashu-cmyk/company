@@ -12,7 +12,7 @@
   <title>Life Quest OS</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
-    :root{--str:#ff4444;--int:#00eeff;--cha:#ff44ff;--vit:#44ff88;--dex:#ffee00;--font-cyber:'Orbitron','Courier New',monospace}
+    :root{--str:#ff4444;--int:#00eeff;--cha:#ff44ff;--vit:#44ff88;--dex:#ffee00;--mind:#9b59b6;--skill:#3498db;--action:#e74c3c;--font-cyber:'Orbitron','Courier New',monospace}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
     html,body{height:100%;overflow:hidden}
     body{color:#fff;font-family:'Courier New',Courier,monospace;background:url('Gemini_Generated_Image_ulplw3ulplw3ulpl.png') center top/cover no-repeat fixed}
@@ -109,6 +109,18 @@
     .offday-btn{flex-shrink:0;background:none;border:1px solid #1a1a1a;border-radius:9px;color:#444;font-family:inherit;font-size:10px;padding:11px 10px;cursor:pointer;transition:color .2s,border-color .2s;white-space:nowrap;letter-spacing:1px}
     .offday-btn:hover{color:#777;border-color:#333}.offday-btn.active{color:#44aaff;border-color:#44aaff}
     .achieve-btn.loading{color:#333;border-color:#111;pointer-events:none;letter-spacing:1px;font-size:12px}
+    .quick-chips{display:flex;gap:6px;overflow-x:auto;padding:0 0 4px;scrollbar-width:none}
+    .quick-chips::-webkit-scrollbar{display:none}
+    .report-label{font-size:10px;color:#444;letter-spacing:2px;padding:0 2px;margin-bottom:2px}
+    .report-input{width:100%;background:#080808;border:1px solid #1e1e1e;border-radius:9px;color:#fff;font-family:inherit;font-size:14px;padding:11px 15px;outline:none;resize:none;transition:border-color .2s;line-height:1.5}
+    .report-input:focus{border-color:#333}.report-input::placeholder{color:#1e1e1e}
+    .quick-chip{flex-shrink:0;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:20px;color:#bbb;font-family:inherit;font-size:11px;padding:4px 11px;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s}
+    .quick-chip:active{background:rgba(255,255,255,.22);color:#fff}
+    .quick-chip[data-stat="STR"]{border-left:3px solid #e74c3c}
+    .quick-chip[data-stat="INT"]{border-left:3px solid #3498db}
+    .quick-chip[data-stat="CHA"]{border-left:3px solid #e91e8c}
+    .quick-chip[data-stat="VIT"]{border-left:3px solid #2ecc71}
+    .quick-chip[data-stat="DEX"]{border-left:3px solid #f39c12}
 
     /* ── XP POPUP ── */
     .xp-popup{position:fixed;pointer-events:none;z-index:50;font-size:12px;font-weight:bold;font-family:'Courier New',monospace;text-shadow:0 0 8px currentColor;animation:xp-float 1.3s ease-out forwards}
@@ -192,6 +204,45 @@
     .settings-btns{display:flex;gap:8px;margin-top:8px}
     .settings-btn{flex:1;background:none;border:1px solid #222;border-radius:8px;color:#555;font-family:inherit;font-size:13px;padding:11px 8px;cursor:pointer;letter-spacing:1px;transition:color .2s,border-color .2s}.settings-btn:hover{color:#fff;border-color:#555}
     .settings-btn.primary{background:#fff;color:#000;border-color:#fff;font-weight:bold}.settings-btn.primary:hover{opacity:.85}
+    .settings-io-row{display:flex;gap:8px}.settings-io-row .settings-btn{font-size:12px;padding:9px 8px}
+
+    /* ── ADMIN DASHBOARD ── */
+    .admin-shell{display:flex;flex-direction:column;height:100dvh;background:#050505;color:#fff;font-family:inherit}
+    .admin-shell.hidden{display:none}
+    .admin-header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid #1a1a1a;font-size:13px;letter-spacing:2px;flex-shrink:0}
+    .admin-import-btn{background:#111;border:1px solid #333;border-radius:8px;color:#ccc;font-family:inherit;font-size:12px;padding:8px 14px;cursor:pointer;letter-spacing:1px;transition:background .15s}.admin-import-btn:hover{background:#1a1a1a}
+    .admin-grid{flex:1;overflow-y:auto;padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;align-content:start}
+    .admin-card{background:#0d0d0d;border:1px solid #1e1e1e;border-radius:12px;padding:16px}
+    .admin-card-name{font-size:10px;letter-spacing:3px;color:#444;margin-bottom:4px}
+    .admin-card-boss{font-size:13px;font-weight:bold;margin-bottom:10px;line-height:1.4;color:#ccc}
+    .admin-stat-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+    .admin-stat-chip{font-size:10px;padding:3px 8px;border-radius:10px;border:1px solid #1e1e1e;color:#666}
+    .admin-meta{font-size:10px;color:#333;display:flex;justify-content:space-between;margin-top:4px}
+    .admin-total-lv{font-size:24px;font-weight:bold;color:#fff;margin-bottom:6px}
+    .admin-empty{color:#333;font-size:12px;text-align:center;grid-column:1/-1;padding:80px 0;letter-spacing:2px}
+    .admin-progress-bar{height:5px;background:#111;border-radius:3px;margin:8px 0;overflow:hidden}
+    .admin-progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#3498db,#9b59b6);transition:width .4s}
+    .admin-progress-pct{font-size:10px;color:#555;text-align:right;margin-top:2px;margin-bottom:8px}
+    .admin-streak-row{display:flex;gap:12px;font-size:11px;color:#555;margin-bottom:8px}
+
+    /* ── AUTH ── */
+    .auth-overlay{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:300;padding:28px}
+    .auth-overlay.hidden{display:none}
+    .auth-card{width:100%;max-width:360px;display:flex;flex-direction:column;gap:14px}
+    .auth-card.hidden{display:none}
+    .auth-logo{font-size:11px;letter-spacing:4px;color:#444;text-align:center}
+    .auth-title{font-size:18px;font-weight:bold;text-align:center;letter-spacing:3px;color:#fff}
+    .auth-name-display{font-size:26px;font-weight:bold;text-align:center;color:#fff;letter-spacing:2px}
+    .auth-sub{font-size:12px;color:#444;text-align:center;letter-spacing:1px}
+    .auth-input{background:#0a0a0a;border:1px solid #1e1e1e;border-radius:9px;color:#fff;font-family:inherit;font-size:16px;padding:13px 16px;outline:none;transition:border-color .2s;text-align:center}
+    .auth-input:focus{border-color:#444}
+    .auth-input::placeholder{color:#2a2a2a}
+    .pin-input{font-size:22px;letter-spacing:10px}
+    .auth-btn{background:#fff;color:#000;border:none;border-radius:9px;font-family:inherit;font-size:15px;font-weight:bold;padding:14px;cursor:pointer;letter-spacing:2px;transition:opacity .15s}
+    .auth-btn:hover{opacity:.85}
+    .auth-error{font-size:12px;color:#e74c3c;text-align:center;letter-spacing:1px}
+    .auth-error.hidden{display:none}
+    @keyframes auth-shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-10px)}40%,80%{transform:translateX(10px)}}
 
     /* ── FIRST VISIT MODAL ── */
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.94);display:flex;align-items:center;justify-content:center;z-index:200;padding:28px}
@@ -295,8 +346,8 @@
   <div class="settings-card">
     <div class="settings-title">⚙ SETTINGS</div>
     <div class="settings-group">
-      <div class="settings-label">FINAL BOSS</div>
-      <input class="settings-input" id="boss-settings-input" type="text" placeholder="最終目標を入力..." maxlength="80">
+      <div class="settings-label">PLAYER NAME</div>
+      <input class="settings-input" id="player-name-input" type="text" placeholder="名前（ダッシュボード表示用）" maxlength="20">
     </div>
     <div class="settings-group">
       <div class="settings-label">CLAUDE API KEY<span class="settings-hint">（AI自動判定）</span></div>
@@ -311,12 +362,25 @@
 </div>
 
 <!-- ── FIRST VISIT MODAL ── -->
-<div class="modal-overlay hidden" id="modal">
-  <div class="modal-card">
-    <div class="modal-title">⚔ LIFE QUEST OS</div>
-    <div class="modal-sub">あなたの最終目標（ラスボス）を入力してください。<br>これが冒険のゴールになります。</div>
-    <input class="modal-input" id="modal-input" type="text" placeholder="例: フルマラソンを完走する" maxlength="80">
-    <button class="modal-btn" id="modal-btn">冒険を始める</button>
+<!-- ── AUTH OVERLAY ── -->
+<div class="auth-overlay" id="auth-overlay">
+  <div class="auth-card" id="auth-setup">
+    <div class="auth-logo">⚔ LIFE QUEST OS</div>
+    <div class="auth-title">プレインターン卒業</div>
+    <div class="auth-sub">プレイヤー名と暗証番号を設定してください</div>
+    <input class="auth-input" id="setup-name" type="text" placeholder="プレイヤー名（例: やましゅ）" maxlength="20" autocomplete="off">
+    <input class="auth-input" id="setup-pin" type="password" inputmode="numeric" placeholder="暗証番号（4桁）" maxlength="4" pattern="[0-9]*" autocomplete="new-password">
+    <input class="auth-input" id="setup-pin2" type="password" inputmode="numeric" placeholder="暗証番号（確認）" maxlength="4" pattern="[0-9]*" autocomplete="new-password">
+    <button class="auth-btn" id="setup-btn">冒険を始める</button>
+    <div class="auth-error hidden" id="setup-error"></div>
+  </div>
+  <div class="auth-card hidden" id="auth-login">
+    <div class="auth-logo">⚔ LIFE QUEST OS</div>
+    <div class="auth-name-display" id="auth-name-display"></div>
+    <div class="auth-sub">暗証番号を入力してください</div>
+    <input class="auth-input pin-input" id="login-pin" type="password" inputmode="numeric" placeholder="● ● ● ●" maxlength="4" pattern="[0-9]*" autocomplete="current-password">
+    <button class="auth-btn" id="login-btn">ログイン</button>
+    <div class="auth-error hidden" id="login-error">暗証番号が違います</div>
   </div>
 </div>
 
@@ -354,6 +418,7 @@
         <div class="condition-bar" id="condition-bar"></div>
         <span class="ai-badge" id="ai-badge" title="APIキー設定">AI OFF</span>
         <button class="hdr-btn" id="book-btn" title="魔導書">📖</button>
+        <a class="hdr-btn" href="?admin" title="管理者ダッシュボード" style="text-decoration:none">👥</a>
         <button class="hdr-btn" id="gear-btn" title="設定">⚙</button>
       </div>
     </div>
@@ -387,7 +452,6 @@
     <div class="scene-quest-col">
       <div class="quest-panel-hdr">
         <span class="quest-panel-title">ACTIVE QUESTS</span>
-        <button class="quests-refresh" id="quests-refresh">🤖</button>
       </div>
       <div id="quest-list"></div>
     </div>
@@ -396,17 +460,44 @@
 
   <!-- FOOTER -->
   <footer class="scene-footer">
-    <div class="last-hint hidden" id="last-hint"></div>
-    <input class="achievement-input" id="achievement-input" type="text"
-           placeholder="今日やったことを入力…" maxlength="120"
-           autocomplete="off" autocorrect="off" spellcheck="false" autofocus>
-    <div class="footer-btns">
-      <button class="achieve-btn" id="achieve-btn">✅　達成！</button>
-      <button class="offday-btn"  id="offday-btn">💤 オフ</button>
-    </div>
+    <div class="report-label">📋 今日の振り返り（数値 + 気づきを記述）</div>
+    <textarea class="report-input" id="report-input" rows="3" maxlength="400"
+      placeholder="例: 営業5件訪問し成約率40%。初対面で目線を意識したら相手の話が増えた。"
+      autocomplete="off" spellcheck="false"></textarea>
+    <button class="achieve-btn" id="achieve-btn">✅ 今日の記録を提出</button>
   </footer>
 
 </div><!-- /app-shell -->
+
+<!-- ── ADMIN AUTH ── -->
+<div class="auth-overlay hidden" id="admin-auth">
+  <div class="auth-card">
+    <div class="auth-logo">⚔ LIFE QUEST OS</div>
+    <div class="auth-title">管理者ダッシュボード</div>
+    <div class="auth-sub" id="admin-auth-sub">暗証番号を入力してください</div>
+    <input class="auth-input pin-input" id="admin-pin-input" type="password"
+      inputmode="numeric" placeholder="● ● ● ●" maxlength="4" autocomplete="off">
+    <button class="auth-btn" id="admin-pin-btn">入力</button>
+    <div class="auth-error hidden" id="admin-pin-error">暗証番号が違います</div>
+  </div>
+</div>
+
+<!-- ── ADMIN DASHBOARD ── -->
+<div class="admin-shell hidden" id="admin-shell">
+  <div class="admin-header">
+    <span>👥 LIFE QUEST OS — 管理者</span>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="admin-import-btn" id="admin-refresh-btn">🔄 更新</button>
+      <label class="admin-import-btn">
+        ＋ 参加者追加
+        <input type="file" id="admin-import-input" accept=".json" multiple style="display:none">
+      </label>
+    </div>
+  </div>
+  <div class="admin-grid" id="admin-grid">
+    <div class="admin-empty">データを読み込んでいます...</div>
+  </div>
+</div>
 
 <script>
 // ══════════════════════════════════════════
@@ -427,68 +518,53 @@
 // ══════════════════════════════════════════
 //  CONFIG
 // ══════════════════════════════════════════
-var STAT_COLORS = {STR:'#ff4444',INT:'#00eeff',CHA:'#ff44ff',VIT:'#44ff88',DEX:'#ffee00'};
-var STAT_ICONS  = {STR:'⚔',INT:'📖',CHA:'🎭',VIT:'❤',DEX:'⚙'};
-
+var STAT_COLORS = {MIND:'#9b59b6', SKILL:'#3498db', ACTION:'#e74c3c'};
+var STAT_ICONS  = {MIND:'🧠', SKILL:'⚡', ACTION:'🎯'};
 var STATS = [
-  {key:'STR',cls:'str',sub:'Action',   kw:['営業','外出','筋トレ','現場','ジム','走','マラソン','運動','スポーツ','体操','泳','ヨガ','ダンス','gym','run','lift','exercise','sport','workout','push','squat','jog','swim']},
-  {key:'INT',cls:'int',sub:'Knowledge',kw:['読書','勉強','学習','本','資格','データ','戦略','調査','論文','講座','授業','研究','企画','分析','study','read','learn','code','program','course','research','write','essay','analyze']},
-  {key:'CHA',cls:'cha',sub:'Social',   kw:['交渉','SNS','面談','人脈','プレゼン','会話','飲み','交流','発信','投稿','ブログ','ミーティング','meet','talk','social','friend','chat','present','network','party','call']},
-  {key:'VIT',cls:'vit',sub:'Wellness', kw:['睡眠','食事','瞑想','サウナ','料理','休息','ウォーキング','ストレッチ','栄養','健康','散歩','sleep','eat','health','diet','cook','meditat','rest','sauna','walk','stretch']},
-  {key:'DEX',cls:'dex',sub:'Technique',kw:['コーディング','プログラミング','資料作成','事務','微調整','デザイン','タスク','整理','作業','完了','完成','code','program','task','finish','complete','clean','organize','done','craft','design']},
+  {key:'MIND',  cls:'mind',   sub:'マインド'},
+  {key:'SKILL', cls:'skill',  sub:'スキル'},
+  {key:'ACTION',cls:'action', sub:'アクション'},
 ];
-
-var SKILL_MAP = [
-  {kw:['筋トレ','ウェイト','ベンチ','スクワット'],skill:'筋トレ',stat:'STR'},
-  {kw:['ジム','gym'],skill:'ジム',stat:'STR'},
-  {kw:['ランニング','ジョギング','マラソン','run','jog'],skill:'ランニング',stat:'STR'},
-  {kw:['走った','走り','走る'],skill:'ランニング',stat:'STR'},
-  {kw:['営業','商談','アポ','訪問'],skill:'営業',stat:'STR'},
-  {kw:['外出','移動','出張'],skill:'外出',stat:'STR'},
-  {kw:['ヨガ','yoga'],skill:'ヨガ',stat:'STR'},
-  {kw:['ダンス','dance'],skill:'ダンス',stat:'STR'},
-  {kw:['水泳','泳','swim'],skill:'水泳',stat:'STR'},
-  {kw:['現場','工事'],skill:'現場作業',stat:'STR'},
-  {kw:['スポーツ','体操','運動'],skill:'運動',stat:'STR'},
-  {kw:['読書','本を読','本読','読み終','読んだ'],skill:'読書',stat:'INT'},
-  {kw:['資格','検定','試験勉強'],skill:'資格勉強',stat:'INT'},
-  {kw:['データ分析','データ解析','分析'],skill:'データ分析',stat:'INT'},
-  {kw:['戦略立案','戦略策定'],skill:'戦略立案',stat:'INT'},
-  {kw:['戦略','プランニング','企画'],skill:'企画立案',stat:'INT'},
-  {kw:['勉強','学習','学んだ'],skill:'勉強',stat:'INT'},
-  {kw:['研究','調査','調べ','リサーチ'],skill:'リサーチ',stat:'INT'},
-  {kw:['論文','レポート'],skill:'論文',stat:'INT'},
-  {kw:['講座','講義','授業','セミナー','course'],skill:'受講',stat:'INT'},
-  {kw:['交渉','ネゴシエ','negotiat'],skill:'交渉',stat:'CHA'},
-  {kw:['SNS','ツイッター','Twitter','Instagram','インスタ','投稿','発信','ブログ'],skill:'SNS発信',stat:'CHA'},
-  {kw:['面談','1on1','ミーティング','meeting'],skill:'面談',stat:'CHA'},
-  {kw:['人脈','ネットワーキング','network'],skill:'人脈作り',stat:'CHA'},
-  {kw:['プレゼン','発表','登壇','LT'],skill:'プレゼン',stat:'CHA'},
-  {kw:['飲み','懇親','飲み会'],skill:'懇親会',stat:'CHA'},
-  {kw:['会話','話した','雑談','talk','chat'],skill:'会話',stat:'CHA'},
-  {kw:['友達','友人','仲間','meet'],skill:'交流',stat:'CHA'},
-  {kw:['睡眠','寝た','早寝','熟睡','sleep'],skill:'睡眠',stat:'VIT'},
-  {kw:['瞑想','マインドフルネス','meditat'],skill:'瞑想',stat:'VIT'},
-  {kw:['サウナ','sauna','温泉','銭湯'],skill:'サウナ',stat:'VIT'},
-  {kw:['食事','栄養','野菜','健康食'],skill:'食事管理',stat:'VIT'},
-  {kw:['料理','自炊','cook'],skill:'料理',stat:'VIT'},
-  {kw:['休息','休憩','休んだ','リラックス','rest'],skill:'戦略的休息',stat:'VIT'},
-  {kw:['ウォーキング','散歩','walk'],skill:'ウォーキング',stat:'VIT'},
-  {kw:['ストレッチ','柔軟','stretch'],skill:'ストレッチ',stat:'VIT'},
-  {kw:['コーディング','プログラミング','コードを書','実装','code','program'],skill:'コーディング',stat:'DEX'},
-  {kw:['資料作成','スライド','パワポ','PowerPoint','keynote'],skill:'資料作成',stat:'DEX'},
-  {kw:['事務','書類','手続き','申請'],skill:'事務処理',stat:'DEX'},
-  {kw:['デザイン','design','UI','UX'],skill:'デザイン',stat:'DEX'},
-  {kw:['微調整','ブラッシュアップ','改善','修正'],skill:'改善',stat:'DEX'},
-  {kw:['整理','片付け','掃除','整頓','clean'],skill:'整理整頓',stat:'DEX'},
-  {kw:['タスク','完了','完成','終わった','done','finish'],skill:'タスク完了',stat:'DEX'},
-  {kw:['買い物','ショッピング','shop','購入'],skill:'買い物',stat:'DEX'},
-];
+var BASE_QUEST_XP = 100;
+var QUEST_POOL = {
+  MIND: [
+    '失敗を恐れず新しく試みたことを記録した',
+    '組織の一員として恥じない振る舞いを徹底した',
+    '相手の感情や背景を推測して行動した',
+    '周囲からの指摘を素直に受け入れた',
+    '昨日より前進したポイントを言葉にした',
+  ],
+  SKILL: [
+    '相手の目を見て信頼関係を築いた',
+    '相槌を使い分け相手の本音を引き出した',
+    '問いかけで相手の考えを深掘りした',
+    '復唱・要約で認識を合わせた',
+    '姿勢・表情で相手に安心感を与えた',
+  ],
+  ACTION: [
+    '自分から先に挨拶した',
+    '連絡に5分以内に返信した',
+    '学びをすぐにメモした',
+    '早起き・身だしなみを整えた',
+    '事前の準備を徹底した',
+  ],
+};
+function getTodayQuests(){
+  var dayNum=Math.floor(Date.now()/86400000);
+  return ['MIND','SKILL','ACTION'].map(function(stat){
+    var pool=QUEST_POOL[stat];
+    var idx=dayNum%pool.length;
+    return{stat:stat,action:pool[idx],done:false};
+  });
+}
 
 var LEARN_KW = ['学んだ','気づ','発見','わかった','分かった','理解','ポイント','コツ','効果的','重要','役立','覚えた','実感','刺さった','ためになった','learned','realized','insight','discovered','tip','key'];
-var HARD_WORDS = ['大変','頑張','きつ','しんど','苦労','難し','つら','辛','必死','全力','本気','ハード','激し','疲れ'];
-var EASY_WORDS = ['ちょっと','少し','軽く','簡単','サクッ','さくっ','ざっと'];
 var BASE_EXP = 50;
+
+// placeholder arrays to avoid any references breaking
+var SKILL_MAP = [];
+var HARD_WORDS = [];
+var EASY_WORDS = [];
 
 // ── API KEY ──
 var apiKey = '';
@@ -500,11 +576,12 @@ loadApiKey();
 //  STATE
 // ══════════════════════════════════════════
 var state = {
-  boss:'', stats:{}, skills:{}, log:[],
+  playerName:'',
+  pin:'',
+  boss:'プレインターン卒業', stats:{}, skills:{}, log:[],
   days:{}, chozetsuDate:null, lastDialogDate:null,
-  grimoire:{STR:[],INT:[],CHA:[],VIT:[],DEX:[]},
-  quests:[], questDate:null,
-  questRefreshCount:0, questRefreshDate:null
+  grimoire:{MIND:[],SKILL:[],ACTION:[]},
+  quests:[], questDate:null
 };
 STATS.forEach(function(s){ state.stats[s.key]={level:1,xp:0}; });
 
@@ -513,7 +590,9 @@ function load(){
   try{
     var raw=localStorage.getItem('lifequest');if(!raw)return;
     var d=JSON.parse(raw);
-    if(d.boss)           state.boss=d.boss;
+    if(d.playerName)     state.playerName=d.playerName;
+    if(d.pin)            state.pin=d.pin;
+    state.boss='プレインターン卒業';
     if(d.log)            state.log=d.log;
     if(d.skills)         state.skills=d.skills;
     if(d.days)           state.days=d.days;
@@ -523,8 +602,6 @@ function load(){
     if(d.stats){STATS.forEach(function(s){if(d.stats[s.key])state.stats[s.key]=d.stats[s.key];});}
     if(d.quests)             state.quests=d.quests;
     if(d.questDate)          state.questDate=d.questDate;
-    if(d.questRefreshCount)  state.questRefreshCount=d.questRefreshCount;
-    if(d.questRefreshDate)   state.questRefreshDate=d.questRefreshDate;
   }catch(_){}
 }
 
@@ -558,32 +635,7 @@ function toggleOffDay(){
 // ══════════════════════════════════════════
 //  SKILL / STAT DETECTION
 // ══════════════════════════════════════════
-function matchSkill(text){
-  var l=text.toLowerCase();
-  for(var i=0;i<SKILL_MAP.length;i++){var e=SKILL_MAP[i];for(var j=0;j<e.kw.length;j++){if(l.indexOf(e.kw[j])!==-1)return{skill:e.skill,stat:e.stat};}}
-  return null;
-}
-function matchStatOnly(text){
-  var l=text.toLowerCase();
-  for(var i=0;i<STATS.length;i++){var s=STATS[i];for(var j=0;j<s.kw.length;j++){if(l.indexOf(s.kw[j])!==-1)return s.key;}}
-  var minP=Infinity,pick='STR';
-  STATS.forEach(function(s){var st=state.stats[s.key],p=st.xp/(st.level*100);if(p<minP){minP=p;pick=s.key;}});
-  return pick;
-}
-function fallbackSkillName(text,stat){
-  var defs={STR:'行動',INT:'学習',CHA:'交流',VIT:'回復',DEX:'作業'};
-  var clean=text.replace(/[をにはがでものへからまでより]/g,' ').replace(/[しましたたった。、！？…「」]/g,' ').replace(/\s+/g,' ').trim();
-  var words=clean.split(' ');
-  for(var i=0;i<words.length;i++){var w=words[i];if(w.length>=2&&w.length<=8)return w.substring(0,8);}
-  return defs[stat]||'行動';
-}
-function calcDiffMult(text){
-  var m=1.0,l=text.length;
-  if(l<8)m=0.5;else if(l<15)m=0.75;else if(l<30)m=1.0;else if(l<50)m=1.25;else m=1.5;
-  var hc=0;HARD_WORDS.forEach(function(w){if(text.indexOf(w)!==-1)hc++;});m+=Math.min(hc,2)*0.25;
-  EASY_WORDS.forEach(function(w){if(text.indexOf(w)!==-1)m-=0.2;});
-  return Math.min(2.0,Math.max(0.5,parseFloat(m.toFixed(2))));
-}
+function fallbackSkillName(text,stat){return stat+'スキル';}
 
 // ══════════════════════════════════════════
 //  LEVEL LOGIC
@@ -682,19 +734,7 @@ function renderConditionBar(){
   else if(nam)badge('namari','⚠×0.7');
   else if(cho)badge('chozetsu','✨×1.5');
 }
-function updateFooterState(){
-  var off=isOffDay();
-  var ab=document.getElementById('achieve-btn'),ob=document.getElementById('offday-btn');
-  if(off){ab.textContent='📝 記録（EXP 0）';ab.classList.add('offmode');ob.textContent='⚡ 再開';ob.classList.add('active');}
-  else{ab.textContent='✅　達成！';ab.classList.remove('offmode');ob.textContent='💤 オフ';ob.classList.remove('active');}
-}
-function updateLastHint(){
-  var hint=document.getElementById('last-hint');if(!hint)return;
-  if(state.log.length===0){hint.classList.add('hidden');return;}
-  var last=state.log[state.log.length-1].text;
-  var label=last.length>22?last.substring(0,22)+'…':last;
-  hint.textContent='↩ 前回: '+label;hint.classList.remove('hidden');
-}
+function updateFooterState(){}
 
 // ── PROGRESS RING ──
 function getAchievementRate(){
@@ -745,6 +785,201 @@ function renderGrimoireEntries(){
 }
 
 // ── BACKUP / IMPORT / RESET ──
+// ══════════════════════════════════════════
+//  ADMIN DASHBOARD
+// ══════════════════════════════════════════
+// ══════════════════════════════════════════
+//  AUTH
+// ══════════════════════════════════════════
+function showAuth(){
+  var overlay=document.getElementById('auth-overlay');
+  overlay.classList.remove('hidden');
+  if(!state.playerName||!state.pin){
+    document.getElementById('auth-setup').classList.remove('hidden');
+    document.getElementById('auth-login').classList.add('hidden');
+    setTimeout(function(){document.getElementById('setup-name').focus();},80);
+  } else {
+    document.getElementById('auth-setup').classList.add('hidden');
+    document.getElementById('auth-login').classList.remove('hidden');
+    document.getElementById('auth-name-display').textContent=state.playerName;
+    setTimeout(function(){document.getElementById('login-pin').focus();},80);
+  }
+}
+function hideAuth(){
+  document.getElementById('auth-overlay').classList.add('hidden');
+  sessionStorage.setItem('lq_auth','1');
+  setTimeout(showStatusDialog,600);
+}
+function doSetup(){
+  var name=document.getElementById('setup-name').value.trim();
+  var pin=document.getElementById('setup-pin').value;
+  var pin2=document.getElementById('setup-pin2').value;
+  var err=document.getElementById('setup-error');
+  err.classList.add('hidden');
+  if(!name){err.textContent='名前を入力してください';err.classList.remove('hidden');return;}
+  if(!/^\d{4}$/.test(pin)){err.textContent='暗証番号は4桁の数字です';err.classList.remove('hidden');return;}
+  if(pin!==pin2){err.textContent='暗証番号が一致しません';err.classList.remove('hidden');return;}
+  state.playerName=name;state.pin=pin;
+  save();hideAuth();
+}
+function doLogin(){
+  var pin=document.getElementById('login-pin').value;
+  var err=document.getElementById('login-error');
+  if(pin===state.pin){
+    err.classList.add('hidden');
+    hideAuth();
+  } else {
+    err.classList.remove('hidden');
+    document.getElementById('login-pin').value='';
+    document.getElementById('login-pin').focus();
+    var card=document.getElementById('auth-login');
+    card.style.animation='none';void card.offsetWidth;card.style.animation='auth-shake .4s ease';
+  }
+}
+
+// ── ADMIN PIN AUTH ──
+var ADMIN_PIN_KEY='lq_admin_pin';
+function showAdminAuth(){
+  var stored=localStorage.getItem(ADMIN_PIN_KEY);
+  var sub=document.getElementById('admin-auth-sub');
+  if(!stored&&sub)sub.textContent='管理者暗証番号を設定してください（初回）';
+  else if(sub)sub.textContent='暗証番号を入力してください';
+  document.getElementById('admin-auth').classList.remove('hidden');
+}
+function showDashboard(){
+  document.getElementById('admin-auth').classList.add('hidden');
+  document.getElementById('admin-shell').classList.remove('hidden');
+  initAdminDashboard();
+}
+function verifyAdminPin(){
+  var pin=document.getElementById('admin-pin-input').value;
+  var err=document.getElementById('admin-pin-error');
+  var stored=localStorage.getItem(ADMIN_PIN_KEY);
+  if(!/^\d{4}$/.test(pin)){err.textContent='4桁の数字を入力してください';err.classList.remove('hidden');return;}
+  if(!stored){
+    localStorage.setItem(ADMIN_PIN_KEY,pin);
+    sessionStorage.setItem('lq_admin_auth','1');
+    showDashboard();
+  } else if(pin===stored){
+    err.classList.add('hidden');
+    sessionStorage.setItem('lq_admin_auth','1');
+    showDashboard();
+  } else {
+    err.textContent='暗証番号が違います';err.classList.remove('hidden');
+    document.getElementById('admin-pin-input').value='';
+    document.getElementById('admin-pin-input').focus();
+    var card=document.querySelector('#admin-auth .auth-card');
+    if(card){card.style.animation='none';void card.offsetWidth;card.style.animation='auth-shake .4s ease';}
+  }
+}
+
+// ══════════════════════════════════════════
+//  ADMIN DASHBOARD
+// ══════════════════════════════════════════
+var adminProfiles=[];
+var adminInitialized=false;
+function initAdminDashboard(){
+  // 自分のデータを自動ロード
+  loadLocalProfileToAdmin();
+  renderAdminGrid();
+
+  if(adminInitialized)return;
+  adminInitialized=true;
+
+  document.getElementById('admin-import-input').addEventListener('change',function(e){
+    Array.from(e.target.files).forEach(function(file){
+      var reader=new FileReader();
+      reader.onload=function(ev){
+        try{
+          var d=JSON.parse(ev.target.result);
+          // 同名プレイヤーは上書き
+          var idx=adminProfiles.findIndex(function(p){return p.playerName===d.playerName&&p._source!=='local';});
+          if(idx>=0)adminProfiles[idx]=d;else adminProfiles.push(d);
+          renderAdminGrid();
+        }catch(_){alert(file.name+' の読み込みに失敗しました');}
+      };
+      reader.readAsText(file);
+    });
+    e.target.value='';
+  });
+
+  document.getElementById('admin-refresh-btn').addEventListener('click',function(){
+    loadLocalProfileToAdmin();
+    renderAdminGrid();
+  });
+}
+function loadLocalProfileToAdmin(){
+  try{
+    var raw=localStorage.getItem('lifequest');
+    if(!raw)return;
+    var d=JSON.parse(raw);
+    if(!d||!d.playerName)return;
+    d._source='local';
+    var idx=adminProfiles.findIndex(function(p){return p._source==='local';});
+    if(idx>=0)adminProfiles[idx]=d;else adminProfiles.unshift(d);
+  }catch(_){}
+}
+function adminTotalLevel(p){
+  if(!p.stats)return 0;
+  return Object.values(p.stats).reduce(function(s,st){return s+(st.level||1);},0);
+}
+function adminStreak(p){
+  if(!p.days)return 0;
+  var streak=0;
+  for(var i=0;;i++){
+    var d=new Date();d.setDate(d.getDate()-i);
+    var ds=d.toISOString().slice(0,10);
+    var day=p.days[ds];
+    if(day&&day.isOff){continue;}
+    if(day&&day.xp>0){streak++;}else{break;}
+  }
+  return streak;
+}
+function adminLastDate(p){
+  if(!p.days)return null;
+  var dates=Object.keys(p.days).filter(function(ds){var d=p.days[ds];return d&&d.xp>0;});
+  if(!dates.length)return null;
+  return dates.sort().pop();
+}
+function renderAdminGrid(){
+  var grid=document.getElementById('admin-grid');
+  if(adminProfiles.length===0){
+    grid.innerHTML='<div class="admin-empty">データがありません<br><small style="color:#333;font-size:10px;margin-top:8px;display:block">アプリを使用後に「🔄 更新」を押すか<br>参加者のJSONを追加してください</small></div>';
+    return;
+  }
+  grid.innerHTML='';
+  var sorted=adminProfiles.slice().sort(function(a,b){return adminTotalLevel(b)-adminTotalLevel(a);});
+  sorted.forEach(function(p,i){
+    var card=document.createElement('div');
+    card.className='admin-card';
+    var isLocal=p._source==='local';
+    var totalLv=adminTotalLevel(p);
+    var maxLv=STATS.length*20; // 3stat×Lv20
+    var pct=Math.min(100,Math.round(totalLv/maxLv*100));
+    var statChips=STATS.map(function(s){
+      var st=p.stats&&p.stats[s.key];
+      var lv=st?st.level:1;
+      var xp=st?st.xp:0;
+      var color=STAT_COLORS[s.key]||'#555';
+      return '<span class="admin-stat-chip" style="border-color:'+color+'44;color:'+color+'">'+s.key+' Lv'+lv+'</span>';
+    }).join('');
+    var streak=adminStreak(p);
+    var logCount=(p.log&&p.log.length)||0;
+    var lastDate=adminLastDate(p)||'—';
+    var displayName=p.playerName||('Player '+(i+1));
+    var badge=isLocal?'<span style="font-size:9px;background:#1a2a1a;color:#3a8;border:1px solid #3a8;border-radius:4px;padding:1px 5px;margin-left:4px">本端末</span>':'';
+    card.innerHTML=
+      '<div class="admin-card-name">#'+(i+1)+(isLocal?' · このデバイス':'')+'</div>'+
+      '<div style="font-size:18px;font-weight:bold;color:#fff;margin-bottom:6px;display:flex;align-items:center;gap:6px">'+esc(displayName)+badge+'</div>'+
+      '<div class="admin-total-lv">Total Lv. '+totalLv+'</div>'+
+      '<div class="admin-progress-bar"><div class="admin-progress-fill" style="width:'+pct+'%"></div></div>'+
+      '<div class="admin-progress-pct">進捗 '+pct+'%（目安：Lv'+maxLv+'で卒業）</div>'+
+      '<div class="admin-stat-row">'+statChips+'</div>'+
+      '<div class="admin-streak-row"><span>🔥 '+streak+'日連続</span><span>📝 '+logCount+'件</span><span>最終: '+lastDate+'</span></div>';
+    grid.appendChild(card);
+  });
+}
+
 function exportData(){
   try{
     var blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
@@ -759,6 +994,7 @@ function importData(file){
   reader.onload=function(ev){
     try{
       var d=JSON.parse(ev.target.result);
+      if(d.playerName) state.playerName=d.playerName;
       if(d.boss)  state.boss=d.boss;
       if(d.stats) state.stats=d.stats;
       if(d.skills)state.skills=d.skills;
@@ -780,7 +1016,7 @@ function resetData(){
 function renderRadarChart(){
   var svg=document.getElementById('radar-svg');if(!svg)return;
   var cx=100,cy=100,maxR=72,minR=8;
-  var angles=[-90,-90+72,-90+144,-90+216,-90+288];
+  var angles=[-90,-90+120,-90+240];
   var maxLv=Math.max.apply(null,STATS.map(function(s){return state.stats[s.key].level;}));
   maxLv=Math.max(maxLv,3);
   var grid='';
@@ -832,8 +1068,8 @@ function calcStreak(){
 }
 function getStreakMult(){
   var s=calcStreak();
-  if(s>=7)return 1.3;
-  if(s>=3)return 1.1;
+  if(s>=7)return 1.5;
+  if(s>=3)return 1.2;
   return 1.0;
 }
 
@@ -844,8 +1080,8 @@ function renderStreak(){
   var best=document.getElementById('streak-best');
   if(el)el.textContent=streak;
   if(best){
-    if(streak>=7)best.textContent='🔥🔥🔥';
-    else if(streak>=3)best.textContent='+10% EXP';
+    if(streak>=7)best.textContent='🔥×1.5 EXP';
+    else if(streak>=3)best.textContent='🔥×1.2 EXP';
     else if(streak>0)best.textContent='継続中！';
     else best.textContent='';
   }
@@ -853,130 +1089,127 @@ function renderStreak(){
   if(flame)flame.style.filter=streak>0?'drop-shadow(0 0 '+(6+Math.min(streak,10)*2)+'px #ff9900)':'none';
 }
 
-// ── QUEST DIFFICULTY ──
-var QUEST_DIFF_MULT=[0,0.8,1.2,1.6,2.2,3.0];
-function diffStars(d){return '⭐'.repeat(d)+'☆'.repeat(Math.max(0,5-d));}
-function questXp(diff){return Math.round(BASE_EXP*QUEST_DIFF_MULT[Math.min(5,Math.max(1,diff))]);}
-
-// ── QUEST REFRESH BUTTON STATE ──
-function updateQuestRefreshBtn(){
-  var btn=document.getElementById('quests-refresh');if(!btn)return;
-  var today=todayStr();
-  var count=state.questRefreshDate===today?state.questRefreshCount:0;
-  var remaining=3-count;
-  if(remaining>0){btn.textContent='🤖 あと'+remaining+'回';btn.disabled=false;btn.style.opacity='1';}
-  else{btn.textContent='🚫 本日終了';btn.disabled=true;btn.style.opacity='.4';}
-}
-
 // ── RENDER QUESTS ──
 function renderQuests(){
   var con=document.getElementById('quest-list');if(!con)return;
-  if(!state.quests||state.quests.length===0){
-    con.innerHTML='<div class="quest-empty">🤖 更新ボタンでAIがクエストを生成<br><span style="font-size:9px;color:#222">APIキー設定が必要</span></div>';
-    return;
+  var today=todayStr();
+  if(state.questDate!==today){
+    state.quests=getTodayQuests();
+    state.questDate=today;
+    save();
   }
   con.innerHTML='';
   state.quests.forEach(function(q){
-    var xp=questXp(q.difficulty);
-    var s=STATS.filter(function(x){return x.key===q.stat;})[0]||STATS[0];
+    var c=STAT_COLORS[q.stat];
     var card=document.createElement('div');
     card.className='quest-card'+(q.done?' done':'');
-    card.innerHTML='<div class="quest-check">'+(q.done?'✓':'')+'</div>'
+    card.innerHTML='<div class="quest-check">'+(q.done?'✓':'○')+'</div>'
       +'<div class="quest-body">'
-        +'<div class="quest-action">'+esc(q.action)+'</div>'
-        +'<div class="quest-meta">'
-          +'<span class="quest-stat '+s.cls+'">'+q.stat+'</span>'
-          +'<span class="quest-diff">'+diffStars(q.difficulty)+'</span>'
-          +'<span class="quest-xp">+'+xp+'</span>'
-        +'</div>'
-        +(q.reason?'<div class="quest-reason">'+esc(q.reason)+'</div>':'')
+        +'<div class="quest-action">'+q.action+'</div>'
+        +'<div class="quest-meta"><span class="quest-stat" style="color:'+c+';border-color:'+c+'22">'+q.stat+'</span>'
+        +(q.done?'<span class="quest-xp">+'+BASE_QUEST_XP+' XP</span>':'')+'</div>'
       +'</div>';
-    if(!q.done){
-      card.addEventListener('click',function(){
-        q.done=true;save();renderQuests();
-        var aiOverride={stat:q.stat,skill:q.action,grimoire:false};
-        doAchieveWithOverride(q.action,aiOverride,q.difficulty);
-      });
-    }
     con.appendChild(card);
   });
-  updateQuestRefreshBtn();
 }
 
-// ── GENERATE QUESTS (AI) ──
-function generateQuests(){
-  var btn=document.getElementById('quests-refresh');
-  if(!apiKey){alert('クエスト生成にはAPIキーが必要です\n⚙ 設定からAPIキーを入力してください');return;}
-  if(!state.boss){alert('先にラスボス（最終目標）を設定してください');return;}
-
-  // ── Daily limit: 3 times per day ──
+// ── DAILY REPORT JUDGMENT ──
+function judgeDailyReport(){
+  var text=document.getElementById('report-input').value.trim();
+  if(!text){alert('振り返り内容を入力してください');return;}
   var today=todayStr();
-  if(state.questRefreshDate!==today){state.questRefreshCount=0;state.questRefreshDate=today;}
-  if(state.questRefreshCount>=3){alert('クエスト更新は1日3回までです。明日また挑戦しよう！');return;}
+  if(state.questDate===today&&state.quests.every(function(q){return q.done;})){
+    alert('本日の記録は提出済みです。');return;
+  }
+  if(state.questDate!==today){state.quests=getTodayQuests();state.questDate=today;}
 
-  if(btn){btn.textContent='生成中…';btn.classList.add('loading');}
+  if(!apiKey){
+    applyQuestResults([true,true,true],{MIND:80,SKILL:80,ACTION:80},null,text);
+    return;
+  }
 
-  var statsWithXp=STATS.map(function(s){
-    var st=state.stats[s.key];return s.key+' Lv.'+st.level+'('+xpPct(st)+'%)';
-  }).join(', ');
-  var recentLog=state.log.slice(-5).map(function(e){return e.text;}).join('、')||'なし';
+  var questList=state.quests.map(function(q,i){
+    return (i+1)+'. ['+q.stat+'] '+q.action;
+  }).join('\n');
 
-  var prompt='あなたはRPGのクエストマスターです。プレイヤーの最終目標達成を助ける今日のクエストを3つ生成してください。\n\n【プレイヤー状態】\n最終目標: "'+state.boss+'"\nステータス(レベル・XP%): '+statsWithXp+'\n最近の行動(直近5件): '+recentLog+'\n\n【生成ルール】\n1. 最終目標に直結する具体的な行動（動詞で終わる形式）\n2. 3つは必ず異なるステータスを対象にする\n3. XP%が低いステータスを優先して強化する\n4. 難易度の目安: 1=5分以内, 2=30分以内, 3=1〜2時間, 4=半日, 5=丸一日\n5. 最近の行動と重複しないこと\n\nJSONのみ(マークダウン・コードブロック不要):\n[{"action":"動詞で終わる具体的行動(20文字以内)","stat":"STR|INT|CHA|VIT|DEX","difficulty":1-5,"reason":"最終目標との関連(20文字以内)"},...]';
+  var prompt='あなたはプレインターン卒業プログラムの成長判定AIです。\n参加者の本日の振り返りレポートを分析してください。\n\n【本日のクエスト】\n'+questList+'\n\n【振り返りレポート】\n"'+text+'"\n\n【判定ルール】\n- 各クエストについて達成したかどうかを判定（3つ分のtrue/false）\n- MIND/SKILL/ACTIONへのXP: 各0〜150で内容の質に応じて付与\n- adviceは前向きで具体的な一言（50文字以内）\n\nJSONのみ返答:\n{"quests":[true,false,true],"xp":{"MIND":80,"SKILL":60,"ACTION":100},"advice":"前向きな助言"}';
+
+  var btn=document.getElementById('achieve-btn');
+  btn.textContent='判定中…';btn.disabled=true;
 
   fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
     headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:500,temperature:0,messages:[{role:'user',content:prompt}]})
-  }).then(function(r){return r.ok?r.json():null;}).then(function(d){
-    if(btn){btn.classList.remove('loading');}
-    if(!d||!d.content||!d.content[0]){updateQuestRefreshBtn();return;}
+    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:300,temperature:0,messages:[{role:'user',content:prompt}]})
+  }).then(function(r){return r.json();}).then(function(d){
+    btn.textContent='✅ 今日の記録を提出';btn.disabled=false;
+    if(!d||!d.content||!d.content[0]){return;}
     var raw=d.content[0].text.replace(/```[a-z]*\n?/g,'').trim();
-    var m=raw.match(/\[[\s\S]*\]/);if(!m){updateQuestRefreshBtn();return;}
     try{
-      var quests=JSON.parse(m[0]);
-      state.quests=quests.slice(0,3).map(function(q){
-        return{action:q.action||'',stat:(['STR','INT','CHA','VIT','DEX'].indexOf(q.stat)!==-1?q.stat:'STR'),difficulty:Math.min(5,Math.max(1,parseInt(q.difficulty)||2)),reason:q.reason||'',done:false};
-      });
-      state.questDate=today;
-      state.questRefreshCount++;
-      state.questRefreshDate=today;
-      save();renderQuests();
-    }catch(e){updateQuestRefreshBtn();}
+      var result=JSON.parse(raw);
+      applyQuestResults(result.quests||[false,false,false],result.xp||{MIND:0,SKILL:0,ACTION:0},result.advice||null,text);
+    }catch(e){applyQuestResults([false,false,false],{MIND:50,SKILL:50,ACTION:50},null,text);}
   }).catch(function(){
-    if(btn){btn.classList.remove('loading');}
-    updateQuestRefreshBtn();
+    btn.textContent='✅ 今日の記録を提出';btn.disabled=false;
+    alert('通信エラーが発生しました');
   });
 }
 
-// ── ACHIEVE WITH QUEST DIFFICULTY ──
-function doAchieveWithOverride(text,aiOverride,diff){
-  var off=isOffDay();
-  var diffM=QUEST_DIFF_MULT[Math.min(5,Math.max(1,diff))];
-  var condM=off?0:getConditionMult();
-  var streakM=off?1:getStreakMult();
-  var xpGain=off?0:Math.round(BASE_EXP*diffM*condM*streakM);
-  var statKey=aiOverride.stat;
-  var skillName=aiOverride.skill||fallbackSkillName(text,statKey);
-  var dayData=getDayData(todayStr());
-  if(!off){dayData.xp+=xpGain;if(statKey==='STR')dayData.hasStr=true;if(statKey==='VIT')dayData.hasVit=true;}
-  var statLv=false,skillLv=false;
-  if(!off){
-    statLv=addXp(state.stats[statKey],xpGain);
-    if(!state.skills[skillName])state.skills[skillName]={stat:statKey,level:1,xp:0};
-    skillLv=addXp(state.skills[skillName],xpGain);
-  } else {
-    if(!state.skills[skillName])state.skills[skillName]={stat:statKey,level:1,xp:0};
-  }
-  state.log.push({stat:statKey,skill:skillName,xp:xpGain,text:text,inGrimoire:false});
+function applyQuestResults(questResults,xpMap,advice,reportText){
+  var streakM=getStreakMult();
+  var hasNumbers=/\d/.test(reportText);
+  var hasReflection=reportText.length>=30;
+  var qualityBonus=(hasNumbers&&hasReflection)?1.2:1.0;
+  var totalXp=0;
+
+  state.quests.forEach(function(q,i){
+    if(questResults[i]){
+      q.done=true;
+      var xp=Math.round(BASE_QUEST_XP*streakM*qualityBonus);
+      totalXp+=xp;
+      addXp(state.stats[q.stat],xp);
+    }
+  });
+
+  ['MIND','SKILL','ACTION'].forEach(function(stat){
+    var v=(xpMap&&xpMap[stat])||0;
+    if(v>0){
+      var xp=Math.round(v*streakM*qualityBonus);
+      totalXp+=xp;
+      addXp(state.stats[stat],xp);
+    }
+  });
+
+  var today=todayStr();
+  var dayData=getDayData(today);
+  dayData.xp+=totalXp;
+
+  state.log.push({stat:'MIND',skill:'日次レポート',xp:totalXp,text:reportText,inGrimoire:false});
   if(state.log.length>50)state.log=state.log.slice(-50);
   save();
-  if(!off){updateGauge(statKey);renderChips(statKey,skillLv);}
-  updateLastHint();renderStreak();renderBoss();
-  showXpPopup(statKey,xpGain,diffM,off);
-  if(skillLv){flashOverlay('LEVEL UP!',skillName+' Lv.'+state.skills[skillName].level,STAT_COLORS[statKey]);setTimeout(function(){renderRadarChart();renderProgressRing();},300);}
-  else if(statLv){flashOverlay('LEVEL UP!',statKey+' Lv.'+state.stats[statKey].level,STAT_COLORS[statKey]);setTimeout(function(){renderRadarChart();renderProgressRing();},300);}
-  renderConditionBar();
+  renderAll();
+
+  showDailyResult(questResults,advice,streakM,qualityBonus,totalXp);
 }
+
+function showDailyResult(questResults,advice,streakM,qualityBonus,totalXp){
+  var lines=state.quests.map(function(q,i){
+    return (questResults[i]?'✅':'❌')+' '+q.action;
+  }).join('\n');
+  var bonusStr='';
+  if(streakM>1.0)bonusStr+=' 🔥×'+streakM;
+  if(qualityBonus>1.0)bonusStr+=' 📊×'+qualityBonus;
+  var msg=lines+(bonusStr?'\n\n'+bonusStr:'')+(advice?'\n\n💬 '+advice:'');
+  flashOverlay('今日の結果','+'+totalXp+' XP','#9b59b6');
+  setTimeout(function(){
+    var el=document.getElementById('rpg-advice-text');
+    if(el&&advice)el.textContent=advice;
+    showStatusDialog();
+  },2600);
+  document.getElementById('report-input').value='';
+}
+
+document.getElementById('achieve-btn').addEventListener('click',judgeDailyReport);
 
 // ── STAT DETAIL OVERLAY ──
 function openStatDetail(){
@@ -1002,7 +1235,7 @@ function closeStatDetail(){
 
 function renderAll(){
   renderBoss();renderStats();renderLog();renderConditionBar();
-  updateFooterState();updateLastHint();updateAiBadge();
+  updateAiBadge();
   renderRadarChart();renderProgressRing();renderStreak();renderQuests();
 }
 
@@ -1080,101 +1313,23 @@ function showStatusDialog(){
 function hideStatusDialog(){
   if(typeTimer)clearInterval(typeTimer);
   document.getElementById('status-dialog').classList.add('hidden');
-  document.getElementById('achievement-input').focus();
 }
 
-// ══════════════════════════════════════════
-//  ACHIEVE
-// ══════════════════════════════════════════
-function achieve(text,aiOverride){
-  text=text.trim();if(!text)return;
-  var off=isOffDay();
-  var diffM=calcDiffMult(text);
-  var condM=off?0:getConditionMult();
-  var streakM=off?1:getStreakMult();
-  var xpGain=off?0:Math.round(BASE_EXP*diffM*condM*streakM);
-  var statKey,skillName;
-  if(aiOverride&&aiOverride.stat){
-    statKey=aiOverride.stat;
-    skillName=aiOverride.skill||fallbackSkillName(text,aiOverride.stat);
-  } else {
-    var matched=matchSkill(text);
-    if(matched){statKey=matched.stat;skillName=matched.skill;}
-    else{statKey=matchStatOnly(text);skillName=fallbackSkillName(text,statKey);}
-  }
-  var dayData=getDayData(todayStr());
-  if(!off){dayData.xp+=xpGain;if(statKey==='STR')dayData.hasStr=true;if(statKey==='VIT')dayData.hasVit=true;}
-  var statLv=false,skillLv=false;
-  if(!off){
-    statLv=addXp(state.stats[statKey],xpGain);
-    if(!state.skills[skillName])state.skills[skillName]={stat:statKey,level:1,xp:0};
-    skillLv=addXp(state.skills[skillName],xpGain);
-  } else {
-    if(!state.skills[skillName])state.skills[skillName]={stat:statKey,level:1,xp:0};
-  }
-  var grimoireText=(aiOverride&&aiOverride.insight)?aiOverride.insight:text;
-  var forceGrim=!!(aiOverride&&aiOverride.grimoire);
-  var inGrim=!off&&addToGrimoire(grimoireText,statKey,skillName,forceGrim);
-  var choFired=false;
-  if(statKey==='VIT'&&!off){var yd=state.days[yesterdayStr()];if(yd&&yd.xp>=300){state.chozetsuDate=tomorrowStr();choFired=true;}}
-  state.log.push({stat:statKey,skill:skillName,xp:xpGain,text:text,inGrimoire:inGrim});
-  if(state.log.length>50)state.log=state.log.slice(-50);
-  save();
-  if(!off){updateGauge(statKey);renderChips(statKey,skillLv);}
-  renderLog();updateLastHint();
-  showXpPopup(statKey,xpGain,diffM*condM*streakM,off);
-  var btn=document.getElementById('achieve-btn');
-  btn.classList.remove('flash');void btn.offsetWidth;btn.classList.add('flash');
-  setTimeout(function(){btn.classList.remove('flash');},500);
-  if(skillLv)     flashOverlay('LEVEL UP!',skillName+' Lv.'+state.skills[skillName].level,STAT_COLORS[statKey]);
-  else if(statLv) flashOverlay('LEVEL UP!',statKey+' Lv.'+state.stats[statKey].level,STAT_COLORS[statKey]);
-  if(choFired)setTimeout(function(){flashOverlay('絶好調バフ！','明日のEXPが×1.5になる！','#ffee00');},2600);
-  if(statLv||skillLv)setTimeout(function(){renderRadarChart();renderProgressRing();},300);
-  renderStreak();renderConditionBar();
-  if(inGrim){
-    var gp=document.getElementById('book-btn');
-    if(gp){gp.style.animation='none';void gp.offsetWidth;gp.style.animation='chip-pop .4s ease-out';setTimeout(function(){gp.style.animation='';},500);}
-  }
-}
-
-// ══════════════════════════════════════════
-//  AI CLASSIFICATION
-// ══════════════════════════════════════════
-function classifyWithAI(text){
-  if(!apiKey)return Promise.resolve(null);
-  var recentLog=state.log.slice(-3).map(function(e){return '['+e.stat+'] '+e.text;}).join('\n')||'なし';
-  var prompt='あなたはライフゲームRPGの行動分類専門AIです。プレイヤーの最終目標と行動履歴を踏まえて、入力テキストを最も適切なステータスに分類してください。\n\n【ステータス定義と分類例】\n- STR（行動力）: 激しい運動・スポーツ・外出・肉体労働\n  例: 筋トレ→STR, ジム→STR, マラソン→STR, 自転車→STR\n  ※散歩・ウォーキングはVIT優先\n- INT（知力）: 学習・調査・思考・企画・読書\n  例: 本を読んだ→INT, 勉強した→INT, 企画書→INT, 調べた→INT\n- CHA（魅力）: 対人交流・発信・コミュニケーション\n  例: 友達と会った→CHA, SNS投稿→CHA, プレゼン→CHA, 営業→CHA\n- VIT（生命力）: 睡眠・食事・健康・回復・軽い運動\n  例: 早寝→VIT, 野菜を食べた→VIT, 瞑想→VIT, 散歩→VIT, サウナ→VIT\n- DEX（技術）: 制作・作業・完成・ツール操作\n  例: コードを書いた→DEX, 資料作成→DEX, デザイン→DEX, 整理→DEX\n\n【プレイヤー情報】\n最終目標: "'+state.boss+'"\n直近の行動:\n'+recentLog+'\n\n【分類する行動】\n"'+text+'"\n\nJSONのみ返してください（マークダウン・説明不要）:\n{"stat":"STR|INT|CHA|VIT|DEX","skill":"スキル名(2-8文字・日本語)","grimoire":true/false,"insight":"気づきの要点(grimoireがtrueの場合のみ・30文字以内)"}';
-  return fetch('https://api.anthropic.com/v1/messages',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:150,temperature:0,messages:[{role:'user',content:prompt}]})
-  }).then(function(resp){
-    if(!resp.ok)return null;return resp.json();
-  }).then(function(data){
-    if(!data||!data.content||!data.content[0])return null;
-    var content=data.content[0].text.replace(/```[a-z]*\n?/g,'').trim();
-    var match=content.match(/\{[\s\S]*?\}/);if(!match)return null;
-    var result=JSON.parse(match[0]);
-    if(['STR','INT','CHA','VIT','DEX'].indexOf(result.stat)===-1)return null;
-    return result;
-  }).catch(function(){return null;});
-}
 
 // ── SETTINGS PANEL ──
 function openSettings(){
-  document.getElementById('boss-settings-input').value=state.boss;
+  document.getElementById('player-name-input').value=state.playerName;
   document.getElementById('api-key-input').value=apiKey;
   document.getElementById('settings-overlay').classList.remove('hidden');
-  setTimeout(function(){document.getElementById('boss-settings-input').focus();},80);
+  setTimeout(function(){document.getElementById('player-name-input').focus();},80);
 }
 function closeSettings(){
   document.getElementById('settings-overlay').classList.add('hidden');
-  setTimeout(function(){document.getElementById('achievement-input').focus();},80);
 }
 function saveSettings(){
-  var boss=document.getElementById('boss-settings-input').value.trim();
+  var name=document.getElementById('player-name-input').value.trim();
   var key=document.getElementById('api-key-input').value.trim();
-  if(boss&&boss!==state.boss){state.boss=boss;save();renderBoss();}
+  if(name&&name!==state.playerName){state.playerName=name;save();}
   if(key!==apiKey){apiKey=key;saveApiKey(key);}
   updateAiBadge();closeSettings();
 }
@@ -1192,7 +1347,7 @@ function saveBossEdit(){
 
 // ── MODAL ──
 function openModal(){document.getElementById('modal').classList.remove('hidden');setTimeout(function(){document.getElementById('modal-input').focus();},80);}
-function closeModal(){document.getElementById('modal').classList.add('hidden');setTimeout(function(){document.getElementById('achievement-input').focus();},80);}
+function closeModal(){document.getElementById('modal').classList.add('hidden');}
 
 // ── UTIL ──
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -1200,91 +1355,63 @@ function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').repl
 // ══════════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════════
-load();renderAll();
+if(location.search.includes('admin')){
+  document.getElementById('app-shell').style.display='none';
+  document.getElementById('auth-overlay').classList.add('hidden');
+  if(sessionStorage.getItem('lq_admin_auth')==='1'){
+    showDashboard();
+  } else {
+    showAdminAuth();
+  }
+} else {
+  load();
+  state.boss='プレインターン卒業';
+  save();
+  renderAll();
+  if(!state.playerName||!state.pin){
+    showAuth();
+  } else if(sessionStorage.getItem('lq_auth')!=='1'){
+    showAuth();
+  } else {
+    setTimeout(showStatusDialog,600);
+  }
+}
 
-if(!state.boss){openModal();}
-else{setTimeout(function(){document.getElementById('achievement-input').focus();},100);setTimeout(showStatusDialog,600);}
-
-// Events
-document.getElementById('boss-text').addEventListener('click',enterBossEdit);
-document.getElementById('gear-btn').addEventListener('click',openSettings);
-document.getElementById('boss-edit-input').addEventListener('blur',saveBossEdit);
-document.getElementById('boss-edit-input').addEventListener('keydown',function(e){if(e.key==='Enter')saveBossEdit();});
-document.getElementById('book-btn').addEventListener('click',openGrimoire);
-document.getElementById('grim-close').addEventListener('click',closeGrimoire);
-
-// Grimoire tabs
-document.getElementById('grim-tabs').addEventListener('click',function(e){
+// Events (all null-safe)
+function on(id,ev,fn){var el=document.getElementById(id);if(el)el.addEventListener(ev,fn);}
+on('gear-btn','click',openSettings);
+on('boss-edit-input','blur',saveBossEdit);
+on('boss-edit-input','keydown',function(e){if(e.key==='Enter')saveBossEdit();});
+on('book-btn','click',openGrimoire);
+on('grim-close','click',closeGrimoire);
+on('grim-tabs','click',function(e){
   var btn=e.target.closest('[data-stat]');if(!btn)return;
   grimFilterStat=btn.getAttribute('data-stat');
   document.querySelectorAll('.gtab').forEach(function(t){t.classList.remove('active');});
   btn.classList.add('active');
   renderGrimoireEntries();
 });
-
-// Achieve
-function doAchieve(){
-  var inp=document.getElementById('achievement-input');var text=inp.value.trim();
-  if(!text){inp.focus();return;}
-  inp.value='';
-  if(apiKey){
-    var btn=document.getElementById('achieve-btn');
-    btn.textContent='🤖 判定中…';btn.classList.add('loading');btn.disabled=true;
-    classifyWithAI(text).then(function(aiResult){
-      btn.disabled=false;btn.classList.remove('loading');updateFooterState();
-      achieve(text,aiResult||undefined);
-    });
-  } else {
-    achieve(text);
-  }
-  inp.focus();
-}
-document.getElementById('achieve-btn').addEventListener('click',doAchieve);
-document.getElementById('achievement-input').addEventListener('keydown',function(e){if(e.key==='Enter')doAchieve();});
-document.getElementById('offday-btn').addEventListener('click',toggleOffDay);
-
-// Last hint
-document.getElementById('last-hint').addEventListener('click',function(){
-  var inp=document.getElementById('achievement-input');
-  if(state.log.length>0){inp.value=state.log[state.log.length-1].text;inp.focus();}
-});
-
-// Modal
-document.getElementById('modal-btn').addEventListener('click',function(){
-  var v=document.getElementById('modal-input').value.trim();if(!v)return;
-  state.boss=v;save();renderBoss();closeModal();setTimeout(showStatusDialog,400);
-});
-document.getElementById('modal-input').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('modal-btn').click();});
-
-// Status dialog
-document.getElementById('rpg-ok-btn').addEventListener('click',hideStatusDialog);
-document.getElementById('levelup-overlay').addEventListener('click',function(){this.classList.remove('show');});
-
-// Settings
-document.getElementById('settings-close-btn').addEventListener('click',closeSettings);
-document.getElementById('settings-save-btn').addEventListener('click',saveSettings);
-document.getElementById('settings-overlay').addEventListener('click',function(e){if(e.target===this)closeSettings();});
-
-// AI badge
-document.getElementById('ai-badge').addEventListener('click',openSettings);
-
-// Pentagon → stat detail
-document.getElementById('radar-section').addEventListener('click',openStatDetail);
-
-// Quest refresh
-document.getElementById('quests-refresh').addEventListener('click',generateQuests);
-
-// Stat detail close
-document.getElementById('sd-close').addEventListener('click',closeStatDetail);
-document.getElementById('stat-detail-overlay').addEventListener('click',function(e){if(e.target===this)closeStatDetail();});
-
-// Backup / Import / Reset
-document.getElementById('export-btn').addEventListener('click',exportData);
-document.getElementById('import-input').addEventListener('change',function(e){
-  if(e.target.files[0])importData(e.target.files[0]);
-  e.target.value='';
-});
-document.getElementById('reset-btn').addEventListener('click',resetData);
+on('setup-btn','click',doSetup);
+on('login-btn','click',doLogin);
+on('login-pin','keydown',function(e){if(e.key==='Enter')doLogin();});
+on('setup-pin2','keydown',function(e){if(e.key==='Enter')doSetup();});
+on('setup-name','keydown',function(e){if(e.key==='Enter'){var p=document.getElementById('setup-pin');if(p)p.focus();}});
+on('setup-pin','keydown',function(e){if(e.key==='Enter'){var p=document.getElementById('setup-pin2');if(p)p.focus();}});
+on('rpg-ok-btn','click',hideStatusDialog);
+on('levelup-overlay','click',function(){this.classList.remove('show');});
+on('settings-close-btn','click',closeSettings);
+on('settings-save-btn','click',saveSettings);
+on('settings-overlay','click',function(e){if(e.target===this)closeSettings();});
+on('ai-badge','click',openSettings);
+on('radar-section','click',openStatDetail);
+on('admin-pin-btn','click',verifyAdminPin);
+on('admin-pin-input','keydown',function(e){if(e.key==='Enter')verifyAdminPin();});
+on('sd-close','click',closeStatDetail);
+on('stat-detail-overlay','click',function(e){if(e.target===this)closeStatDetail();});
+on('export-btn','click',exportData);
+on('import-input','change',function(e){if(e.target.files[0])importData(e.target.files[0]);e.target.value='';});
+on('reset-btn','click',resetData);
+on('achieve-btn','click',judgeDailyReport);
 </script>
 </body>
 </html>
