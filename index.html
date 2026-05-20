@@ -94,6 +94,10 @@
     .quest-diff{font-size:9px}.quest-xp{font-size:8px;color:#ffcc00;font-family:var(--font-cyber)}
     .quest-reason{font-size:9px;color:#444;margin-top:2px;line-height:1.3;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
     .quest-empty{text-align:center;padding:12px 4px;color:#333;font-size:10px;line-height:1.8}
+    .daily-goal-bar{margin:6px 12px 0;padding:8px 12px;background:rgba(255,204,0,.07);border:1px solid rgba(255,204,0,.25);border-radius:8px;display:flex;align-items:flex-start;gap:8px}
+    .daily-goal-bar.hidden{display:none}
+    .daily-goal-label{font-size:9px;letter-spacing:2px;color:#ffcc00;font-family:var(--font-cyber);flex-shrink:0;margin-top:1px}
+    .daily-goal-text{font-size:12px;color:#fff;line-height:1.4;flex:1}
 
     /* ── FOOTER ── */
     .scene-footer{flex-shrink:0;padding:6px 14px 10px;background:rgba(0,0,0,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid rgba(255,255,255,.05);display:flex;flex-direction:column;gap:5px;position:relative;z-index:15}
@@ -406,6 +410,12 @@
       </div>
     </div>
 
+    <!-- Daily goal bar -->
+    <div class="daily-goal-bar hidden" id="daily-goal-bar">
+      <div class="daily-goal-label">🎯 今日の目標</div>
+      <div class="daily-goal-text" id="daily-goal-text"></div>
+    </div>
+
     <!-- Dragon image -->
     <div class="scene-dragon">
       <img src="Gemini_Generated_Image_aoh43aaoh43aaoh4.png" alt="">
@@ -452,6 +462,7 @@
     <div class="scene-quest-col">
       <div class="quest-panel-hdr">
         <span class="quest-panel-title">ACTIVE QUESTS</span>
+        <button class="quests-refresh" id="quest-refresh-btn">更新 <span id="quest-refresh-left">残3</span></button>
       </div>
       <div id="quest-list"></div>
     </div>
@@ -586,7 +597,9 @@ var state = {
   boss:'プレインターン卒業', stats:{}, skills:{}, log:[],
   days:{}, chozetsuDate:null, lastDialogDate:null,
   grimoire:{MIND:[],SKILL:[],KNOWHOW:[]},
-  quests:[], questDate:null
+  quests:[], questDate:null,
+  questRefreshCount:0, questRefreshDate:'',
+  dailyGoal:null
 };
 STATS.forEach(function(s){ state.stats[s.key]={level:1,xp:0}; });
 
@@ -607,6 +620,9 @@ function load(){
     if(d.stats){STATS.forEach(function(s){if(d.stats[s.key])state.stats[s.key]=d.stats[s.key];});}
     if(d.quests)             state.quests=d.quests;
     if(d.questDate)          state.questDate=d.questDate;
+    if(d.questRefreshCount)  state.questRefreshCount=d.questRefreshCount;
+    if(d.questRefreshDate)   state.questRefreshDate=d.questRefreshDate;
+    if(d.dailyGoal)          state.dailyGoal=d.dailyGoal;
   }catch(_){}
 }
 
@@ -1094,28 +1110,88 @@ function renderStreak(){
   if(flame)flame.style.filter=streak>0?'drop-shadow(0 0 '+(6+Math.min(streak,10)*2)+'px #ff9900)':'none';
 }
 
+// ── DAILY GOAL ──
+function renderDailyGoal(){
+  var bar=document.getElementById('daily-goal-bar');
+  var txt=document.getElementById('daily-goal-text');
+  if(!bar||!txt)return;
+  if(state.dailyGoal){
+    txt.textContent=state.dailyGoal.action;
+    bar.classList.remove('hidden');
+  } else {
+    bar.classList.add('hidden');
+  }
+}
+
 // ── RENDER QUESTS ──
 function renderQuests(){
   var con=document.getElementById('quest-list');if(!con)return;
   var today=todayStr();
-  if(state.questDate!==today){
+  // 古いstat(ACTION等)が残っていたら強制リフレッシュ
+  var hasStale=state.quests&&state.quests.some(function(q){return !QUEST_POOL[q.stat];});
+  if(state.questDate!==today||hasStale){
     state.quests=getTodayQuests();
     state.questDate=today;
+    if(state.questRefreshDate!==today){state.questRefreshCount=0;state.questRefreshDate=today;}
+    // 古いdailyGoalをクリア
+    if(hasStale)state.dailyGoal=null;
     save();
   }
+  // 更新ボタンの残り回数を表示
+  var leftEl=document.getElementById('quest-refresh-left');
+  if(leftEl){
+    var today2=todayStr();
+    var used=(state.questRefreshDate===today2)?state.questRefreshCount:0;
+    var left=3-used;
+    leftEl.textContent='残'+left;
+    var btn=document.getElementById('quest-refresh-btn');
+    if(btn)btn.disabled=(left<=0);
+  }
   con.innerHTML='';
-  state.quests.forEach(function(q){
+  state.quests.forEach(function(q,i){
     var c=STAT_COLORS[q.stat];
+    var isGoal=state.dailyGoal&&state.dailyGoal.action===q.action&&state.dailyGoal.stat===q.stat;
     var card=document.createElement('div');
-    card.className='quest-card'+(q.done?' done':'');
+    card.className='quest-card'+(q.done?' done':'')+(isGoal?' goal-active':'');
+    card.style.borderColor=isGoal?(c||'#ffcc00'):'';
     card.innerHTML='<div class="quest-check">'+(q.done?'✓':'○')+'</div>'
       +'<div class="quest-body">'
         +'<div class="quest-action">'+q.action+'</div>'
-        +'<div class="quest-meta"><span class="quest-stat" style="color:'+c+';border-color:'+c+'22">'+q.stat+'</span>'
+        +'<div class="quest-meta"><span class="quest-stat" style="color:'+c+';border-color:'+c+'44">'+q.stat+'</span>'
+        +(isGoal?'<span style="font-size:8px;color:#ffcc00;font-family:var(--font-cyber)">🎯 目標中</span>':'')
         +(q.done?'<span class="quest-xp">+'+BASE_QUEST_XP+' XP</span>':'')+'</div>'
       +'</div>';
+    if(!q.done){
+      card.addEventListener('click',function(){
+        if(isGoal){
+          state.dailyGoal=null;
+        } else {
+          state.dailyGoal={stat:q.stat,action:q.action};
+        }
+        save();
+        renderQuests();
+        renderDailyGoal();
+      });
+    }
     con.appendChild(card);
   });
+}
+
+function refreshQuests(){
+  var today=todayStr();
+  if(state.questRefreshDate!==today){state.questRefreshCount=0;state.questRefreshDate=today;}
+  if(state.questRefreshCount>=3){alert('本日の更新回数の上限（3回）に達しました');return;}
+  state.questRefreshCount++;
+  state.quests=getTodayQuests();
+  state.questDate=today;
+  // 目標中クエストが消えたらクリア
+  if(state.dailyGoal){
+    var still=state.quests.some(function(q){return q.stat===state.dailyGoal.stat&&q.action===state.dailyGoal.action;});
+    if(!still)state.dailyGoal=null;
+  }
+  save();
+  renderQuests();
+  renderDailyGoal();
 }
 
 // ── DAILY REPORT JUDGMENT ──
@@ -1173,6 +1249,10 @@ function applyQuestResults(questResults,xpMap,advice,reportText){
       var xp=Math.round(BASE_QUEST_XP*streakM*qualityBonus);
       totalXp+=xp;
       addXp(state.stats[q.stat],xp);
+      // 達成したクエストが今日の目標だったらクリア
+      if(state.dailyGoal&&state.dailyGoal.stat===q.stat&&state.dailyGoal.action===q.action){
+        state.dailyGoal=null;
+      }
     }
   });
 
@@ -1241,7 +1321,7 @@ function closeStatDetail(){
 function renderAll(){
   renderBoss();renderStats();renderLog();renderConditionBar();
   updateAiBadge();
-  renderRadarChart();renderProgressRing();renderStreak();renderQuests();
+  renderRadarChart();renderProgressRing();renderStreak();renderQuests();renderDailyGoal();
 }
 
 // ══════════════════════════════════════════
@@ -1413,6 +1493,7 @@ on('export-btn','click',exportData);
 on('import-input','change',function(e){if(e.target.files[0])importData(e.target.files[0]);e.target.value='';});
 on('reset-btn','click',resetData);
 on('achieve-btn','click',judgeDailyReport);
+on('quest-refresh-btn','click',refreshQuests);
 </script>
 </body>
 </html>
