@@ -462,7 +462,7 @@
     <div class="scene-quest-col">
       <div class="quest-panel-hdr">
         <span class="quest-panel-title">ACTIVE QUESTS</span>
-        <button class="quests-refresh" id="quest-refresh-btn">更新 <span id="quest-refresh-left">残3</span></button>
+        <button class="quests-refresh" id="quest-refresh-btn">更新</button>
       </div>
       <div id="quest-list"></div>
     </div>
@@ -565,12 +565,17 @@ var QUEST_POOL = {
     'サクセス・ケーススタディ：先輩が過去に成約させた代表的な成功トークのパターンをインプットした',
   ],
 };
-function getTodayQuests(){
+function getTodayQuests(avoidActions){
+  avoidActions=avoidActions||[];
   var dayNum=Math.floor(Date.now()/86400000);
   return ['MIND','SKILL','KNOWHOW'].map(function(stat){
     var pool=QUEST_POOL[stat];
-    var idx=dayNum%pool.length;
-    return{stat:stat,action:pool[idx],done:false};
+    var candidates=pool.filter(function(a){return avoidActions.indexOf(a)<0;});
+    if(candidates.length===0)candidates=pool.slice();
+    // シードベースで選択（同じ日は同じ基準、更新時は避けリストで変わる）
+    var seed=dayNum+avoidActions.length*37;
+    var idx=seed%candidates.length;
+    return{stat:stat,action:candidates[idx],done:false};
   });
 }
 
@@ -1137,16 +1142,6 @@ function renderQuests(){
     if(hasStale)state.dailyGoal=null;
     save();
   }
-  // 更新ボタンの残り回数を表示
-  var leftEl=document.getElementById('quest-refresh-left');
-  if(leftEl){
-    var today2=todayStr();
-    var used=(state.questRefreshDate===today2)?state.questRefreshCount:0;
-    var left=3-used;
-    leftEl.textContent='残'+left;
-    var btn=document.getElementById('quest-refresh-btn');
-    if(btn)btn.disabled=(left<=0);
-  }
   con.innerHTML='';
   state.quests.forEach(function(q,i){
     var c=STAT_COLORS[q.stat];
@@ -1179,12 +1174,11 @@ function renderQuests(){
 
 function refreshQuests(){
   var today=todayStr();
-  if(state.questRefreshDate!==today){state.questRefreshCount=0;state.questRefreshDate=today;}
-  if(state.questRefreshCount>=3){alert('本日の更新回数の上限（3回）に達しました');return;}
-  state.questRefreshCount++;
-  state.quests=getTodayQuests();
+  // 現在のクエスト内容を避けリストに追加して別のクエストを出す
+  var avoid=state.quests.map(function(q){return q.action;});
+  state.quests=getTodayQuests(avoid);
   state.questDate=today;
-  // 目標中クエストが消えたらクリア
+  // 目標中クエストが変わったらクリア
   if(state.dailyGoal){
     var still=state.quests.some(function(q){return q.stat===state.dailyGoal.stat&&q.action===state.dailyGoal.action;});
     if(!still)state.dailyGoal=null;
