@@ -12,7 +12,7 @@
   <title>Life Quest OS</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
-    :root{--str:#ff4444;--int:#00eeff;--cha:#ff44ff;--vit:#44ff88;--dex:#ffee00;--mind:#9b59b6;--skill:#3498db;--action:#e74c3c;--font-cyber:'Orbitron','Courier New',monospace}
+    :root{--str:#ff4444;--int:#00eeff;--cha:#ff44ff;--vit:#44ff88;--dex:#ffee00;--mind:#9b59b6;--skill:#3498db;--knowhow:#e74c3c;--font-cyber:'Orbitron','Courier New',monospace}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
     html,body{height:100%;overflow:hidden}
     body{color:#fff;font-family:'Courier New',Courier,monospace;background:url('Gemini_Generated_Image_ulplw3ulplw3ulpl.png') center top/cover no-repeat fixed}
@@ -518,12 +518,12 @@
 // ══════════════════════════════════════════
 //  CONFIG
 // ══════════════════════════════════════════
-var STAT_COLORS = {MIND:'#9b59b6', SKILL:'#3498db', ACTION:'#e74c3c'};
-var STAT_ICONS  = {MIND:'🧠', SKILL:'⚡', ACTION:'🎯'};
+var STAT_COLORS = {MIND:'#9b59b6', SKILL:'#3498db', KNOWHOW:'#e74c3c'};
+var STAT_ICONS  = {MIND:'🧠', SKILL:'⚡', KNOWHOW:'📚'};
 var STATS = [
-  {key:'MIND',  cls:'mind',   sub:'マインド'},
-  {key:'SKILL', cls:'skill',  sub:'スキル'},
-  {key:'ACTION',cls:'action', sub:'アクション'},
+  {key:'MIND',   cls:'mind',    sub:'マインド'},
+  {key:'SKILL',  cls:'skill',   sub:'スキル'},
+  {key:'KNOWHOW',cls:'knowhow', sub:'ノウハウ'},
 ];
 var BASE_QUEST_XP = 100;
 var QUEST_POOL = {
@@ -541,7 +541,7 @@ var QUEST_POOL = {
     '復唱・要約で認識を合わせた',
     '姿勢・表情で相手に安心感を与えた',
   ],
-  ACTION: [
+  KNOWHOW: [
     '自分から先に挨拶した',
     '連絡に5分以内に返信した',
     '学びをすぐにメモした',
@@ -551,7 +551,7 @@ var QUEST_POOL = {
 };
 function getTodayQuests(){
   var dayNum=Math.floor(Date.now()/86400000);
-  return ['MIND','SKILL','ACTION'].map(function(stat){
+  return ['MIND','SKILL','KNOWHOW'].map(function(stat){
     var pool=QUEST_POOL[stat];
     var idx=dayNum%pool.length;
     return{stat:stat,action:pool[idx],done:false};
@@ -580,7 +580,7 @@ var state = {
   pin:'',
   boss:'プレインターン卒業', stats:{}, skills:{}, log:[],
   days:{}, chozetsuDate:null, lastDialogDate:null,
-  grimoire:{MIND:[],SKILL:[],ACTION:[]},
+  grimoire:{MIND:[],SKILL:[],KNOWHOW:[]},
   quests:[], questDate:null
 };
 STATS.forEach(function(s){ state.stats[s.key]={level:1,xp:0}; });
@@ -1124,7 +1124,7 @@ function judgeDailyReport(){
   if(state.questDate!==today){state.quests=getTodayQuests();state.questDate=today;}
 
   if(!apiKey){
-    applyQuestResults([true,true,true],{MIND:80,SKILL:80,ACTION:80},null,text);
+    applyQuestResults([true,true,true],{MIND:80,SKILL:80,KNOWHOW:80},null,text);
     return;
   }
 
@@ -1132,7 +1132,7 @@ function judgeDailyReport(){
     return (i+1)+'. ['+q.stat+'] '+q.action;
   }).join('\n');
 
-  var prompt='あなたはプレインターン卒業プログラムの成長判定AIです。\n参加者の本日の振り返りレポートを分析してください。\n\n【本日のクエスト】\n'+questList+'\n\n【振り返りレポート】\n"'+text+'"\n\n【判定ルール】\n- 各クエストについて達成したかどうかを判定（3つ分のtrue/false）\n- MIND/SKILL/ACTIONへのXP: 各0〜150で内容の質に応じて付与\n- adviceは前向きで具体的な一言（50文字以内）\n\nJSONのみ返答:\n{"quests":[true,false,true],"xp":{"MIND":80,"SKILL":60,"ACTION":100},"advice":"前向きな助言"}';
+  var prompt='あなたはプレインターン卒業プログラムの成長判定AIです。\n参加者の本日の振り返りレポートを分析してください。\n\n【本日のクエスト】\n'+questList+'\n\n【振り返りレポート】\n"'+text+'"\n\n【判定ルール】\n- 各クエストについて達成したかどうかを判定（3つ分のtrue/false）\n- MIND/SKILL/KNOWHOWへのXP: 各0〜150で内容の質に応じて付与\n- adviceは前向きで具体的な一言（50文字以内）\n\nJSONのみ返答:\n{"quests":[true,false,true],"xp":{"MIND":80,"SKILL":60,"KNOWHOW":100},"advice":"前向きな助言"}';
 
   var btn=document.getElementById('achieve-btn');
   btn.textContent='判定中…';btn.disabled=true;
@@ -1147,8 +1147,8 @@ function judgeDailyReport(){
     var raw=d.content[0].text.replace(/```[a-z]*\n?/g,'').trim();
     try{
       var result=JSON.parse(raw);
-      applyQuestResults(result.quests||[false,false,false],result.xp||{MIND:0,SKILL:0,ACTION:0},result.advice||null,text);
-    }catch(e){applyQuestResults([false,false,false],{MIND:50,SKILL:50,ACTION:50},null,text);}
+      applyQuestResults(result.quests||[false,false,false],result.xp||{MIND:0,SKILL:0,KNOWHOW:0},result.advice||null,text);
+    }catch(e){applyQuestResults([false,false,false],{MIND:50,SKILL:50,KNOWHOW:50},null,text);}
   }).catch(function(){
     btn.textContent='✅ 今日の記録を提出';btn.disabled=false;
     alert('通信エラーが発生しました');
@@ -1171,7 +1171,7 @@ function applyQuestResults(questResults,xpMap,advice,reportText){
     }
   });
 
-  ['MIND','SKILL','ACTION'].forEach(function(stat){
+  ['MIND','SKILL','KNOWHOW'].forEach(function(stat){
     var v=(xpMap&&xpMap[stat])||0;
     if(v>0){
       var xp=Math.round(v*streakM*qualityBonus);
