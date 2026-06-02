@@ -4,40 +4,40 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
   <title>LIFE QUEST OS — 管理者ダッシュボード</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{background:#050505;color:#fff;font-family:'Helvetica Neue',Arial,sans-serif;min-height:100dvh}
     :root{--mind:#9b59b6;--skill:#3498db;--knowhow:#e74c3c;--cyber:'Orbitron','Courier New',monospace}
 
-    /* HEADER */
-    .header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid #111;position:sticky;top:0;background:#050505;z-index:10}
-    .header-title{font-family:var(--cyber);font-size:12px;letter-spacing:3px;color:#555}
-    .header-btns{display:flex;gap:8px}
-    .btn{background:#0d0d0d;border:1px solid #222;border-radius:8px;color:#888;font-size:12px;padding:7px 14px;cursor:pointer;font-family:inherit;transition:all .15s}
+    .header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #111;position:sticky;top:0;background:#050505;z-index:10;flex-wrap:wrap;gap:8px}
+    .header-left{display:flex;align-items:center;gap:10px}
+    .header-title{font-family:var(--cyber);font-size:11px;letter-spacing:3px;color:#555}
+    .header-btns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .btn{background:#0d0d0d;border:1px solid #222;border-radius:8px;color:#888;font-size:12px;padding:7px 12px;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap}
     .btn:hover{background:#1a1a1a;color:#fff;border-color:#444}
     .btn.primary{border-color:#3498db44;color:#3498db}
-    .btn.primary:hover{background:#0a1a2a;border-color:#3498db}
+    .back-link{font-size:11px;color:#333;text-decoration:none;letter-spacing:1px}.back-link:hover{color:#fff}
+
+    /* FIREBASE CONFIG */
+    .firebase-bar{display:flex;gap:8px;align-items:center;padding:10px 16px;background:#0a0a0a;border-bottom:1px solid #111}
+    .firebase-bar.connected{border-bottom-color:#1a3a1a}
+    .firebase-input{flex:1;background:#000;border:1px solid #1a1a1a;border-radius:6px;color:#888;font-size:11px;padding:7px 10px;font-family:inherit}
+    .firebase-input:focus{outline:none;border-color:#3498db;color:#fff}
+    .firebase-status{font-size:10px;white-space:nowrap;letter-spacing:1px}
+    .firebase-status.ok{color:#3a8}
+    .firebase-status.off{color:#333}
 
     /* STATS BAR */
-    .stats-bar{display:flex;gap:12px;padding:12px 18px;border-bottom:1px solid #0a0a0a;overflow-x:auto;scrollbar-width:none}
+    .stats-bar{display:flex;gap:10px;padding:10px 16px;border-bottom:1px solid #0a0a0a;overflow-x:auto;scrollbar-width:none}
     .stats-bar::-webkit-scrollbar{display:none}
     .stat-chip{background:#0d0d0d;border:1px solid #1a1a1a;border-radius:8px;padding:8px 14px;text-align:center;flex-shrink:0}
     .stat-chip-num{font-size:20px;font-weight:bold;font-family:var(--cyber)}
     .stat-chip-label{font-size:9px;color:#444;letter-spacing:2px;margin-top:2px}
 
-    /* DROP ZONE */
-    .drop-zone{margin:16px 18px;border:2px dashed #1a1a1a;border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:all .2s;position:relative}
-    .drop-zone.drag-over{border-color:#3498db;background:rgba(52,152,219,.05)}
-    .drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer}
-    .drop-zone-text{font-size:12px;color:#333;letter-spacing:1px}
-    .drop-zone-sub{font-size:10px;color:#222;margin-top:4px}
-
     /* GRID */
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;padding:0 18px 32px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;padding:16px}
 
     /* CARD */
     .card{background:#0d0d0d;border:1px solid #1a1a1a;border-radius:12px;padding:16px;transition:border-color .2s}
@@ -45,118 +45,164 @@
     .card-rank{font-size:9px;color:#333;letter-spacing:2px;margin-bottom:4px;font-family:var(--cyber)}
     .card-name{font-size:18px;font-weight:bold;color:#fff;margin-bottom:8px;display:flex;align-items:center;gap:6px}
     .badge-local{font-size:9px;background:#0a1a0a;color:#3a8;border:1px solid #3a8;border-radius:4px;padding:1px 6px}
+    .badge-active{font-size:9px;background:#0a2a0a;color:#4c4;border:1px solid #4c4;border-radius:4px;padding:1px 6px}
     .card-lv{font-size:28px;font-weight:bold;font-family:var(--cyber);color:#fff;margin-bottom:2px}
     .card-lv-label{font-size:9px;color:#444;letter-spacing:2px;margin-bottom:10px}
     .progress-bar{height:4px;background:#111;border-radius:2px;margin-bottom:4px;overflow:hidden}
-    .progress-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#3498db,#9b59b6);transition:width .4s}
+    .progress-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#3498db,#9b59b6)}
     .progress-pct{font-size:9px;color:#444;text-align:right;margin-bottom:10px}
     .stat-row{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
     .stat-badge{font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid;font-family:var(--cyber);font-weight:bold}
-    .stat-badge.mind{color:var(--mind);border-color:#9b59b622}
-    .stat-badge.skill{color:var(--skill);border-color:#3498db22}
-    .stat-badge.knowhow{color:var(--knowhow);border-color:#e74c3c22}
+    .stat-badge.mind{color:var(--mind);border-color:#9b59b633}
+    .stat-badge.skill{color:var(--skill);border-color:#3498db33}
+    .stat-badge.knowhow{color:var(--knowhow);border-color:#e74c3c33}
     .meta-row{display:flex;justify-content:space-between;font-size:10px;color:#333;border-top:1px solid #111;padding-top:8px;margin-top:4px}
-
-    /* LOGS IN CARD */
     .card-logs{margin-top:10px;border-top:1px solid #111;padding-top:8px}
     .card-log-title{font-size:9px;color:#333;letter-spacing:2px;margin-bottom:6px}
     .card-log-entry{background:#000;border-radius:4px;padding:6px 8px;margin-bottom:4px;font-size:10px;color:#666;line-height:1.4}
     .card-log-date{font-size:9px;color:#333;margin-bottom:2px;font-family:var(--cyber)}
 
-    /* EMPTY */
-    .empty{text-align:center;padding:60px 20px;color:#222;font-size:12px;letter-spacing:2px;grid-column:1/-1}
-    .empty-sub{font-size:10px;color:#1a1a1a;margin-top:8px}
-
-    /* BACK LINK */
-    .back-link{font-size:11px;color:#333;text-decoration:none;letter-spacing:1px}
-    .back-link:hover{color:#fff}
+    .empty{text-align:center;padding:60px 20px;color:#222;font-size:12px;letter-spacing:2px;grid-column:1/-1;line-height:2}
+    .empty-sub{font-size:10px;color:#1a1a1a;margin-top:8px;line-height:1.8}
+    .sync-label{font-size:10px;color:#333;padding:4px 16px}
   </style>
 </head>
 <body>
 
 <div class="header">
-  <div>
-    <a class="back-link" href="index.html">← アプリへ戻る</a>
-    <span style="margin:0 10px;color:#1a1a1a">|</span>
+  <div class="header-left">
+    <a class="back-link" href="index.html">← アプリ</a>
     <span class="header-title">👥 管理者ダッシュボード</span>
   </div>
   <div class="header-btns">
-    <button class="btn" id="refresh-btn">🔄 自分のデータを更新</button>
-    <label class="btn primary" style="cursor:pointer">
-      ＋ 参加者JSONを追加
+    <span class="sync-label" id="sync-label">—</span>
+    <button class="btn" id="refresh-btn">🔄 更新</button>
+    <label class="btn" style="cursor:pointer">
+      ＋ JSON追加
       <input type="file" id="import-input" accept=".json" multiple style="display:none">
     </label>
   </div>
 </div>
 
-<div class="stats-bar" id="stats-bar">
-  <div class="stat-chip"><div class="stat-chip-num" id="total-users">0</div><div class="stat-chip-label">参加者数</div></div>
-  <div class="stat-chip"><div class="stat-chip-num" id="total-reports">0</div><div class="stat-chip-label">総日報数</div></div>
-  <div class="stat-chip"><div class="stat-chip-num" id="avg-lv">—</div><div class="stat-chip-label">平均レベル</div></div>
-  <div class="stat-chip"><div class="stat-chip-num" id="active-today">0</div><div class="stat-chip-label">本日活動</div></div>
+<div class="firebase-bar" id="firebase-bar">
+  <input class="firebase-input" id="firebase-url-input" type="text"
+    placeholder="Firebase URL を入力: https://xxxx-default-rtdb.firebaseio.com">
+  <button class="btn primary" id="firebase-connect-btn">接続</button>
+  <span class="firebase-status off" id="firebase-status">未接続</span>
 </div>
 
-<div class="drop-zone" id="drop-zone">
-  <input type="file" id="drop-input" accept=".json" multiple>
-  <div class="drop-zone-text">📂 参加者から受け取ったJSONをここにドロップ</div>
-  <div class="drop-zone-sub">または上の「参加者JSONを追加」ボタンからファイルを選択</div>
+<div class="stats-bar">
+  <div class="stat-chip"><div class="stat-chip-num" id="total-users">0</div><div class="stat-chip-label">参加者数</div></div>
+  <div class="stat-chip"><div class="stat-chip-num" id="total-reports">0</div><div class="stat-chip-label">総日報数</div></div>
+  <div class="stat-chip"><div class="stat-chip-num" id="avg-lv">—</div><div class="stat-chip-label">平均Lv</div></div>
+  <div class="stat-chip"><div class="stat-chip-num" id="active-today">0</div><div class="stat-chip-label">本日活動</div></div>
 </div>
 
 <div class="grid" id="grid">
   <div class="empty">
     参加者データがありません
-    <div class="empty-sub">参加者のアプリ設定から「管理者にデータを共有」でJSONを受け取り<br>ここにドロップしてください</div>
+    <div class="empty-sub">
+      【自動受信の設定手順】<br>
+      1. <a href="https://console.firebase.google.com/" target="_blank" style="color:#3498db">Firebase Console</a> で無料プロジェクトを作成<br>
+      2. Realtime Database を作成（テストモード）<br>
+      3. データベースURLをここと参加者アプリの設定に入力<br>
+      4. 参加者が日報を提出すると自動でここに表示されます
+    </div>
   </div>
 </div>
 
 <script>
-var STATS = [
-  {key:'MIND',  cls:'mind',   label:'MIND'},
-  {key:'SKILL', cls:'skill',  label:'SKILL'},
-  {key:'KNOWHOW',cls:'knowhow',label:'KNOWHOW'},
-];
-var MAX_LV_TOTAL = STATS.length * 20;
-
-var profiles = [];
+var STATS=[{key:'MIND',cls:'mind'},{key:'SKILL',cls:'skill'},{key:'KNOWHOW',cls:'knowhow'}];
+var MAX_LV_TOTAL=STATS.length*20;
+var profiles=[];
+var firebaseUrl='';
+var autoRefreshTimer=null;
 
 function todayStr(){return new Date().toISOString().slice(0,10);}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// Firebase URL persistence
+function loadFbUrl(){
+  firebaseUrl=localStorage.getItem('lq_admin_firebase_url')||'';
+  if(firebaseUrl){
+    document.getElementById('firebase-url-input').value=firebaseUrl;
+    connectFirebase();
+  }
+}
+function saveFbUrl(u){localStorage.setItem('lq_admin_firebase_url',u);}
+
+function connectFirebase(){
+  var url=document.getElementById('firebase-url-input').value.trim();
+  if(!url){alert('Firebase URLを入力してください');return;}
+  firebaseUrl=url.replace(/\/+$/,'');
+  saveFbUrl(firebaseUrl);
+  document.getElementById('firebase-status').textContent='接続中…';
+  document.getElementById('firebase-status').className='firebase-status off';
+  fetchFromFirebase();
+}
+
+function fetchFromFirebase(){
+  if(!firebaseUrl)return;
+  fetch(firebaseUrl+'/participants.json')
+    .then(function(r){return r.json();})
+    .then(function(data){
+      document.getElementById('firebase-status').textContent='● 接続中';
+      document.getElementById('firebase-status').className='firebase-status ok';
+      document.getElementById('firebase-bar').classList.add('connected');
+      if(data&&typeof data==='object'){
+        Object.values(data).forEach(function(p){
+          if(!p||!p.playerName)return;
+          p._source='firebase';
+          var idx=profiles.findIndex(function(x){return x.playerName===p.playerName&&x._source==='firebase';});
+          if(idx>=0)profiles[idx]=p;else profiles.push(p);
+        });
+      }
+      var now=new Date();
+      document.getElementById('sync-label').textContent='最終更新 '+('0'+now.getHours()).slice(-2)+':'+('0'+now.getMinutes()).slice(-2)+':'+('0'+now.getSeconds()).slice(-2);
+      render();
+      // 30秒ごとに自動更新
+      clearTimeout(autoRefreshTimer);
+      autoRefreshTimer=setTimeout(fetchFromFirebase,30000);
+    })
+    .catch(function(){
+      document.getElementById('firebase-status').textContent='接続失敗';
+      document.getElementById('firebase-status').className='firebase-status off';
+    });
+}
 
 function loadLocal(){
   try{
-    var raw = localStorage.getItem('lifequest');
-    if(!raw) return;
-    var d = JSON.parse(raw);
-    if(!d || !d.playerName) return;
-    d._source = 'local';
-    var idx = profiles.findIndex(function(p){return p._source==='local';});
-    if(idx>=0) profiles[idx]=d; else profiles.unshift(d);
+    var raw=localStorage.getItem('lifequest');if(!raw)return;
+    var d=JSON.parse(raw);if(!d||!d.playerName)return;
+    d._source='local';
+    var idx=profiles.findIndex(function(p){return p._source==='local';});
+    if(idx>=0)profiles[idx]=d;else profiles.unshift(d);
   }catch(_){}
 }
 
 function importFile(file){
-  var reader = new FileReader();
-  reader.onload = function(ev){
+  var reader=new FileReader();
+  reader.onload=function(ev){
     try{
-      var d = JSON.parse(ev.target.result);
-      if(!d) return;
-      var idx = profiles.findIndex(function(p){return p.playerName===d.playerName && p._source!=='local';});
-      if(idx>=0) profiles[idx]=d; else profiles.push(d);
+      var d=JSON.parse(ev.target.result);if(!d)return;
+      var idx=profiles.findIndex(function(p){return p.playerName===d.playerName&&p._source==='import';});
+      d._source='import';
+      if(idx>=0)profiles[idx]=d;else profiles.push(d);
       render();
-    }catch(_){ alert(file.name + ' の読み込みに失敗しました'); }
+    }catch(_){alert(file.name+' の読み込みに失敗しました');}
   };
   reader.readAsText(file);
 }
 
 function totalLv(p){
-  if(!p.stats) return 0;
+  if(!p.stats)return 0;
   return Object.values(p.stats).reduce(function(s,st){return s+(st.level||1);},0);
 }
-
 function calcStreak(p){
-  if(!p.days) return 0;
+  if(!p.days)return 0;
   var streak=0;
   for(var i=0;;i++){
-    var d=new Date(); d.setDate(d.getDate()-i);
+    var d=new Date();d.setDate(d.getDate()-i);
     var ds=d.toISOString().slice(0,10);
     var day=p.days[ds];
     if(day&&day.isOff){continue;}
@@ -164,76 +210,53 @@ function calcStreak(p){
   }
   return streak;
 }
-
 function lastDate(p){
-  if(!p.days) return '—';
+  if(!p.days)return'—';
   var dates=Object.keys(p.days).filter(function(ds){var d=p.days[ds];return d&&d.xp>0;});
-  if(!dates.length) return '—';
-  return dates.sort().pop();
+  return dates.length?dates.sort().pop():'—';
 }
-
 function isActiveToday(p){
-  var today=todayStr();
-  return p.days && p.days[today] && p.days[today].xp>0;
+  var t=todayStr();return p.days&&p.days[t]&&p.days[t].xp>0;
 }
 
-function updateStats(){
-  document.getElementById('total-users').textContent = profiles.length;
-  var totalReports = profiles.reduce(function(s,p){return s+((p.log&&p.log.length)||0);},0);
-  document.getElementById('total-reports').textContent = totalReports;
-  var avgLv = profiles.length>0
-    ? Math.round(profiles.reduce(function(s,p){return s+totalLv(p);},0)/profiles.length)
-    : '—';
-  document.getElementById('avg-lv').textContent = avgLv;
-  var active = profiles.filter(isActiveToday).length;
-  document.getElementById('active-today').textContent = active;
+function updateSummary(){
+  document.getElementById('total-users').textContent=profiles.length;
+  document.getElementById('total-reports').textContent=profiles.reduce(function(s,p){return s+((p.log&&p.log.length)||0);},0);
+  document.getElementById('avg-lv').textContent=profiles.length?Math.round(profiles.reduce(function(s,p){return s+totalLv(p);},0)/profiles.length):'—';
+  document.getElementById('active-today').textContent=profiles.filter(isActiveToday).length;
 }
 
 function render(){
-  var grid = document.getElementById('grid');
+  var grid=document.getElementById('grid');
   if(profiles.length===0){
-    grid.innerHTML='<div class="empty">参加者データがありません<div class="empty-sub">参加者のアプリ設定から「管理者にデータを共有」でJSONを受け取り<br>ここにドロップしてください</div></div>';
-    updateStats();
-    return;
+    grid.innerHTML='<div class="empty">参加者データがありません<div class="empty-sub">【自動受信の設定手順】<br>1. <a href="https://console.firebase.google.com/" target="_blank" style="color:#3498db">Firebase Console</a> で無料プロジェクトを作成<br>2. Realtime Database を作成（テストモード）<br>3. データベースURLをここと参加者アプリの設定に入力<br>4. 参加者が日報を提出すると自動でここに表示されます</div></div>';
+    updateSummary();return;
   }
   grid.innerHTML='';
-  var sorted = profiles.slice().sort(function(a,b){return totalLv(b)-totalLv(a);});
+  var sorted=profiles.slice().sort(function(a,b){return totalLv(b)-totalLv(a);});
   sorted.forEach(function(p,i){
-    var lv = totalLv(p);
-    var pct = Math.min(100,Math.round(lv/MAX_LV_TOTAL*100));
-    var streak = calcStreak(p);
-    var last = lastDate(p);
-    var logCount = (p.log&&p.log.length)||0;
-    var isLocal = p._source==='local';
-    var activeToday = isActiveToday(p);
-
-    var statBadges = STATS.map(function(s){
-      var st = p.stats&&p.stats[s.key];
-      var lv2 = st?st.level:1;
-      return '<span class="stat-badge '+s.cls+'">'+s.label+' Lv'+lv2+'</span>';
+    var lv=totalLv(p);
+    var pct=Math.min(100,Math.round(lv/MAX_LV_TOTAL*100));
+    var streak=calcStreak(p);
+    var last=lastDate(p);
+    var logCount=(p.log&&p.log.length)||0;
+    var isLocal=p._source==='local';
+    var activeToday=isActiveToday(p);
+    var statBadges=STATS.map(function(s){
+      var st=p.stats&&p.stats[s.key];
+      return '<span class="stat-badge '+s.cls+'">'+s.key+' Lv'+(st?st.level:1)+'</span>';
     }).join('');
-
-    // 最新ログ3件
-    var recentLogs = (p.log||[]).filter(function(e){return e.text&&e.text.length>0;}).slice(-3).reverse();
-    var logsHtml = '';
-    if(recentLogs.length>0){
-      logsHtml = '<div class="card-logs">'
-        +'<div class="card-log-title">最近の日報</div>'
-        +recentLogs.map(function(e){
-          return '<div class="card-log-entry">'
-            +(e.date?'<div class="card-log-date">'+e.date+'</div>':'')
-            +'<div>'+e.text.slice(0,80)+(e.text.length>80?'…':'')+'</div>'
-            +'</div>';
-        }).join('')
-        +'</div>';
-    }
-
-    var card = document.createElement('div');
-    card.className = 'card';
-    if(activeToday) card.style.borderColor='#2a3a2a';
-    card.innerHTML =
-      '<div class="card-rank">#'+(i+1)+(isLocal?' · このデバイス':'')+(activeToday?' · 本日活動済み':'')+'</div>'
-      +'<div class="card-name">'+p.playerName+(isLocal?'<span class="badge-local">本端末</span>':'')+'</div>'
+    var recentLogs=(p.log||[]).filter(function(e){return e.text&&e.text.length>0;}).slice(-3).reverse();
+    var logsHtml=recentLogs.length?'<div class="card-logs"><div class="card-log-title">最近の日報</div>'+recentLogs.map(function(e){
+      return '<div class="card-log-entry">'+(e.date?'<div class="card-log-date">'+e.date+'</div>':'')+'<div>'+esc(e.text).slice(0,100)+(e.text.length>100?'…':'')+'</div></div>';
+    }).join('')+'</div>':'';
+    var card=document.createElement('div');
+    card.className='card';
+    if(activeToday)card.style.borderColor='#1a3a1a';
+    card.innerHTML='<div class="card-rank">#'+(i+1)+(p._source==='firebase'?' · Firebase':isLocal?' · このデバイス':' · JSON')+'</div>'
+      +'<div class="card-name">'+esc(p.playerName)
+      +(isLocal?'<span class="badge-local">本端末</span>':'')
+      +(activeToday?'<span class="badge-active">本日活動</span>':'')+'</div>'
       +'<div class="card-lv">Lv. '+lv+'</div>'
       +'<div class="card-lv-label">TOTAL LEVEL</div>'
       +'<div class="progress-bar"><div class="progress-fill" style="width:'+pct+'%"></div></div>'
@@ -243,35 +266,25 @@ function render(){
       +logsHtml;
     grid.appendChild(card);
   });
-  updateStats();
+  updateSummary();
 }
 
-// File import
-function handleFiles(files){
-  Array.from(files).forEach(function(f){if(f.name.endsWith('.json'))importFile(f);});
-}
-document.getElementById('import-input').addEventListener('change',function(e){
-  handleFiles(e.target.files); e.target.value='';
-});
-document.getElementById('drop-input').addEventListener('change',function(e){
-  handleFiles(e.target.files); e.target.value='';
-});
-document.getElementById('refresh-btn').addEventListener('click',function(){
-  loadLocal(); render();
-});
+// Events
+document.getElementById('firebase-connect-btn').addEventListener('click',connectFirebase);
+document.getElementById('firebase-url-input').addEventListener('keydown',function(e){if(e.key==='Enter')connectFirebase();});
+document.getElementById('refresh-btn').addEventListener('click',function(){loadLocal();fetchFromFirebase();});
+document.getElementById('import-input').addEventListener('change',function(e){Array.from(e.target.files).forEach(importFile);e.target.value='';});
 
-// Drag & drop on body
-var dropZone = document.getElementById('drop-zone');
-document.body.addEventListener('dragover',function(e){e.preventDefault();dropZone.classList.add('drag-over');});
-document.body.addEventListener('dragleave',function(e){if(!e.relatedTarget)dropZone.classList.remove('drag-over');});
+// Drag & drop
+document.body.addEventListener('dragover',function(e){e.preventDefault();});
 document.body.addEventListener('drop',function(e){
   e.preventDefault();
-  dropZone.classList.remove('drag-over');
-  handleFiles(e.dataTransfer.files);
+  Array.from(e.dataTransfer.files).forEach(function(f){if(f.name.endsWith('.json'))importFile(f);});
 });
 
 // Init
 loadLocal();
+loadFbUrl();
 render();
 </script>
 </body>
