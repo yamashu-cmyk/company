@@ -97,6 +97,14 @@
     .quest-diff{font-size:9px}.quest-xp{font-size:8px;color:#ffcc00;font-family:var(--font-cyber)}
     .quest-reason{font-size:9px;color:#444;margin-top:2px;line-height:1.3;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
     .quest-empty{text-align:center;padding:12px 4px;color:#333;font-size:10px;line-height:1.8}
+    .log-section{padding:6px 10px 0;display:flex;flex-direction:column;gap:4px}
+    .log-entry{background:rgba(255,255,255,.03);border:1px solid #111;border-radius:6px;padding:6px 10px;display:flex;flex-direction:column;gap:2px}
+    .log-entry-header{display:flex;align-items:center;gap:6px;font-size:9px;font-family:var(--font-cyber)}
+    .log-stat{padding:1px 5px;border-radius:3px;border:1px solid currentColor;font-size:8px;font-weight:bold}
+    .log-stat.mind{color:#9b59b6}.log-stat.skill{color:#3498db}.log-stat.knowhow{color:#e74c3c}
+    .log-xp{color:#ffcc00}.log-date{color:#333;margin-left:auto}
+    .log-text{font-size:11px;color:#888;line-height:1.4;margin-top:2px;word-break:break-all}
+    .log-empty{color:#333;font-size:11px;text-align:center;padding:10px;letter-spacing:1px}
     .daily-goal-bar{margin:6px 12px 0;padding:8px 12px;background:rgba(255,204,0,.07);border:1px solid rgba(255,204,0,.25);border-radius:8px;display:flex;align-items:flex-start;gap:8px}
     .daily-goal-bar.hidden{display:none}
     .daily-goal-label{font-size:9px;letter-spacing:2px;color:#ffcc00;font-family:var(--font-cyber);flex-shrink:0;margin-top:1px}
@@ -436,7 +444,7 @@
         <div class="condition-bar" id="condition-bar"></div>
         <span class="ai-badge" id="ai-badge" title="APIキー設定">AI OFF</span>
         <button class="hdr-btn" id="book-btn" title="魔導書">📖</button>
-        <a class="hdr-btn" href="?admin" title="管理者ダッシュボード" style="text-decoration:none">👥</a>
+        <a class="hdr-btn" href="admin.html" title="管理者ダッシュボード" style="text-decoration:none">👥</a>
         <button class="hdr-btn" id="gear-btn" title="設定">⚙</button>
       </div>
     </div>
@@ -476,6 +484,9 @@
     </div>
 
   </div><!-- /scene-middle -->
+
+  <!-- LOG -->
+  <div class="log-section" id="log-section"></div>
 
   <!-- FOOTER -->
   <footer class="scene-footer">
@@ -740,15 +751,24 @@ function updateGauge(k){
 function renderLog(){
   var sec=document.getElementById('log-section');if(!sec)return;
   sec.innerHTML='';
-  state.log.slice(-5).reverse().forEach(function(e){
-    var s=STATS.filter(function(x){return x.key===e.stat;})[0];if(!s)return;
+  var entries=state.log.filter(function(e){return e.text&&e.text.length>0;}).slice(-5).reverse();
+  if(entries.length===0){
+    sec.innerHTML='<div class="log-empty">日報の記録はまだありません</div>';
+    return;
+  }
+  entries.forEach(function(e){
+    var s=STATS.filter(function(x){return x.key===e.stat;})[0];
+    var cls=s?s.cls:'mind';
+    var statKey=e.stat||'MIND';
     var el=document.createElement('div');el.className='log-entry';
-    var xpL=e.xp>0?'+'+e.xp+'exp':'OFF';
-    var bookL=e.inGrimoire?'📖':'';
-    el.innerHTML='<span class="log-stat '+s.cls+'">['+e.stat+']</span>'
-      +'<span class="log-xp">'+xpL+'</span>'
-      +(bookL?'<span class="log-book">'+bookL+'</span>':'')
-      +'<span class="log-text">'+esc(e.text)+'</span>';
+    var xpL=e.xp>0?'+'+e.xp+' XP':'';
+    var dateL=e.date?e.date:'';
+    el.innerHTML='<div class="log-entry-header">'
+      +'<span class="log-stat '+cls+'">'+statKey+'</span>'
+      +(xpL?'<span class="log-xp">'+xpL+'</span>':'')
+      +(dateL?'<span class="log-date">'+dateL+'</span>':'')
+      +'</div>'
+      +'<div class="log-text">'+esc(e.text)+'</div>';
     sec.appendChild(el);
   });
 }
@@ -1295,7 +1315,7 @@ function applyQuestResults(questResults,xpMap,advice,reportText){
   var dayData=getDayData(today);
   dayData.xp+=totalXp;
 
-  state.log.push({stat:'MIND',skill:'日次レポート',xp:totalXp,text:reportText,inGrimoire:false});
+  state.log.push({stat:'MIND',skill:'日次レポート',xp:totalXp,text:reportText,inGrimoire:false,date:todayStr()});
   if(state.log.length>50)state.log=state.log.slice(-50);
   save();
   renderAll();
