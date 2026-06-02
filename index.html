@@ -137,16 +137,41 @@
     .quick-chip[data-stat="VIT"]{border-left:3px solid #2ecc71}
     .quick-chip[data-stat="DEX"]{border-left:3px solid #f39c12}
 
-    /* ── XP POPUP ── */
+    /* ── XP POPUP (legacy) ── */
     .xp-popup{position:fixed;pointer-events:none;z-index:50;font-size:12px;font-weight:bold;font-family:'Courier New',monospace;text-shadow:0 0 8px currentColor;animation:xp-float 1.3s ease-out forwards}
     @keyframes xp-float{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-44px)}}
 
-    /* ── LEVEL UP ── */
+    /* ── XP BURST ── */
+    @keyframes xp-burst{0%{transform:translate(-50%,-50%) scale(0);opacity:0}35%{transform:translate(-50%,-60%) scale(1.5);opacity:1}65%{transform:translate(-50%,-65%) scale(1.1);opacity:1}100%{transform:translate(-50%,-80%) scale(1.2);opacity:0}}
+    @keyframes edge-flash{0%{opacity:0}20%{opacity:1}100%{opacity:0}}
+    @keyframes particle-scatter{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--px),var(--py)) scale(0)}}
+    .xp-burst-num{position:fixed;top:50%;left:50%;pointer-events:none;z-index:220;
+      font-size:60px;font-weight:bold;font-family:var(--font-cyber);letter-spacing:2px;
+      animation:xp-burst 1.4s cubic-bezier(.22,1,.36,1) forwards;white-space:nowrap}
+    .screen-edge-flash{position:fixed;inset:0;pointer-events:none;z-index:210;
+      border-radius:0;animation:edge-flash .5s ease-out forwards}
+    .xp-particle{position:fixed;width:10px;height:10px;border-radius:50%;pointer-events:none;z-index:215;
+      animation:particle-scatter 1s ease-out forwards}
+
+    /* ── LEVEL UP (new) ── */
+    @keyframes lu-zoom{0%{transform:scale(0.1);opacity:0}50%{transform:scale(1.2);opacity:1}70%{transform:scale(.95)}100%{transform:scale(1);opacity:1}}
+    @keyframes lu-num-pop{0%{transform:scale(0);opacity:0}60%{transform:scale(1.3);opacity:1}80%{transform:scale(.9)}100%{transform:scale(1);opacity:1}}
+    @keyframes lu-glow{0%,100%{text-shadow:0 0 20px currentColor,0 0 40px currentColor}50%{text-shadow:0 0 60px currentColor,0 0 120px currentColor,0 0 180px currentColor}}
+    @keyframes rainbow{0%{color:#ff6b6b}16%{color:#ffcc00}33%{color:#6bff6b}50%{color:#6bffff}66%{color:#6b6bff}83%{color:#ff6bff}100%{color:#ff6b6b}}
+    @keyframes lu-bg-in{0%{opacity:0}30%{opacity:.7}70%{opacity:.5}100%{opacity:0}}
+    .lu-screen{position:fixed;inset:0;z-index:260;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;pointer-events:none}
+    .lu-screen.hidden{display:none}
+    .lu-bg{position:absolute;inset:0;pointer-events:none}
+    .lu-label{font-size:52px;font-weight:bold;font-family:var(--font-cyber);letter-spacing:6px;z-index:1;animation:lu-zoom .6s cubic-bezier(.22,1,.36,1) forwards,lu-glow 1.2s .6s ease-in-out infinite,rainbow 2s .6s linear infinite}
+    .lu-stat-name{font-size:16px;letter-spacing:6px;z-index:1;opacity:.8;margin-top:4px}
+    .lu-num{font-size:100px;font-weight:bold;font-family:var(--font-cyber);z-index:1;animation:lu-num-pop .5s .5s cubic-bezier(.22,1,.36,1) both,lu-glow 1.2s 1s ease-in-out infinite}
+    .lu-particle{position:absolute;border-radius:50%;pointer-events:none;animation:particle-scatter 1.2s ease-out forwards}
+
+    /* ── LEVEL UP (legacy, keep for fallback) ── */
     .levelup-overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;pointer-events:none;opacity:0}
     .levelup-overlay.show{animation:lu-fade 2.4s ease-out forwards;pointer-events:auto}
     @keyframes lu-fade{0%{opacity:0}10%{opacity:1}72%{opacity:1}100%{opacity:0}}
-    .levelup-big{font-size:46px;font-weight:bold;letter-spacing:5px;animation:lu-scale 2.4s ease-out forwards}
-    @keyframes lu-scale{0%{transform:scale(.4);opacity:0}14%{transform:scale(1.1);opacity:1}22%{transform:scale(1)}72%{transform:scale(1);opacity:1}100%{transform:scale(1.2);opacity:0}}
+    .levelup-big{font-size:46px;font-weight:bold;letter-spacing:5px}
     .levelup-sub{font-size:15px;letter-spacing:4px;margin-top:10px;color:rgba(255,255,255,.6)}
 
     /* ── STATUS DIALOG ── */
@@ -335,7 +360,16 @@
   </div>
 </div>
 
-<!-- ── LEVEL UP ── -->
+<!-- ── LEVEL UP NEW ── -->
+<div class="lu-screen hidden" id="lu-screen">
+  <div class="lu-bg" id="lu-bg"></div>
+  <div class="lu-label">LEVEL UP!</div>
+  <div class="lu-stat-name" id="lu-stat-name"></div>
+  <div class="lu-num" id="lu-num"></div>
+  <div id="lu-particles"></div>
+</div>
+
+<!-- ── LEVEL UP (legacy) ── -->
 <div class="levelup-overlay" id="levelup-overlay">
   <div class="levelup-big" id="levelup-big"></div>
   <div class="levelup-sub" id="levelup-sub"></div>
@@ -1394,9 +1428,12 @@ function applyQuestResults(stat,aiXp,advice,reportText){
     if(q.stat===stat){q.done=true;targetQuest=q;}
   });
 
-  // そのstatだけXP付与
+  // そのstatだけXP付与・レベルアップ検出
   var xp=Math.round((BASE_QUEST_XP+aiXp)*streakM*qualityBonus);
+  var prevLv=state.stats[stat].level;
   addXp(state.stats[stat],xp);
+  var didLevelUp=state.stats[stat].level>prevLv;
+  var newLevel=state.stats[stat].level;
 
   // 目標クリア
   state.dailyGoal=null;
@@ -1413,14 +1450,18 @@ function applyQuestResults(stat,aiXp,advice,reportText){
   save();
   renderAll();
 
-  showDailyResult(stat,xp,advice);
+  showDailyResult(stat,xp,advice,didLevelUp,newLevel);
 }
 
-function showDailyResult(stat,totalXp,advice){
-  var color=STAT_COLORS[stat]||'#9b59b6';
-  flashOverlay(stat+' クリア！','+'+totalXp+' XP',color);
+function showDailyResult(stat,totalXp,advice,didLevelUp,newLevel){
+  showXpBurst(stat,totalXp);
+  // レベルアップ演出はXP演出の後に起動
+  if(didLevelUp){
+    setTimeout(function(){showLevelUpEffect(stat,newLevel);},1800);
+  }
+  // AIフィードバックはレベルアップあり→4.5秒後、なし→2.8秒後
+  var delay=didLevelUp?5400:2800;
   setTimeout(function(){
-    // AIフィードバックをステータスダイアログに表示
     var advSec=document.getElementById('rpg-advice');
     var advTxt=document.getElementById('rpg-advice-text');
     var advMeta=document.getElementById('rpg-advice-meta');
@@ -1432,7 +1473,7 @@ function showDailyResult(stat,totalXp,advice){
       advSec.classList.add('hidden');
     }
     showStatusDialog();
-  },2600);
+  },delay);
   document.getElementById('report-input').value='';
 }
 
@@ -1489,6 +1530,118 @@ function showXpPopup(sk,xp,cm,off){
   document.body.appendChild(el);
   setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},1400);
 }
+// ── 振動ヘルパー ──
+function vibe(pattern){try{if(navigator.vibrate)navigator.vibrate(pattern);}catch(_){}}
+
+// ── パーティクル生成 ──
+function spawnParticles(container,color,count,isAbsolute){
+  var cx=isAbsolute?window.innerWidth/2:container.offsetWidth/2;
+  var cy=isAbsolute?window.innerHeight/2:container.offsetHeight/2;
+  for(var i=0;i<count;i++){
+    var p=document.createElement('div');
+    p.className=isAbsolute?'xp-particle':'lu-particle';
+    var angle=Math.random()*Math.PI*2;
+    var dist=80+Math.random()*200;
+    var px=Math.cos(angle)*dist;
+    var py=Math.sin(angle)*dist;
+    var size=6+Math.random()*10;
+    var shapes=['50%','2px','0'];
+    p.style.cssText='width:'+size+'px;height:'+size+'px;background:'+color+
+      ';left:'+(isAbsolute?window.innerWidth/2:cx)+'px;top:'+(isAbsolute?window.innerHeight/2:cy)+'px;'+
+      'border-radius:'+shapes[Math.floor(Math.random()*shapes.length)]+
+      ';--px:'+px+'px;--py:'+py+'px'+
+      ';animation-delay:'+(Math.random()*0.3)+'s;animation-duration:'+(0.7+Math.random()*0.6)+'s';
+    container.appendChild(p);
+  }
+}
+
+// ── XP取得演出 ──
+function showXpBurst(stat,xp){
+  var color=STAT_COLORS[stat]||'#ffcc00';
+  // 画面縁フラッシュ
+  var flash=document.createElement('div');
+  flash.className='screen-edge-flash';
+  flash.style.boxShadow='inset 0 0 120px 40px '+color;
+  document.body.appendChild(flash);
+  setTimeout(function(){if(flash.parentNode)flash.parentNode.removeChild(flash);},600);
+  // XP数字バースト
+  var num=document.createElement('div');
+  num.className='xp-burst-num';
+  num.textContent='+'+xp+' XP';
+  num.style.color=color;
+  num.style.textShadow='0 0 30px '+color+',0 0 60px '+color;
+  document.body.appendChild(num);
+  // パーティクル
+  for(var i=0;i<20;i++){
+    var p=document.createElement('div');
+    p.className='xp-particle';
+    var angle=Math.random()*Math.PI*2;
+    var dist=60+Math.random()*160;
+    var px=Math.cos(angle)*dist;
+    var py=Math.sin(angle)*dist;
+    var size=6+Math.random()*8;
+    p.style.cssText='width:'+size+'px;height:'+size+'px;background:'+color+
+      ';left:'+window.innerWidth/2+'px;top:'+window.innerHeight/2+'px;'+
+      'border-radius:'+(Math.random()>0.5?'50%':'2px')+
+      ';--px:'+px+'px;--py:'+py+'px'+
+      ';animation-delay:'+(Math.random()*0.15)+'s;animation-duration:'+(0.8+Math.random()*0.5)+'s';
+    document.body.appendChild(p);
+    setTimeout(function(el){return function(){if(el.parentNode)el.parentNode.removeChild(el);};}(p),1500);
+  }
+  vibe(150);
+  setTimeout(function(){if(num.parentNode)num.parentNode.removeChild(num);},1600);
+}
+
+// ── レベルアップ演出 ──
+var luScreenTimer=null;
+function showLevelUpEffect(stat,newLevel){
+  var color=STAT_COLORS[stat]||'#ffcc00';
+  var screen=document.getElementById('lu-screen');
+  var bg=document.getElementById('lu-bg');
+  var statName=document.getElementById('lu-stat-name');
+  var numEl=document.getElementById('lu-num');
+  var particles=document.getElementById('lu-particles');
+  if(!screen)return;
+  // リセット
+  screen.classList.remove('hidden');
+  particles.innerHTML='';
+  // 背景色フラッシュ
+  bg.style.background=color;
+  bg.style.animation='none';void bg.offsetWidth;
+  bg.style.animation='lu-bg-in 3.5s ease-out forwards';
+  // テキスト更新
+  statName.textContent=stat;
+  statName.style.color=color;
+  numEl.textContent='Lv. '+newLevel;
+  numEl.style.color=color;
+  // アニメーション再起動
+  ['lu-label','lu-stat-name','lu-num'].forEach(function(id){
+    var el=document.getElementById(id);if(!el)return;
+    el.style.animation='none';void el.offsetWidth;el.style.animation='';
+  });
+  // パーティクル大爆発
+  for(var i=0;i<50;i++){
+    var p=document.createElement('div');
+    p.className='lu-particle';
+    var angle=Math.random()*Math.PI*2;
+    var dist=120+Math.random()*300;
+    var px=Math.cos(angle)*dist;
+    var py=Math.sin(angle)*dist;
+    var size=8+Math.random()*14;
+    var colors=[color,'#ffcc00','#fff','#ff6b6b','#6bffff'];
+    var c=colors[Math.floor(Math.random()*colors.length)];
+    p.style.cssText='width:'+size+'px;height:'+size+'px;background:'+c+
+      ';left:50%;top:50%;margin-left:'+(-(size/2))+'px;margin-top:'+(-(size/2))+'px;'+
+      'border-radius:'+(Math.random()>0.4?'50%':'3px')+
+      ';--px:'+px+'px;--py:'+py+'px'+
+      ';animation-delay:'+(Math.random()*0.4)+'s;animation-duration:'+(0.9+Math.random()*0.8)+'s';
+    particles.appendChild(p);
+  }
+  vibe([200,80,200,80,400]);
+  if(luScreenTimer)clearTimeout(luScreenTimer);
+  luScreenTimer=setTimeout(function(){screen.classList.add('hidden');particles.innerHTML='';},3600);
+}
+
 var luTimer=null;
 function flashOverlay(big,sub,color){
   var ov=document.getElementById('levelup-overlay');
