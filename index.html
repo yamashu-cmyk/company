@@ -63,11 +63,11 @@
 
     /* Hero column — 絶対配置で大きく */
     .scene-hero-col{position:absolute;bottom:0;left:0;z-index:7;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
-    .scene-hero-col img{width:200px;height:auto;display:block;image-rendering:pixelated;filter:drop-shadow(0 0 12px rgba(68,255,136,.7))}
+    .scene-hero-col img{width:160px;height:auto;display:block;image-rendering:pixelated;filter:drop-shadow(0 0 12px rgba(68,255,136,.7))}
     .hero-lbl{font-size:7px;letter-spacing:2px;color:#44ff88;font-family:var(--font-cyber);text-shadow:0 0 6px #44ff88;margin-top:2px;text-align:center}
 
     /* Center column */
-    .scene-center-col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:6px 2px;position:relative;z-index:6}
+    .scene-center-col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:6px 2px 6px 110px;position:relative;z-index:6}
     .radar-section{display:flex;justify-content:center;align-items:center;cursor:pointer;border-radius:50%;transition:filter .2s;width:100%;max-width:110px}
     .radar-section:active{filter:brightness(1.3)}
     .radar-svg{overflow:visible;width:100%;height:auto;display:block}
@@ -519,27 +519,27 @@
       <div class="hero-lbl">⚔ HERO</div>
     </div>
 
-    <!-- Center: Radar + Streak -->
+    <!-- Center: Radar only -->
     <div class="scene-center-col">
       <div class="radar-section" id="radar-section" title="タップでステータス詳細">
         <svg class="radar-svg" id="radar-svg" viewBox="0 0 200 200"></svg>
       </div>
       <div class="radar-tap-hint">TAP → STATUS</div>
-      <div class="streak-row" id="streak-section">
-        <span class="streak-flame">🔥</span>
-        <span class="streak-count" id="streak-count">0</span>
-        <span class="streak-sub">日連続</span>
-        <span id="streak-best"></span>
-      </div>
     </div>
 
-    <!-- Quests (right) -->
+    <!-- Quests (right) + Streak below -->
     <div class="scene-quest-col">
       <div class="quest-panel-hdr">
         <span class="quest-panel-title">ACTIVE QUESTS</span>
         <button class="quests-refresh" id="quest-refresh-btn">↺</button>
       </div>
       <div id="quest-list"></div>
+      <div class="streak-row" id="streak-section" style="margin-top:6px">
+        <span class="streak-flame">🔥</span>
+        <span class="streak-count" id="streak-count">0</span>
+        <span class="streak-sub">日連続</span>
+        <span id="streak-best"></span>
+      </div>
     </div>
 
   </div><!-- /scene-middle -->
