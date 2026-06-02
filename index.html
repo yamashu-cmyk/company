@@ -413,17 +413,9 @@
       <input class="settings-input" id="api-key-input" type="password" placeholder="sk-ant-..." autocomplete="off" spellcheck="false">
       <div class="settings-note">APIキーはこの端末のLocalStorageのみに保存されます。</div>
     </div>
-    <div class="settings-group">
-      <div class="settings-label">FIREBASE URL<span class="settings-hint">（管理者へ自動送信）</span></div>
-      <input class="settings-input" id="firebase-url-input" type="text" placeholder="https://xxxx-default-rtdb.firebaseio.com" autocomplete="off" spellcheck="false">
-      <div class="settings-note">管理者から共有されたFirebase URLを入力すると日報が自動送信されます。</div>
-    </div>
     <div class="settings-btns">
       <button class="settings-btn" id="settings-close-btn">✕ キャンセル</button>
       <button class="settings-btn primary" id="settings-save-btn">保存</button>
-    </div>
-    <div style="margin-top:12px;padding-top:12px;border-top:1px solid #1a1a1a">
-      <button class="settings-btn" id="share-to-admin-btn" style="width:100%;background:#0a1a0a;border-color:#2a5a2a;color:#4a9a4a">📤 管理者にデータを共有（JSONを保存）</button>
     </div>
   </div>
 </div>
@@ -658,26 +650,7 @@ function loadApiKey(){try{apiKey=localStorage.getItem('lq_apikey')||'';}catch(_)
 function saveApiKey(k){try{if(k)localStorage.setItem('lq_apikey',k);else localStorage.removeItem('lq_apikey');}catch(_){}}
 loadApiKey();
 
-var firebaseUrl='';
-function loadFirebaseUrl(){try{firebaseUrl=localStorage.getItem('lq_firebase_url')||'';}catch(_){}}
-function saveFirebaseUrl(u){try{if(u)localStorage.setItem('lq_firebase_url',u);else localStorage.removeItem('lq_firebase_url');}catch(_){}}
-loadFirebaseUrl();
-
-function syncToFirebase(){
-  if(!firebaseUrl||!state.playerName)return;
-  var url=firebaseUrl.replace(/\/+$/,'')+'/participants/'+encodeURIComponent(state.playerName)+'.json';
-  var payload=JSON.stringify({
-    playerName:state.playerName,
-    stats:state.stats,
-    log:state.log,
-    days:state.days,
-    quests:state.quests,
-    questDate:state.questDate,
-    grimoire:state.grimoire,
-    lastSync:new Date().toISOString()
-  });
-  fetch(url,{method:'PUT',headers:{'Content-Type':'application/json'},body:payload}).catch(function(){});
-}
+function syncToFirebase(){} // 無効化
 
 // ══════════════════════════════════════════
 //  STATE
@@ -1738,7 +1711,6 @@ function hideStatusDialog(){
 function openSettings(){
   document.getElementById('player-name-input').value=state.playerName;
   document.getElementById('api-key-input').value=apiKey;
-  document.getElementById('firebase-url-input').value=firebaseUrl;
   document.getElementById('settings-overlay').classList.remove('hidden');
   setTimeout(function(){document.getElementById('player-name-input').focus();},80);
 }
@@ -1748,10 +1720,8 @@ function closeSettings(){
 function saveSettings(){
   var name=document.getElementById('player-name-input').value.trim();
   var key=document.getElementById('api-key-input').value.trim();
-  var fbUrl=document.getElementById('firebase-url-input').value.trim();
   if(name&&name!==state.playerName){state.playerName=name;save();}
   if(key!==apiKey){apiKey=key;saveApiKey(key);}
-  if(fbUrl!==firebaseUrl){firebaseUrl=fbUrl;saveFirebaseUrl(fbUrl);}
   updateAiBadge();closeSettings();
 }
 
@@ -1820,7 +1790,6 @@ on('import-input','change',function(e){if(e.target.files[0])importData(e.target.
 on('reset-btn','click',resetData);
 on('achieve-btn','click',judgeDailyReport);
 on('quest-refresh-btn','click',refreshQuests);
-on('share-to-admin-btn','click',function(){exportData();alert('JSONファイルが保存されました。\n管理者にファイルを送付してください。');});
 on('login-btn','click',doLogin);
 on('login-name','input',updateLoginForm);
 on('login-name','keydown',function(e){if(e.key==='Enter'){var p=document.getElementById('login-pin');if(p)p.focus();}});
