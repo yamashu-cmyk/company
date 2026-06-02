@@ -172,7 +172,8 @@ function fetchFromFirebase(){
 
 function loadLocal(){
   try{
-    // 全アカウントをlocalStorageから読み込む
+    var added=0;
+    // lq_accounts リストから全ユーザーを読み込む
     var accountList=JSON.parse(localStorage.getItem('lq_accounts')||'[]');
     accountList.forEach(function(name){
       try{
@@ -182,20 +183,26 @@ function loadLocal(){
         if(!d||!d.playerName)return;
         d._source='local';
         var idx=profiles.findIndex(function(p){return p.playerName===d.playerName&&p._source==='local';});
-        if(idx>=0)profiles[idx]=d;else profiles.push(d);
+        if(idx>=0)profiles[idx]=d;else{profiles.push(d);added++;}
       }catch(_){}
     });
-    // 旧形式のフォールバック
-    if(accountList.length===0){
-      var raw=localStorage.getItem('lifequest');
-      if(raw){
+    // lq_user_* キーをローラーサーチ（lq_accountsに漏れがある場合の保険）
+    for(var i=0;i<localStorage.length;i++){
+      var k=localStorage.key(i);
+      if(!k||!k.startsWith('lq_user_'))continue;
+      try{
+        var raw=localStorage.getItem(k);
+        if(!raw)continue;
         var d=JSON.parse(raw);
-        if(d&&d.playerName){
-          d._source='local';
-          var idx=profiles.findIndex(function(p){return p.playerName===d.playerName&&p._source==='local';});
-          if(idx>=0)profiles[idx]=d;else profiles.push(d);
-        }
-      }
+        if(!d||!d.playerName)continue;
+        var already=profiles.some(function(p){return p.playerName===d.playerName&&p._source==='local';});
+        if(!already){d._source='local';profiles.push(d);added++;}
+      }catch(_){}
+    }
+    // 旧形式フォールバック
+    if(profiles.filter(function(p){return p._source==='local';}).length===0){
+      var raw=localStorage.getItem('lifequest');
+      if(raw){var d=JSON.parse(raw);if(d&&d.playerName){d._source='local';profiles.push(d);}}
     }
   }catch(_){}
 }

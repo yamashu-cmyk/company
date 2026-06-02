@@ -399,10 +399,20 @@
     <div class="auth-logo">⚔ LIFE QUEST OS</div>
     <div class="auth-title">プレインターン卒業</div>
     <div class="auth-sub" id="auth-main-sub">名前と暗証番号を入力してください</div>
-    <input class="auth-input" id="login-name" type="text" placeholder="プレイヤー名" maxlength="20" autocomplete="off">
-    <input class="auth-input pin-input" id="login-pin" type="password" inputmode="numeric" placeholder="● ● ● ●" maxlength="4" pattern="[0-9]*" autocomplete="current-password">
-    <div class="auth-sub" id="auth-new-hint" style="color:#333;font-size:10px">※ 初めての方はそのまま登録されます</div>
-    <button class="auth-btn" id="login-btn">ログイン / 登録</button>
+    <!-- ブラウザのオートコンプリートを無効化するダミーフィールド -->
+    <input type="text" style="display:none" aria-hidden="true">
+    <input type="password" style="display:none" aria-hidden="true">
+    <input class="auth-input" id="login-name" type="text" placeholder="プレイヤー名"
+      maxlength="20" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+      name="lq-name-field">
+    <input class="auth-input pin-input" id="login-pin" type="password" inputmode="numeric"
+      placeholder="暗証番号 (4桁)" maxlength="4" pattern="[0-9]*"
+      autocomplete="new-password" name="lq-pin-field">
+    <input class="auth-input pin-input" id="login-pin2" type="password" inputmode="numeric"
+      placeholder="暗証番号 (確認)" maxlength="4" pattern="[0-9]*"
+      autocomplete="new-password" name="lq-pin2-field" style="display:none">
+    <div class="auth-sub" id="auth-new-hint" style="color:#555;font-size:10px;display:none">※ 初めての方：確認用にもう一度入力してください</div>
+    <button class="auth-btn" id="login-btn">ログイン</button>
     <div class="auth-error hidden" id="login-error"></div>
   </div>
 </div>
@@ -926,9 +936,25 @@ function hideAuth(){
   setTimeout(showStatusDialog,600);
 }
 
+function updateLoginForm(){
+  var name=document.getElementById('login-name').value.trim();
+  var isNew=name.length>0&&getAccountsList().indexOf(name)<0;
+  var pin2=document.getElementById('login-pin2');
+  var hint=document.getElementById('auth-new-hint');
+  var btn=document.getElementById('login-btn');
+  if(isNew){
+    pin2.style.display=''; hint.style.display='';
+    btn.textContent='新規登録';
+  } else {
+    pin2.style.display='none'; hint.style.display='none';
+    btn.textContent='ログイン';
+  }
+}
+
 function doLogin(){
   var name=document.getElementById('login-name').value.trim();
   var pin=document.getElementById('login-pin').value;
+  var pin2=document.getElementById('login-pin2').value;
   var err=document.getElementById('login-error');
   err.classList.add('hidden');
   if(!name){err.textContent='名前を入力してください';err.classList.remove('hidden');return;}
@@ -948,6 +974,7 @@ function doLogin(){
     }
   } else {
     // 新規アカウント作成
+    if(pin!==pin2){err.textContent='暗証番号が一致しません';err.classList.remove('hidden');return;}
     list.push(name);saveAccountsList(list);
     loadUserByName(name);
     state.playerName=name;state.pin=pin;
@@ -955,7 +982,6 @@ function doLogin(){
   }
 }
 
-// 後方互換のため残す（呼び出し元なし）
 function doSetup(){}
 function switchAccount(){}
 
@@ -1617,8 +1643,13 @@ on('achieve-btn','click',judgeDailyReport);
 on('quest-refresh-btn','click',refreshQuests);
 on('share-to-admin-btn','click',function(){exportData();alert('JSONファイルが保存されました。\n管理者にファイルを送付してください。');});
 on('login-btn','click',doLogin);
-on('login-pin','keydown',function(e){if(e.key==='Enter')doLogin();});
+on('login-name','input',updateLoginForm);
 on('login-name','keydown',function(e){if(e.key==='Enter'){var p=document.getElementById('login-pin');if(p)p.focus();}});
+on('login-pin','keydown',function(e){if(e.key==='Enter'){
+  var isNew=getAccountsList().indexOf(document.getElementById('login-name').value.trim())<0;
+  if(isNew){var p=document.getElementById('login-pin2');if(p)p.focus();}else doLogin();
+}});
+on('login-pin2','keydown',function(e){if(e.key==='Enter')doLogin();});
 </script>
 </body>
 </html>
