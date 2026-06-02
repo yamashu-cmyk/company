@@ -1404,37 +1404,45 @@ function judgeDailyReport(){
   if(!apiKey){
     // APIキーなし→フォールバックフィードバック
     var fallbacks=[
-      '今日も振り返りを記録できました。継続することが一番の力です。明日もこの調子で！',
-      '行動を言葉にすることで、成長が加速します。今日の気づきを明日につなげてください。',
-      '振り返りを習慣にしている人は確実に伸びます。今日の記録が未来の自分への財産です。',
-      'よく書けました。数字と気づきを両方記録できると、成長がより実感しやすくなります。',
-      '今日の積み重ねが、プレインターン卒業への一歩です。明日もクエストに挑戦してください！',
+      '継続が一番の力！明日もこの調子で挑戦しよう。',
+      '振り返りが成長を加速させる。明日につなげよう！',
+      '記録する習慣が未来の自分を作る。よくできた！',
+      '数字と気づきを書けると成長が見える。次も頑張れ！',
+      '一歩一歩が卒業への道。明日もクエストに挑戦！',
     ];
     var fb=fallbacks[Math.floor(Math.random()*fallbacks.length)];
     applyQuestResults(state.dailyGoal.stat,80,fb,text);
     return;
   }
 
-  var prompt='あなたはプレインターン卒業プログラムの成長判定AIです。\n\n【参加者名】'+state.playerName+'\n【本日の目標クエスト（'+state.dailyGoal.stat+'）】\n'+state.dailyGoal.action+'\n\n【振り返りレポート】\n"'+text+'"\n\n【判定ルール】\n- このクエストをレポートから達成したか判定（true/false）\n- XP: 内容の質に応じて0〜150\n- adviceは参加者の成長を認め、明日への具体的なアドバイスを2〜3文（150文字以内）\n\nJSONのみ返答:\n{"achieved":true,"xp":100,"advice":"フィードバック"}';
+  var goalStat=state.dailyGoal.stat;
+  var goalAction=state.dailyGoal.action;
+
+  var prompt='あなたはインターン育成AIです。\n参加者名:'+state.playerName+'\nクエスト('+goalStat+'):'+goalAction+'\n振り返り:"'+text+'"\n\n達成判定とフィードバックをJSONのみで返答:\n{"achieved":true,"xp":80,"advice":"頑張りを褒めて次につながる一言（30〜50文字）"}';
 
   var btn=document.getElementById('achieve-btn');
-  btn.textContent='判定中…';btn.disabled=true;
+  btn.textContent='AI判定中…';btn.disabled=true;
 
   fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
     headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:300,temperature:0,messages:[{role:'user',content:prompt}]})
+    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:200,temperature:0.3,messages:[{role:'user',content:prompt}]})
   }).then(function(r){return r.json();}).then(function(d){
     btn.textContent='✅ 今日の記録を提出';btn.disabled=false;
-    if(!d||!d.content||!d.content[0]){return;}
-    var raw=d.content[0].text.replace(/```[a-z]*\n?/g,'').trim();
+    var advice=null,xp=50;
     try{
-      var result=JSON.parse(raw);
-      applyQuestResults(state.dailyGoal.stat,result.xp||50,result.advice||null,text);
-    }catch(e){applyQuestResults(state.dailyGoal.stat,50,null,text);}
-  }).catch(function(){
+      if(d&&d.content&&d.content[0]){
+        var raw=d.content[0].text.replace(/```[a-z]*\n?/g,'').trim();
+        var result=JSON.parse(raw);
+        xp=result.xp||50;
+        advice=result.advice||null;
+      }
+    }catch(e){}
+    applyQuestResults(goalStat,xp,advice,text);
+  }).catch(function(e){
     btn.textContent='✅ 今日の記録を提出';btn.disabled=false;
-    alert('通信エラーが発生しました');
+    // 通信エラー時もフォールバックで結果を反映（送信はできる）
+    applyQuestResults(goalStat,50,null,text);
   });
 }
 
