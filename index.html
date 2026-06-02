@@ -61,10 +61,10 @@
     /* ── SCENE MIDDLE ── */
     .scene-middle{flex:1;display:flex;align-items:stretch;position:relative;overflow:hidden;background:rgba(0,0,0,.30);min-height:0}
 
-    /* Hero column */
-    .scene-hero-col{flex:0 0 38%;max-width:38%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:8px;position:relative;z-index:6;min-width:0}
-    .scene-hero-col img{width:95%;max-width:320px;height:auto;mix-blend-mode:multiply;image-rendering:pixelated;filter:drop-shadow(0 0 10px rgba(68,255,136,.6));display:block}
-    .hero-lbl{font-size:7px;letter-spacing:2px;color:#44ff88;font-family:var(--font-cyber);text-shadow:0 0 6px #44ff88;margin-top:2px}
+    /* Hero column — 絶対配置で大きく */
+    .scene-hero-col{position:absolute;bottom:0;left:0;z-index:7;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
+    .scene-hero-col img{width:200px;height:auto;display:block;image-rendering:pixelated;filter:drop-shadow(0 0 12px rgba(68,255,136,.7))}
+    .hero-lbl{font-size:7px;letter-spacing:2px;color:#44ff88;font-family:var(--font-cyber);text-shadow:0 0 6px #44ff88;margin-top:2px;text-align:center}
 
     /* Center column */
     .scene-center-col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:6px 2px;position:relative;z-index:6}
@@ -79,7 +79,7 @@
     #streak-best{font-size:8px;color:#555;letter-spacing:.5px;margin-left:2px}
 
     /* Quest column */
-    .scene-quest-col{flex:0 0 40%;max-width:40%;min-width:0;display:flex;flex-direction:column;padding:6px 4px 4px 2px;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;position:relative;z-index:6}
+    .scene-quest-col{flex:0 0 46%;max-width:46%;min-width:0;display:flex;flex-direction:column;padding:6px 4px 4px 2px;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;position:relative;z-index:6}
     .scene-quest-col::-webkit-scrollbar{display:none}
     .quest-panel-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;padding:0 2px}
     .quest-panel-title{font-size:7px;letter-spacing:2px;color:#555;font-family:var(--font-cyber)}
