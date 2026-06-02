@@ -259,6 +259,14 @@
     .auth-btn:hover{opacity:.85}
     .auth-error{font-size:12px;color:#e74c3c;text-align:center;letter-spacing:1px}
     .auth-error.hidden{display:none}
+    .account-list{display:flex;flex-direction:column;gap:8px}
+    .account-btn{background:#0d0d0d;border:1px solid #1e1e1e;border-radius:9px;color:#fff;font-family:inherit;font-size:16px;font-weight:bold;padding:14px;cursor:pointer;letter-spacing:1px;transition:all .15s;text-align:left;display:flex;align-items:center;justify-content:space-between}
+    .account-btn:hover{background:#1a1a1a;border-color:#444}
+    .account-btn-arrow{color:#444;font-size:18px}
+    .auth-btn-sub{background:none;border:1px solid #1e1e1e;border-radius:9px;color:#555;font-family:inherit;font-size:13px;padding:11px;cursor:pointer;letter-spacing:1px;transition:all .15s}
+    .auth-btn-sub:hover{border-color:#444;color:#fff}
+    .auth-back{background:none;border:none;color:#333;font-size:12px;cursor:pointer;letter-spacing:1px;text-align:center;padding:4px;font-family:inherit}
+    .auth-back:hover{color:#888}
     @keyframes auth-shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-10px)}40%,80%{transform:translateX(10px)}}
 
     /* ── FIRST VISIT MODAL ── */
@@ -378,8 +386,9 @@
       <button class="settings-btn" id="settings-close-btn">✕ キャンセル</button>
       <button class="settings-btn primary" id="settings-save-btn">保存</button>
     </div>
-    <div style="margin-top:12px;padding-top:12px;border-top:1px solid #1a1a1a">
-      <button class="settings-btn" id="share-to-admin-btn" style="width:100%;background:#0a1a0a;border-color:#2a5a2a;color:#4a9a4a">📤 管理者にデータを共有（JSONを保存）</button>
+    <div style="margin-top:12px;padding-top:12px;border-top:1px solid #1a1a1a;display:flex;flex-direction:column;gap:8px">
+      <button class="settings-btn" id="share-to-admin-btn" style="background:#0a1a0a;border-color:#2a5a2a;color:#4a9a4a">📤 管理者にデータを共有（JSONを保存）</button>
+      <button class="settings-btn" id="switch-account-btn" style="border-color:#333;color:#555">👤 アカウントを切り替える</button>
     </div>
   </div>
 </div>
@@ -387,16 +396,26 @@
 <!-- ── FIRST VISIT MODAL ── -->
 <!-- ── AUTH OVERLAY ── -->
 <div class="auth-overlay" id="auth-overlay">
-  <div class="auth-card" id="auth-setup">
+  <!-- アカウント選択 -->
+  <div class="auth-card hidden" id="auth-accounts">
     <div class="auth-logo">⚔ LIFE QUEST OS</div>
-    <div class="auth-title">プレインターン卒業</div>
+    <div class="auth-sub">アカウントを選択</div>
+    <div class="account-list" id="account-list"></div>
+    <button class="auth-btn-sub" id="new-account-btn">＋ 新しいアカウントを作成</button>
+  </div>
+  <!-- 新規登録 -->
+  <div class="auth-card hidden" id="auth-setup">
+    <div class="auth-logo">⚔ LIFE QUEST OS</div>
+    <div class="auth-title">新規登録</div>
     <div class="auth-sub">プレイヤー名と暗証番号を設定してください</div>
     <input class="auth-input" id="setup-name" type="text" placeholder="プレイヤー名を入力" maxlength="20" autocomplete="off">
     <input class="auth-input" id="setup-pin" type="password" inputmode="numeric" placeholder="暗証番号（4桁）" maxlength="4" pattern="[0-9]*" autocomplete="new-password">
     <input class="auth-input" id="setup-pin2" type="password" inputmode="numeric" placeholder="暗証番号（確認）" maxlength="4" pattern="[0-9]*" autocomplete="new-password">
     <button class="auth-btn" id="setup-btn">冒険を始める</button>
     <div class="auth-error hidden" id="setup-error"></div>
+    <button class="auth-back" id="setup-back-btn">← 戻る</button>
   </div>
+  <!-- PIN入力 -->
   <div class="auth-card hidden" id="auth-login">
     <div class="auth-logo">⚔ LIFE QUEST OS</div>
     <div class="auth-name-display" id="auth-name-display"></div>
@@ -404,6 +423,7 @@
     <input class="auth-input pin-input" id="login-pin" type="password" inputmode="numeric" placeholder="● ● ● ●" maxlength="4" pattern="[0-9]*" autocomplete="current-password">
     <button class="auth-btn" id="login-btn">ログイン</button>
     <div class="auth-error hidden" id="login-error">暗証番号が違います</div>
+    <button class="auth-back" id="login-back-btn">← アカウント選択に戻る</button>
   </div>
 </div>
 
@@ -486,9 +506,6 @@
     </div>
 
   </div><!-- /scene-middle -->
-
-  <!-- LOG -->
-  <div class="log-section" id="log-section"></div>
 
   <!-- FOOTER -->
   <footer class="scene-footer">
@@ -651,26 +668,71 @@ var state = {
 };
 STATS.forEach(function(s){ state.stats[s.key]={level:1,xp:0}; });
 
-function save(){try{localStorage.setItem('lifequest',JSON.stringify(state));}catch(_){}}
+// ── マルチアカウント ──
+var ACCOUNTS_KEY='lq_accounts';
+function getAccountsList(){try{return JSON.parse(localStorage.getItem(ACCOUNTS_KEY)||'[]');}catch(_){return[];}}
+function saveAccountsList(list){localStorage.setItem(ACCOUNTS_KEY,JSON.stringify(list));}
+function userKey(name){return 'lq_user_'+name;}
+
+function save(){
+  if(!state.playerName)return;
+  try{
+    localStorage.setItem(userKey(state.playerName),JSON.stringify(state));
+    localStorage.setItem('lifequest',JSON.stringify(state)); // 後方互換
+  }catch(_){}
+}
+
+function loadUserData(d){
+  if(d.playerName)     state.playerName=d.playerName;
+  if(d.pin)            state.pin=d.pin;
+  state.boss='プレインターン卒業';
+  if(d.log)            state.log=d.log;
+  if(d.skills)         state.skills=d.skills;
+  if(d.days)           state.days=d.days;
+  if(d.chozetsuDate)   state.chozetsuDate=d.chozetsuDate;
+  if(d.lastDialogDate) state.lastDialogDate=d.lastDialogDate;
+  if(d.grimoire){STATS.forEach(function(s){if(d.grimoire[s.key])state.grimoire[s.key]=d.grimoire[s.key];});}
+  if(d.stats){STATS.forEach(function(s){if(d.stats[s.key])state.stats[s.key]=d.stats[s.key];});}
+  if(d.quests)            state.quests=d.quests;
+  if(d.questDate)         state.questDate=d.questDate;
+  if(d.questRefreshCount) state.questRefreshCount=d.questRefreshCount;
+  if(d.questRefreshDate)  state.questRefreshDate=d.questRefreshDate;
+  if(d.dailyGoal)         state.dailyGoal=d.dailyGoal;
+}
+
 function load(){
   try{
-    var raw=localStorage.getItem('lifequest');if(!raw)return;
-    var d=JSON.parse(raw);
-    if(d.playerName)     state.playerName=d.playerName;
-    if(d.pin)            state.pin=d.pin;
-    state.boss='プレインターン卒業';
-    if(d.log)            state.log=d.log;
-    if(d.skills)         state.skills=d.skills;
-    if(d.days)           state.days=d.days;
-    if(d.chozetsuDate)   state.chozetsuDate=d.chozetsuDate;
-    if(d.lastDialogDate) state.lastDialogDate=d.lastDialogDate;
-    if(d.grimoire){STATS.forEach(function(s){if(d.grimoire[s.key])state.grimoire[s.key]=d.grimoire[s.key];});}
-    if(d.stats){STATS.forEach(function(s){if(d.stats[s.key])state.stats[s.key]=d.stats[s.key];});}
-    if(d.quests)             state.quests=d.quests;
-    if(d.questDate)          state.questDate=d.questDate;
-    if(d.questRefreshCount)  state.questRefreshCount=d.questRefreshCount;
-    if(d.questRefreshDate)   state.questRefreshDate=d.questRefreshDate;
-    if(d.dailyGoal)          state.dailyGoal=d.dailyGoal;
+    // 旧データの移行
+    var oldRaw=localStorage.getItem('lifequest');
+    if(oldRaw){
+      var old=JSON.parse(oldRaw);
+      if(old&&old.playerName&&!localStorage.getItem(userKey(old.playerName))){
+        var list=getAccountsList();
+        if(list.indexOf(old.playerName)<0){list.push(old.playerName);saveAccountsList(list);}
+        localStorage.setItem(userKey(old.playerName),oldRaw);
+      }
+    }
+    // セッションのアクティブユーザーをロード
+    var active=sessionStorage.getItem('lq_active_user');
+    if(!active)return;
+    var raw=localStorage.getItem(userKey(active));
+    if(!raw)return;
+    loadUserData(JSON.parse(raw));
+  }catch(_){}
+}
+
+function loadUserByName(name){
+  // stateをリセットしてから指定ユーザーのデータをロード
+  state.playerName='';state.pin='';state.boss='プレインターン卒業';
+  state.stats={};state.skills={};state.log=[];state.days={};
+  state.chozetsuDate=null;state.lastDialogDate=null;
+  state.grimoire={MIND:[],SKILL:[],KNOWHOW:[]};
+  state.quests=[];state.questDate=null;
+  state.questRefreshCount=0;state.questRefreshDate='';state.dailyGoal=null;
+  STATS.forEach(function(s){state.stats[s.key]={level:1,xp:0};});
+  try{
+    var raw=localStorage.getItem(userKey(name));
+    if(raw)loadUserData(JSON.parse(raw));
   }catch(_){}
 }
 
@@ -869,25 +931,50 @@ function renderGrimoireEntries(){
 // ══════════════════════════════════════════
 //  AUTH
 // ══════════════════════════════════════════
+function showCard(id){
+  ['auth-accounts','auth-setup','auth-login'].forEach(function(c){
+    document.getElementById(c).classList.toggle('hidden',c!==id);
+  });
+}
+
 function showAuth(){
-  var overlay=document.getElementById('auth-overlay');
-  overlay.classList.remove('hidden');
-  if(!state.playerName||!state.pin){
-    document.getElementById('auth-setup').classList.remove('hidden');
-    document.getElementById('auth-login').classList.add('hidden');
+  document.getElementById('auth-overlay').classList.remove('hidden');
+  var list=getAccountsList();
+  if(list.length===0){
+    showCard('auth-setup');
     setTimeout(function(){document.getElementById('setup-name').focus();},80);
   } else {
-    document.getElementById('auth-setup').classList.add('hidden');
-    document.getElementById('auth-login').classList.remove('hidden');
-    document.getElementById('auth-name-display').textContent=state.playerName;
-    setTimeout(function(){document.getElementById('login-pin').focus();},80);
+    renderAccountButtons(list);
+    showCard('auth-accounts');
   }
 }
+
+function renderAccountButtons(list){
+  var con=document.getElementById('account-list');
+  con.innerHTML='';
+  list.forEach(function(name){
+    var btn=document.createElement('button');
+    btn.className='account-btn';
+    btn.innerHTML='<span>'+esc(name)+'</span><span class="account-btn-arrow">›</span>';
+    btn.addEventListener('click',function(){
+      loadUserByName(name);
+      document.getElementById('auth-name-display').textContent=name;
+      document.getElementById('login-pin').value='';
+      document.getElementById('login-error').classList.add('hidden');
+      showCard('auth-login');
+      setTimeout(function(){document.getElementById('login-pin').focus();},80);
+    });
+    con.appendChild(btn);
+  });
+}
+
 function hideAuth(){
   document.getElementById('auth-overlay').classList.add('hidden');
   sessionStorage.setItem('lq_auth','1');
+  sessionStorage.setItem('lq_active_user',state.playerName);
   setTimeout(showStatusDialog,600);
 }
+
 function doSetup(){
   var name=document.getElementById('setup-name').value.trim();
   var pin=document.getElementById('setup-pin').value;
@@ -897,9 +984,13 @@ function doSetup(){
   if(!name){err.textContent='名前を入力してください';err.classList.remove('hidden');return;}
   if(!/^\d{4}$/.test(pin)){err.textContent='暗証番号は4桁の数字です';err.classList.remove('hidden');return;}
   if(pin!==pin2){err.textContent='暗証番号が一致しません';err.classList.remove('hidden');return;}
+  var list=getAccountsList();
+  if(list.indexOf(name)>=0){err.textContent='その名前はすでに使われています';err.classList.remove('hidden');return;}
+  list.push(name);saveAccountsList(list);
   state.playerName=name;state.pin=pin;
   save();hideAuth();
 }
+
 function doLogin(){
   var pin=document.getElementById('login-pin').value;
   var err=document.getElementById('login-error');
@@ -913,6 +1004,13 @@ function doLogin(){
     var card=document.getElementById('auth-login');
     card.style.animation='none';void card.offsetWidth;card.style.animation='auth-shake .4s ease';
   }
+}
+
+function switchAccount(){
+  sessionStorage.removeItem('lq_auth');
+  sessionStorage.removeItem('lq_active_user');
+  closeSettings();
+  location.reload();
 }
 
 // ── ADMIN PIN AUTH ──
@@ -1525,14 +1623,19 @@ if(location.href.includes('admin')){
 } else {
   load();
   state.boss='プレインターン卒業';
-  save();
   renderAll();
-  if(!state.playerName||!state.pin){
+  var hasSession=sessionStorage.getItem('lq_auth')==='1'&&sessionStorage.getItem('lq_active_user');
+  var hasAccounts=getAccountsList().length>0;
+  if(hasSession&&state.playerName){
+    save();
+    setTimeout(showStatusDialog,600);
+  } else if(hasAccounts){
     showAuth();
-  } else if(sessionStorage.getItem('lq_auth')!=='1'){
+  } else if(state.playerName&&state.pin){
+    // 旧データあり・セッション切れ
     showAuth();
   } else {
-    setTimeout(showStatusDialog,600);
+    showAuth();
   }
 }
 
@@ -1571,11 +1674,24 @@ on('export-btn','click',exportData);
 on('import-input','change',function(e){if(e.target.files[0])importData(e.target.files[0]);e.target.value='';});
 on('reset-btn','click',resetData);
 on('achieve-btn','click',judgeDailyReport);
-on('share-to-admin-btn','click',function(){
-  exportData();
-  alert('JSONファイルが保存されました。\n管理者にファイルを送付してください。');
-});
 on('quest-refresh-btn','click',refreshQuests);
+on('share-to-admin-btn','click',function(){exportData();alert('JSONファイルが保存されました。\n管理者にファイルを送付してください。');});
+on('switch-account-btn','click',switchAccount);
+on('new-account-btn','click',function(){
+  document.getElementById('setup-name').value='';
+  document.getElementById('setup-pin').value='';
+  document.getElementById('setup-pin2').value='';
+  document.getElementById('setup-error').classList.add('hidden');
+  showCard('auth-setup');
+  setTimeout(function(){document.getElementById('setup-name').focus();},80);
+});
+on('setup-back-btn','click',function(){
+  var list=getAccountsList();
+  if(list.length>0){renderAccountButtons(list);showCard('auth-accounts');}
+});
+on('login-back-btn','click',function(){
+  renderAccountButtons(getAccountsList());showCard('auth-accounts');
+});
 </script>
 </body>
 </html>
