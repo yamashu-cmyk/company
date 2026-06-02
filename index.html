@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <meta name="theme-color" content="#000000">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -224,6 +227,8 @@
     .admin-meta{font-size:10px;color:#333;display:flex;justify-content:space-between;margin-top:4px}
     .admin-total-lv{font-size:24px;font-weight:bold;color:#fff;margin-bottom:6px}
     .admin-empty{color:#333;font-size:12px;text-align:center;grid-column:1/-1;padding:80px 0;letter-spacing:2px}
+    .admin-drop-hint{margin:0 16px 0;padding:10px 16px;border:1px dashed #222;border-radius:8px;color:#333;font-size:11px;text-align:center;letter-spacing:1px;transition:border-color .2s,color .2s}
+    .admin-drop-hint.drag-over{border-color:#3498db;color:#3498db}
     .admin-progress-bar{height:5px;background:#111;border-radius:3px;margin:8px 0;overflow:hidden}
     .admin-progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#3498db,#9b59b6);transition:width .4s}
     .admin-progress-pct{font-size:10px;color:#555;text-align:right;margin-top:2px;margin-bottom:8px}
@@ -361,6 +366,9 @@
     <div class="settings-btns">
       <button class="settings-btn" id="settings-close-btn">✕ キャンセル</button>
       <button class="settings-btn primary" id="settings-save-btn">保存</button>
+    </div>
+    <div style="margin-top:12px;padding-top:12px;border-top:1px solid #1a1a1a">
+      <button class="settings-btn" id="share-to-admin-btn" style="width:100%;background:#0a1a0a;border-color:#2a5a2a;color:#4a9a4a">📤 管理者にデータを共有（JSONを保存）</button>
     </div>
   </div>
 </div>
@@ -505,6 +513,7 @@
       </label>
     </div>
   </div>
+  <div class="admin-drop-hint" id="admin-drop-hint">参加者から受け取ったJSONをここにドロップ</div>
   <div class="admin-grid" id="admin-grid">
     <div class="admin-empty">データを読み込んでいます...</div>
   </div>
@@ -932,6 +941,29 @@ function initAdminDashboard(){
   document.getElementById('admin-refresh-btn').addEventListener('click',function(){
     loadLocalProfileToAdmin();
     renderAdminGrid();
+  });
+
+  // ドラッグ＆ドロップ
+  var shell=document.getElementById('admin-shell');
+  var hint=document.getElementById('admin-drop-hint');
+  shell.addEventListener('dragover',function(e){e.preventDefault();if(hint)hint.classList.add('drag-over');});
+  shell.addEventListener('dragleave',function(){if(hint)hint.classList.remove('drag-over');});
+  shell.addEventListener('drop',function(e){
+    e.preventDefault();
+    if(hint)hint.classList.remove('drag-over');
+    Array.from(e.dataTransfer.files).forEach(function(file){
+      if(!file.name.endsWith('.json'))return;
+      var reader=new FileReader();
+      reader.onload=function(ev){
+        try{
+          var d=JSON.parse(ev.target.result);
+          var idx=adminProfiles.findIndex(function(p){return p.playerName===d.playerName&&p._source!=='local';});
+          if(idx>=0)adminProfiles[idx]=d;else adminProfiles.push(d);
+          renderAdminGrid();
+        }catch(_){alert(file.name+' の読み込みに失敗しました');}
+      };
+      reader.readAsText(file);
+    });
   });
 }
 function loadLocalProfileToAdmin(){
@@ -1434,9 +1466,12 @@ function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').repl
 // ══════════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════════
-if(location.search.includes('admin')){
+if(location.href.includes('admin')){
   document.getElementById('app-shell').style.display='none';
-  document.getElementById('auth-overlay').classList.add('hidden');
+  document.querySelectorAll('.auth-overlay').forEach(function(el){
+    el.classList.add('hidden');
+    el.style.display='none';
+  });
   showDashboard();
 } else {
   load();
@@ -1487,6 +1522,10 @@ on('export-btn','click',exportData);
 on('import-input','change',function(e){if(e.target.files[0])importData(e.target.files[0]);e.target.value='';});
 on('reset-btn','click',resetData);
 on('achieve-btn','click',judgeDailyReport);
+on('share-to-admin-btn','click',function(){
+  exportData();
+  alert('JSONファイルが保存されました。\n管理者にファイルを送付してください。');
+});
 on('quest-refresh-btn','click',refreshQuests);
 </script>
 </body>
