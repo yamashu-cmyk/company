@@ -724,9 +724,11 @@ function loadUserData(d){
   if(d.dailyGoal)         state.dailyGoal=d.dailyGoal;
 }
 
+var ACTIVE_USER_KEY='lq_active_user';
+
 function load(){
   try{
-    // 旧データの移行
+    // 旧データの移行（lifequest→lq_user_xxx）
     var oldRaw=localStorage.getItem('lifequest');
     if(oldRaw){
       var old=JSON.parse(oldRaw);
@@ -736,11 +738,15 @@ function load(){
         localStorage.setItem(userKey(old.playerName),oldRaw);
       }
     }
-    // セッションのアクティブユーザーをロード
-    var active=sessionStorage.getItem('lq_active_user');
+    // localStorageからアクティブユーザーを読み込む（ブラウザを閉じても保持）
+    var active=localStorage.getItem(ACTIVE_USER_KEY);
     if(!active)return;
     var raw=localStorage.getItem(userKey(active));
-    if(!raw)return;
+    if(!raw){
+      // lq_user_xxx がない場合 lifequest から再試行
+      if(oldRaw){var od=JSON.parse(oldRaw);if(od&&od.playerName===active)loadUserData(od);}
+      return;
+    }
     loadUserData(JSON.parse(raw));
   }catch(_){}
 }
@@ -965,8 +971,7 @@ function showAuth(){
 
 function hideAuth(){
   document.getElementById('auth-overlay').classList.add('hidden');
-  sessionStorage.setItem('lq_auth','1');
-  sessionStorage.setItem('lq_active_user',state.playerName);
+  localStorage.setItem(ACTIVE_USER_KEY,state.playerName);
   state.boss='プレインターン卒業';
   save();
   renderAll();
@@ -975,7 +980,8 @@ function hideAuth(){
 
 function updateLoginForm(){
   var name=document.getElementById('login-name').value.trim();
-  var isNew=name.length>0&&getAccountsList().indexOf(name)<0;
+  var list=getAccountsList();
+  var isNew=name.length>0&&list.indexOf(name)<0;
   var pin2=document.getElementById('login-pin2');
   var hint=document.getElementById('auth-new-hint');
   var btn=document.getElementById('login-btn');
@@ -985,6 +991,11 @@ function updateLoginForm(){
   } else {
     pin2.style.display='none'; hint.style.display='none';
     btn.textContent='ログイン';
+    // 名前が確定したら事前にデータをロードしておく（PIN入力後に即表示可能）
+    if(name.length>0&&list.indexOf(name)>=0){
+      loadUserByName(name);
+      renderAll();
+    }
   }
 }
 
@@ -998,8 +1009,8 @@ function doLogin(){
   if(!/^\d{4}$/.test(pin)){err.textContent='暗証番号は4桁の数字を入力してください';err.classList.remove('hidden');return;}
   var list=getAccountsList();
   if(list.indexOf(name)>=0){
-    // 既存アカウント → PIN照合
-    loadUserByName(name);
+    // 既存アカウント → データが未ロードなら先にロード
+    if(state.playerName!==name)loadUserByName(name);
     if(pin===state.pin){
       hideAuth();
     } else {
@@ -1761,20 +1772,8 @@ if(location.href.includes('admin')){
 } else {
   load();
   state.boss='プレインターン卒業';
-  renderAll();
-  var hasSession=sessionStorage.getItem('lq_auth')==='1'&&sessionStorage.getItem('lq_active_user');
-  var hasAccounts=getAccountsList().length>0;
-  if(hasSession&&state.playerName){
-    save();
-    setTimeout(showStatusDialog,600);
-  } else if(hasAccounts){
-    showAuth();
-  } else if(state.playerName&&state.pin){
-    // 旧データあり・セッション切れ
-    showAuth();
-  } else {
-    showAuth();
-  }
+  renderAll(); // データが読み込めていればここで正しく表示される
+  showAuth();  // 常にPIN画面を表示（データは裏で描画済み）
 }
 
 // Events (all null-safe)
