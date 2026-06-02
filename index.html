@@ -25,8 +25,8 @@
     .app-shell{width:100%;height:100dvh;display:flex;flex-direction:column;overflow:hidden;position:relative}
 
     /* ── SCENE TOP: Boss + Dragon ── */
-    .scene-top{position:relative;flex-shrink:0;height:36dvh;overflow:hidden}
-    @media(max-height:700px){.scene-top{height:28dvh}}
+    .scene-top{position:relative;flex-shrink:0;height:42dvh;overflow:hidden}
+    @media(max-height:700px){.scene-top{height:38dvh}}
 
     /* Boss goal row */
     .boss-row{position:absolute;top:0;left:0;right:0;z-index:10;display:flex;align-items:center;gap:10px;padding:10px 14px 9px;background:rgba(0,0,0,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
@@ -43,8 +43,8 @@
     .progress-sublabel{font-size:7px;color:#888;letter-spacing:1px;margin-top:1px}
 
     /* Dragon */
-    .scene-dragon{position:absolute;top:48px;right:0;bottom:28px;z-index:5;width:62%;pointer-events:none;display:flex;align-items:flex-end;justify-content:flex-end}
-    .scene-dragon img{width:100%;height:100%;object-fit:contain;object-position:right bottom}
+    .scene-dragon{position:absolute;top:40px;right:0;bottom:24px;z-index:5;width:65%;pointer-events:none;display:flex;align-items:flex-end;justify-content:flex-end}
+    .scene-dragon img{width:100%;height:100%;object-fit:contain;object-position:center bottom}
 
     /* HUD bar at bottom of scene-top */
     .hud-bar{position:absolute;bottom:0;left:0;right:0;z-index:12;display:flex;align-items:center;justify-content:space-between;padding:5px 14px;background:rgba(0,0,0,.60);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-top:1px solid rgba(255,255,255,.06)}
@@ -59,38 +59,39 @@
     .ai-badge.active{color:#00eeff;border-color:#00eeff44;text-shadow:0 0 6px #00eeff88}
 
     /* ── SCENE MIDDLE ── */
-    .scene-middle{flex:1;display:flex;align-items:stretch;position:relative;overflow:hidden;background:rgba(0,0,0,.30)}
+    .scene-middle{flex:1;display:flex;align-items:stretch;position:relative;overflow:hidden;background:rgba(0,0,0,.30);min-height:0}
 
     /* Hero column */
-    .scene-hero-col{flex-shrink:0;width:26%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:8px;position:relative;z-index:6}
-    .scene-hero-col img{width:88%;max-width:105px;height:auto;mix-blend-mode:multiply;image-rendering:pixelated;filter:drop-shadow(0 0 8px rgba(68,255,136,.5));display:block}
+    .scene-hero-col{flex:0 0 22%;max-width:22%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:8px;position:relative;z-index:6;min-width:0}
+    .scene-hero-col img{width:90%;max-width:90px;height:auto;mix-blend-mode:multiply;image-rendering:pixelated;filter:drop-shadow(0 0 8px rgba(68,255,136,.5));display:block}
     .hero-lbl{font-size:7px;letter-spacing:2px;color:#44ff88;font-family:var(--font-cyber);text-shadow:0 0 6px #44ff88;margin-top:2px}
 
     /* Center column */
-    .scene-center-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px 4px;position:relative;z-index:6}
-    .radar-section{display:flex;justify-content:center;align-items:center;cursor:pointer;border-radius:50%;transition:filter .2s}
+    .scene-center-col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:6px 2px;position:relative;z-index:6}
+    .radar-section{display:flex;justify-content:center;align-items:center;cursor:pointer;border-radius:50%;transition:filter .2s;width:100%;max-width:110px}
     .radar-section:active{filter:brightness(1.3)}
-    .radar-svg{overflow:visible}
+    .radar-svg{overflow:visible;width:100%;height:auto;display:block}
     .radar-tap-hint{font-size:7px;color:#333;letter-spacing:1px;text-align:center;font-family:var(--font-cyber)}
-    .streak-row{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;background:rgba(0,0,0,.65);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
-    .streak-flame{font-size:18px;filter:drop-shadow(0 0 5px #ff9900)}
-    .streak-count{font-size:18px;font-weight:900;font-family:var(--font-cyber);color:#ffcc00;text-shadow:0 0 10px #ff9900}
+    .streak-row{display:flex;align-items:center;gap:4px;padding:4px 8px;border-radius:8px;background:rgba(0,0,0,.65);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+    .streak-flame{font-size:16px;filter:drop-shadow(0 0 5px #ff9900)}
+    .streak-count{font-size:16px;font-weight:900;font-family:var(--font-cyber);color:#ffcc00;text-shadow:0 0 10px #ff9900}
     .streak-sub{font-size:8px;color:#888;letter-spacing:1px}
     #streak-best{font-size:8px;color:#555;letter-spacing:.5px;margin-left:2px}
 
     /* Quest column */
-    .scene-quest-col{flex-shrink:0;width:47%;display:flex;flex-direction:column;padding:6px 6px 4px 2px;overflow-y:auto;scrollbar-width:none;position:relative;z-index:6}
+    .scene-quest-col{flex:0 0 46%;max-width:46%;min-width:0;display:flex;flex-direction:column;padding:6px 4px 4px 2px;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;position:relative;z-index:6}
     .scene-quest-col::-webkit-scrollbar{display:none}
     .quest-panel-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;padding:0 2px}
     .quest-panel-title{font-size:7px;letter-spacing:2px;color:#555;font-family:var(--font-cyber)}
     .quests-refresh{background:none;border:1px solid #222;border-radius:3px;color:#444;font-size:9px;padding:2px 6px;cursor:pointer;font-family:var(--font-cyber);letter-spacing:1px;transition:color .2s,border-color .2s}
     .quests-refresh:hover{color:#fff;border-color:#555}.quests-refresh.loading{color:#222;pointer-events:none}
-    .quest-card{display:flex;align-items:flex-start;gap:6px;padding:6px 7px;border-radius:6px;background:rgba(0,0,0,.72);border:1px solid rgba(255,255,255,.07);cursor:pointer;transition:border-color .2s,background .2s;backdrop-filter:blur(6px);margin-bottom:4px}
+    .quest-card{display:flex;align-items:flex-start;gap:5px;padding:5px 6px;border-radius:6px;min-width:0;overflow:hidden;background:rgba(0,0,0,.72);border:1px solid rgba(255,255,255,.07);cursor:pointer;transition:border-color .2s,background .2s;backdrop-filter:blur(6px);margin-bottom:4px}
     .quest-card:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.2)}.quest-card.done{opacity:.35;pointer-events:none}
     .quest-check{width:14px;height:14px;border-radius:3px;border:1px solid #444;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;margin-top:1px}
     .quest-card.done .quest-check{background:#222;border-color:#444}
     .quest-body{flex:1;min-width:0}
-    .quest-action{font-size:11px;line-height:1.3;color:#ddd;margin-bottom:3px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+    .quest-action{font-size:10px;line-height:1.3;color:#ddd;margin-bottom:3px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-all;min-width:0}
+    .quest-body{flex:1;min-width:0;overflow:hidden}
     .quest-card.done .quest-action{text-decoration:line-through;color:#444}
     .quest-meta{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
     .quest-stat{font-size:8px;font-weight:bold;font-family:var(--font-cyber);padding:1px 4px;border-radius:2px;border:1px solid currentColor}
@@ -510,7 +511,7 @@
     <!-- Center: Radar + Streak -->
     <div class="scene-center-col">
       <div class="radar-section" id="radar-section" title="タップでステータス詳細">
-        <svg class="radar-svg" id="radar-svg" width="120" height="120" viewBox="0 0 200 200"></svg>
+        <svg class="radar-svg" id="radar-svg" viewBox="0 0 200 200"></svg>
       </div>
       <div class="radar-tap-hint">TAP → STATUS</div>
       <div class="streak-row" id="streak-section">
@@ -525,7 +526,7 @@
     <div class="scene-quest-col">
       <div class="quest-panel-hdr">
         <span class="quest-panel-title">ACTIVE QUESTS</span>
-        <button class="quests-refresh" id="quest-refresh-btn">更新</button>
+        <button class="quests-refresh" id="quest-refresh-btn">↺</button>
       </div>
       <div id="quest-list"></div>
     </div>
