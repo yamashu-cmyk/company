@@ -1282,7 +1282,7 @@ function judgeDailyReport(){
     return (i+1)+'. ['+q.stat+'] '+q.action;
   }).join('\n');
 
-  var prompt='あなたはプレインターン卒業プログラムの成長判定AIです。\n参加者の本日の振り返りレポートを分析してください。\n\n【本日のクエスト】\n'+questList+'\n\n【振り返りレポート】\n"'+text+'"\n\n【判定ルール】\n- 各クエストについて達成したかどうかを判定（3つ分のtrue/false）\n- MIND/SKILL/KNOWHOWへのXP: 各0〜150で内容の質に応じて付与\n- adviceは前向きで具体的な一言（50文字以内）\n\nJSONのみ返答:\n{"quests":[true,false,true],"xp":{"MIND":80,"SKILL":60,"KNOWHOW":100},"advice":"前向きな助言"}';
+  var prompt='あなたはプレインターン卒業プログラムの成長判定AIです。参加者の本日の振り返りレポートを分析してください。\n\n【参加者名】'+state.playerName+'\n【本日のクエスト】\n'+questList+'\n\n【振り返りレポート】\n"'+text+'"\n\n【判定ルール】\n- 各クエストについてレポート内容から達成したかを判定（3つ分のtrue/false）\n- 達成したクエストのstatへXP（0〜150）を付与。未達成のstatは0にすること\n- adviceは参加者の成長を認め、明日への具体的なアドバイスを含む2〜3文（150文字以内）\n\nJSONのみ返答:\n{"quests":[true,false,true],"xp":{"MIND":80,"SKILL":0,"KNOWHOW":100},"advice":"本日の振り返りへの詳しいフィードバック"}';
 
   var btn=document.getElementById('achieve-btn');
   btn.textContent='判定中…';btn.disabled=true;
@@ -1315,22 +1315,15 @@ function applyQuestResults(questResults,xpMap,advice,reportText){
   state.quests.forEach(function(q,i){
     if(questResults[i]){
       q.done=true;
-      var xp=Math.round(BASE_QUEST_XP*streakM*qualityBonus);
+      // 達成したクエストのstatだけXP付与
+      var questXp=Math.round(BASE_QUEST_XP*streakM*qualityBonus);
+      var aiXp=Math.round(((xpMap&&xpMap[q.stat])||0)*streakM*qualityBonus);
+      var xp=questXp+aiXp;
       totalXp+=xp;
       addXp(state.stats[q.stat],xp);
-      // 達成したクエストが今日の目標だったらクリア
       if(state.dailyGoal&&state.dailyGoal.stat===q.stat&&state.dailyGoal.action===q.action){
         state.dailyGoal=null;
       }
-    }
-  });
-
-  ['MIND','SKILL','KNOWHOW'].forEach(function(stat){
-    var v=(xpMap&&xpMap[stat])||0;
-    if(v>0){
-      var xp=Math.round(v*streakM*qualityBonus);
-      totalXp+=xp;
-      addXp(state.stats[stat],xp);
     }
   });
 
@@ -1353,17 +1346,20 @@ function applyQuestResults(questResults,xpMap,advice,reportText){
 }
 
 function showDailyResult(questResults,advice,streakM,qualityBonus,totalXp){
-  var lines=state.quests.map(function(q,i){
-    return (questResults[i]?'✅':'❌')+' '+q.action;
-  }).join('\n');
-  var bonusStr='';
-  if(streakM>1.0)bonusStr+=' 🔥×'+streakM;
-  if(qualityBonus>1.0)bonusStr+=' 📊×'+qualityBonus;
-  var msg=lines+(bonusStr?'\n\n'+bonusStr:'')+(advice?'\n\n💬 '+advice:'');
-  flashOverlay('今日の結果','+'+totalXp+' XP','#9b59b6');
+  var achieved=questResults.filter(Boolean).length;
+  flashOverlay('今日の結果',achieved+'/3 達成  +'+totalXp+' XP','#9b59b6');
   setTimeout(function(){
-    var el=document.getElementById('rpg-advice-text');
-    if(el&&advice)el.textContent=advice;
+    // AIフィードバックをステータスダイアログに表示
+    var advSec=document.getElementById('rpg-advice');
+    var advTxt=document.getElementById('rpg-advice-text');
+    var advMeta=document.getElementById('rpg-advice-meta');
+    if(advSec&&advTxt&&advice){
+      advTxt.textContent=advice;
+      if(advMeta)advMeta.textContent='── AI フィードバック';
+      advSec.classList.remove('hidden');
+    } else if(advSec){
+      advSec.classList.add('hidden');
+    }
     showStatusDialog();
   },2600);
   document.getElementById('report-input').value='';
