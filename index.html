@@ -386,9 +386,8 @@
       <button class="settings-btn" id="settings-close-btn">✕ キャンセル</button>
       <button class="settings-btn primary" id="settings-save-btn">保存</button>
     </div>
-    <div style="margin-top:12px;padding-top:12px;border-top:1px solid #1a1a1a;display:flex;flex-direction:column;gap:8px">
-      <button class="settings-btn" id="share-to-admin-btn" style="background:#0a1a0a;border-color:#2a5a2a;color:#4a9a4a">📤 管理者にデータを共有（JSONを保存）</button>
-      <button class="settings-btn" id="switch-account-btn" style="border-color:#333;color:#555">👤 アカウントを切り替える</button>
+    <div style="margin-top:12px;padding-top:12px;border-top:1px solid #1a1a1a">
+      <button class="settings-btn" id="share-to-admin-btn" style="width:100%;background:#0a1a0a;border-color:#2a5a2a;color:#4a9a4a">📤 管理者にデータを共有（JSONを保存）</button>
     </div>
   </div>
 </div>
@@ -396,34 +395,15 @@
 <!-- ── FIRST VISIT MODAL ── -->
 <!-- ── AUTH OVERLAY ── -->
 <div class="auth-overlay" id="auth-overlay">
-  <!-- アカウント選択 -->
-  <div class="auth-card hidden" id="auth-accounts">
+  <div class="auth-card" id="auth-main">
     <div class="auth-logo">⚔ LIFE QUEST OS</div>
-    <div class="auth-sub">アカウントを選択</div>
-    <div class="account-list" id="account-list"></div>
-    <button class="auth-btn-sub" id="new-account-btn">＋ 新しいアカウントを作成</button>
-  </div>
-  <!-- 新規登録 -->
-  <div class="auth-card hidden" id="auth-setup">
-    <div class="auth-logo">⚔ LIFE QUEST OS</div>
-    <div class="auth-title">新規登録</div>
-    <div class="auth-sub">プレイヤー名と暗証番号を設定してください</div>
-    <input class="auth-input" id="setup-name" type="text" placeholder="プレイヤー名を入力" maxlength="20" autocomplete="off">
-    <input class="auth-input" id="setup-pin" type="password" inputmode="numeric" placeholder="暗証番号（4桁）" maxlength="4" pattern="[0-9]*" autocomplete="new-password">
-    <input class="auth-input" id="setup-pin2" type="password" inputmode="numeric" placeholder="暗証番号（確認）" maxlength="4" pattern="[0-9]*" autocomplete="new-password">
-    <button class="auth-btn" id="setup-btn">冒険を始める</button>
-    <div class="auth-error hidden" id="setup-error"></div>
-    <button class="auth-back" id="setup-back-btn">← 戻る</button>
-  </div>
-  <!-- PIN入力 -->
-  <div class="auth-card hidden" id="auth-login">
-    <div class="auth-logo">⚔ LIFE QUEST OS</div>
-    <div class="auth-name-display" id="auth-name-display"></div>
-    <div class="auth-sub">暗証番号を入力してください</div>
+    <div class="auth-title">プレインターン卒業</div>
+    <div class="auth-sub" id="auth-main-sub">名前と暗証番号を入力してください</div>
+    <input class="auth-input" id="login-name" type="text" placeholder="プレイヤー名" maxlength="20" autocomplete="off">
     <input class="auth-input pin-input" id="login-pin" type="password" inputmode="numeric" placeholder="● ● ● ●" maxlength="4" pattern="[0-9]*" autocomplete="current-password">
-    <button class="auth-btn" id="login-btn">ログイン</button>
-    <div class="auth-error hidden" id="login-error">暗証番号が違います</div>
-    <button class="auth-back" id="login-back-btn">← アカウント選択に戻る</button>
+    <div class="auth-sub" id="auth-new-hint" style="color:#333;font-size:10px">※ 初めての方はそのまま登録されます</div>
+    <button class="auth-btn" id="login-btn">ログイン / 登録</button>
+    <div class="auth-error hidden" id="login-error"></div>
   </div>
 </div>
 
@@ -931,41 +911,12 @@ function renderGrimoireEntries(){
 // ══════════════════════════════════════════
 //  AUTH
 // ══════════════════════════════════════════
-function showCard(id){
-  ['auth-accounts','auth-setup','auth-login'].forEach(function(c){
-    document.getElementById(c).classList.toggle('hidden',c!==id);
-  });
-}
-
 function showAuth(){
   document.getElementById('auth-overlay').classList.remove('hidden');
-  var list=getAccountsList();
-  if(list.length===0){
-    showCard('auth-setup');
-    setTimeout(function(){document.getElementById('setup-name').focus();},80);
-  } else {
-    renderAccountButtons(list);
-    showCard('auth-accounts');
-  }
-}
-
-function renderAccountButtons(list){
-  var con=document.getElementById('account-list');
-  con.innerHTML='';
-  list.forEach(function(name){
-    var btn=document.createElement('button');
-    btn.className='account-btn';
-    btn.innerHTML='<span>'+esc(name)+'</span><span class="account-btn-arrow">›</span>';
-    btn.addEventListener('click',function(){
-      loadUserByName(name);
-      document.getElementById('auth-name-display').textContent=name;
-      document.getElementById('login-pin').value='';
-      document.getElementById('login-error').classList.add('hidden');
-      showCard('auth-login');
-      setTimeout(function(){document.getElementById('login-pin').focus();},80);
-    });
-    con.appendChild(btn);
-  });
+  document.getElementById('login-name').value='';
+  document.getElementById('login-pin').value='';
+  document.getElementById('login-error').classList.add('hidden');
+  setTimeout(function(){document.getElementById('login-name').focus();},80);
 }
 
 function hideAuth(){
@@ -975,43 +926,38 @@ function hideAuth(){
   setTimeout(showStatusDialog,600);
 }
 
-function doSetup(){
-  var name=document.getElementById('setup-name').value.trim();
-  var pin=document.getElementById('setup-pin').value;
-  var pin2=document.getElementById('setup-pin2').value;
-  var err=document.getElementById('setup-error');
-  err.classList.add('hidden');
-  if(!name){err.textContent='名前を入力してください';err.classList.remove('hidden');return;}
-  if(!/^\d{4}$/.test(pin)){err.textContent='暗証番号は4桁の数字です';err.classList.remove('hidden');return;}
-  if(pin!==pin2){err.textContent='暗証番号が一致しません';err.classList.remove('hidden');return;}
-  var list=getAccountsList();
-  if(list.indexOf(name)>=0){err.textContent='その名前はすでに使われています';err.classList.remove('hidden');return;}
-  list.push(name);saveAccountsList(list);
-  state.playerName=name;state.pin=pin;
-  save();hideAuth();
-}
-
 function doLogin(){
+  var name=document.getElementById('login-name').value.trim();
   var pin=document.getElementById('login-pin').value;
   var err=document.getElementById('login-error');
-  if(pin===state.pin){
-    err.classList.add('hidden');
-    hideAuth();
+  err.classList.add('hidden');
+  if(!name){err.textContent='名前を入力してください';err.classList.remove('hidden');return;}
+  if(!/^\d{4}$/.test(pin)){err.textContent='暗証番号は4桁の数字を入力してください';err.classList.remove('hidden');return;}
+  var list=getAccountsList();
+  if(list.indexOf(name)>=0){
+    // 既存アカウント → PIN照合
+    loadUserByName(name);
+    if(pin===state.pin){
+      hideAuth();
+    } else {
+      err.textContent='暗証番号が違います';err.classList.remove('hidden');
+      document.getElementById('login-pin').value='';
+      document.getElementById('login-pin').focus();
+      var card=document.getElementById('auth-main');
+      card.style.animation='none';void card.offsetWidth;card.style.animation='auth-shake .4s ease';
+    }
   } else {
-    err.classList.remove('hidden');
-    document.getElementById('login-pin').value='';
-    document.getElementById('login-pin').focus();
-    var card=document.getElementById('auth-login');
-    card.style.animation='none';void card.offsetWidth;card.style.animation='auth-shake .4s ease';
+    // 新規アカウント作成
+    list.push(name);saveAccountsList(list);
+    loadUserByName(name);
+    state.playerName=name;state.pin=pin;
+    save();hideAuth();
   }
 }
 
-function switchAccount(){
-  sessionStorage.removeItem('lq_auth');
-  sessionStorage.removeItem('lq_active_user');
-  closeSettings();
-  location.reload();
-}
+// 後方互換のため残す（呼び出し元なし）
+function doSetup(){}
+function switchAccount(){}
 
 // ── ADMIN PIN AUTH ──
 var ADMIN_PIN_KEY='lq_admin_pin';
@@ -1653,12 +1599,6 @@ on('grim-tabs','click',function(e){
   btn.classList.add('active');
   renderGrimoireEntries();
 });
-on('setup-btn','click',doSetup);
-on('login-btn','click',doLogin);
-on('login-pin','keydown',function(e){if(e.key==='Enter')doLogin();});
-on('setup-pin2','keydown',function(e){if(e.key==='Enter')doSetup();});
-on('setup-name','keydown',function(e){if(e.key==='Enter'){var p=document.getElementById('setup-pin');if(p)p.focus();}});
-on('setup-pin','keydown',function(e){if(e.key==='Enter'){var p=document.getElementById('setup-pin2');if(p)p.focus();}});
 on('rpg-ok-btn','click',hideStatusDialog);
 on('levelup-overlay','click',function(){this.classList.remove('show');});
 on('settings-close-btn','click',closeSettings);
@@ -1676,22 +1616,9 @@ on('reset-btn','click',resetData);
 on('achieve-btn','click',judgeDailyReport);
 on('quest-refresh-btn','click',refreshQuests);
 on('share-to-admin-btn','click',function(){exportData();alert('JSONファイルが保存されました。\n管理者にファイルを送付してください。');});
-on('switch-account-btn','click',switchAccount);
-on('new-account-btn','click',function(){
-  document.getElementById('setup-name').value='';
-  document.getElementById('setup-pin').value='';
-  document.getElementById('setup-pin2').value='';
-  document.getElementById('setup-error').classList.add('hidden');
-  showCard('auth-setup');
-  setTimeout(function(){document.getElementById('setup-name').focus();},80);
-});
-on('setup-back-btn','click',function(){
-  var list=getAccountsList();
-  if(list.length>0){renderAccountButtons(list);showCard('auth-accounts');}
-});
-on('login-back-btn','click',function(){
-  renderAccountButtons(getAccountsList());showCard('auth-accounts');
-});
+on('login-btn','click',doLogin);
+on('login-pin','keydown',function(e){if(e.key==='Enter')doLogin();});
+on('login-name','keydown',function(e){if(e.key==='Enter'){var p=document.getElementById('login-pin');if(p)p.focus();}});
 </script>
 </body>
 </html>

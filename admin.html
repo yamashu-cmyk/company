@@ -172,11 +172,31 @@ function fetchFromFirebase(){
 
 function loadLocal(){
   try{
-    var raw=localStorage.getItem('lifequest');if(!raw)return;
-    var d=JSON.parse(raw);if(!d||!d.playerName)return;
-    d._source='local';
-    var idx=profiles.findIndex(function(p){return p._source==='local';});
-    if(idx>=0)profiles[idx]=d;else profiles.unshift(d);
+    // 全アカウントをlocalStorageから読み込む
+    var accountList=JSON.parse(localStorage.getItem('lq_accounts')||'[]');
+    accountList.forEach(function(name){
+      try{
+        var raw=localStorage.getItem('lq_user_'+name);
+        if(!raw)return;
+        var d=JSON.parse(raw);
+        if(!d||!d.playerName)return;
+        d._source='local';
+        var idx=profiles.findIndex(function(p){return p.playerName===d.playerName&&p._source==='local';});
+        if(idx>=0)profiles[idx]=d;else profiles.push(d);
+      }catch(_){}
+    });
+    // 旧形式のフォールバック
+    if(accountList.length===0){
+      var raw=localStorage.getItem('lifequest');
+      if(raw){
+        var d=JSON.parse(raw);
+        if(d&&d.playerName){
+          d._source='local';
+          var idx=profiles.findIndex(function(p){return p.playerName===d.playerName&&p._source==='local';});
+          if(idx>=0)profiles[idx]=d;else profiles.push(d);
+        }
+      }
+    }
   }catch(_){}
 }
 
