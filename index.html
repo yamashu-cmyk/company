@@ -967,6 +967,9 @@ function hideAuth(){
   document.getElementById('auth-overlay').classList.add('hidden');
   sessionStorage.setItem('lq_auth','1');
   sessionStorage.setItem('lq_active_user',state.playerName);
+  state.boss='プレインターン卒業';
+  save();
+  renderAll();
   setTimeout(showStatusDialog,600);
 }
 
@@ -1388,7 +1391,16 @@ function judgeDailyReport(){
   if(goalQuest&&goalQuest.done){alert('そのクエストは本日達成済みです。');return;}
 
   if(!apiKey){
-    applyQuestResults(state.dailyGoal.stat,80,null,text);
+    // APIキーなし→フォールバックフィードバック
+    var fallbacks=[
+      '今日も振り返りを記録できました。継続することが一番の力です。明日もこの調子で！',
+      '行動を言葉にすることで、成長が加速します。今日の気づきを明日につなげてください。',
+      '振り返りを習慣にしている人は確実に伸びます。今日の記録が未来の自分への財産です。',
+      'よく書けました。数字と気づきを両方記録できると、成長がより実感しやすくなります。',
+      '今日の積み重ねが、プレインターン卒業への一歩です。明日もクエストに挑戦してください！',
+    ];
+    var fb=fallbacks[Math.floor(Math.random()*fallbacks.length)];
+    applyQuestResults(state.dailyGoal.stat,80,fb,text);
     return;
   }
 
@@ -1455,24 +1467,14 @@ function applyQuestResults(stat,aiXp,advice,reportText){
 
 function showDailyResult(stat,totalXp,advice,didLevelUp,newLevel){
   showXpBurst(stat,totalXp);
-  // レベルアップ演出はXP演出の後に起動
   if(didLevelUp){
     setTimeout(function(){showLevelUpEffect(stat,newLevel);},1800);
   }
-  // AIフィードバックはレベルアップあり→4.5秒後、なし→2.8秒後
-  var delay=didLevelUp?5400:2800;
+  // レベルアップあり→5秒後、なし→2.8秒後にフィードバック表示
+  var delay=didLevelUp?5000:2800;
   setTimeout(function(){
-    var advSec=document.getElementById('rpg-advice');
-    var advTxt=document.getElementById('rpg-advice-text');
-    var advMeta=document.getElementById('rpg-advice-meta');
-    if(advSec&&advTxt&&advice){
-      advTxt.textContent=advice;
-      if(advMeta)advMeta.textContent='── AI フィードバック';
-      advSec.classList.remove('hidden');
-    } else if(advSec){
-      advSec.classList.add('hidden');
-    }
-    showStatusDialog();
+    // AIアドバイスをshowStatusDialogに直接渡す（上書きされない）
+    showStatusDialog(advice||null);
   },delay);
   document.getElementById('report-input').value='';
 }
@@ -1665,30 +1667,41 @@ function buildCondInfo(){
   return    {name:'✅ 良好',color:'#ffffff',mult:null,msg:'コンディションは良好だ。\n今日も冒険に出よう！'};
 }
 var typeTimer=null;
-function showStatusDialog(){
+function showStatusDialog(aiAdviceText){
   var today=todayStr();
-  if(state.lastDialogDate===today)return;
+  // AIアドバイスがある場合は毎回表示、ない場合は1日1回
+  if(!aiAdviceText&&state.lastDialogDate===today)return;
   var info=buildCondInfo();
-  var advice=getRandomAdvice();
   var nameEl=document.getElementById('rpg-cond-name');
   var msgEl=document.getElementById('rpg-message');
   var multEl=document.getElementById('rpg-mult');
   var advSec=document.getElementById('rpg-advice');
   var advTxt=document.getElementById('rpg-advice-text');
   var advMeta=document.getElementById('rpg-advice-meta');
+  var advLabel=document.querySelector('#rpg-advice .rpg-advice-label');
   nameEl.textContent=info.name;nameEl.style.color=info.color;nameEl.style.textShadow='0 0 12px '+info.color;
   multEl.textContent=info.mult||'';multEl.style.color=info.color;
   msgEl.textContent='';
-  if(advice){
-    advTxt.textContent='"'+advice.text+'"';
-    advMeta.textContent='── '+advice.stat+(advice.skill?'  ·  '+advice.skill:'')+'  ('+fmtDate(advice.date)+')';
+  if(aiAdviceText){
+    // AIフィードバックを優先表示
+    if(advLabel)advLabel.textContent='💬 AIからのフィードバック';
+    advTxt.textContent=aiAdviceText;
+    advMeta.textContent='';
     advSec.classList.remove('hidden');
-  } else {advSec.classList.add('hidden');}
+  } else {
+    var advice=getRandomAdvice();
+    if(advice){
+      if(advLabel)advLabel.textContent='〔過去の自分より〕';
+      advTxt.textContent='"'+advice.text+'"';
+      advMeta.textContent='── '+advice.stat+(advice.skill?'  ·  '+advice.skill:'')+'  ('+fmtDate(advice.date)+')';
+      advSec.classList.remove('hidden');
+    } else {advSec.classList.add('hidden');}
+  }
   document.getElementById('status-dialog').classList.remove('hidden');
   if(typeTimer)clearInterval(typeTimer);
   var txt=info.msg,i=0;
   typeTimer=setInterval(function(){msgEl.textContent+=txt[i];i++;if(i>=txt.length)clearInterval(typeTimer);},28);
-  state.lastDialogDate=today;save();
+  if(!aiAdviceText){state.lastDialogDate=today;save();}
 }
 function hideStatusDialog(){
   if(typeTimer)clearInterval(typeTimer);
