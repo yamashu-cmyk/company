@@ -492,7 +492,7 @@
 
   <!-- FOOTER -->
   <footer class="scene-footer">
-    <div class="report-label">📋 今日の振り返り（数値 + 気づきを記述）</div>
+    <div class="report-label">📋 今日の振り返り<span id="report-goal-hint" style="color:#555;font-size:10px;margin-left:6px">← クエストをタップして目標を選んでください</span></div>
     <textarea class="report-input" id="report-input" rows="3" maxlength="400"
       placeholder="例: 営業5件訪問し成約率40%。初対面で目線を意識したら相手の話が増えた。"
       autocomplete="off" spellcheck="false"></textarea>
@@ -1194,12 +1194,15 @@ function renderStreak(){
 function renderDailyGoal(){
   var bar=document.getElementById('daily-goal-bar');
   var txt=document.getElementById('daily-goal-text');
+  var hint=document.getElementById('report-goal-hint');
   if(!bar||!txt)return;
   if(state.dailyGoal){
     txt.textContent=state.dailyGoal.action;
     bar.classList.remove('hidden');
+    if(hint){hint.style.color=STAT_COLORS[state.dailyGoal.stat]||'#ffcc00';hint.textContent='目標: '+state.dailyGoal.stat+'  ✓ 設定済み';}
   } else {
     bar.classList.add('hidden');
+    if(hint){hint.style.color='#555';hint.textContent='← クエストをタップして目標を選んでください';}
   }
 }
 
@@ -1267,22 +1270,25 @@ function refreshQuests(){
 function judgeDailyReport(){
   var text=document.getElementById('report-input').value.trim();
   if(!text){alert('振り返り内容を入力してください');return;}
-  var today=todayStr();
-  if(state.questDate===today&&state.quests.every(function(q){return q.done;})){
-    alert('本日の記録は提出済みです。');return;
+
+  // クエストを選んでいない場合は先に選ぶよう促す
+  if(!state.dailyGoal){
+    alert('上のクエストをタップして今日の目標を選んでから提出してください');return;
   }
+
+  var today=todayStr();
   if(state.questDate!==today){state.quests=getTodayQuests();state.questDate=today;}
 
+  // 選んだクエストが既に達成済みなら終了
+  var goalQuest=state.quests.filter(function(q){return q.stat===state.dailyGoal.stat&&q.action===state.dailyGoal.action;})[0];
+  if(goalQuest&&goalQuest.done){alert('そのクエストは本日達成済みです。');return;}
+
   if(!apiKey){
-    applyQuestResults([true,true,true],{MIND:80,SKILL:80,KNOWHOW:80},null,text);
+    applyQuestResults(state.dailyGoal.stat,80,null,text);
     return;
   }
 
-  var questList=state.quests.map(function(q,i){
-    return (i+1)+'. ['+q.stat+'] '+q.action;
-  }).join('\n');
-
-  var prompt='あなたはプレインターン卒業プログラムの成長判定AIです。参加者の本日の振り返りレポートを分析してください。\n\n【参加者名】'+state.playerName+'\n【本日のクエスト】\n'+questList+'\n\n【振り返りレポート】\n"'+text+'"\n\n【判定ルール】\n- 各クエストについてレポート内容から達成したかを判定（3つ分のtrue/false）\n- 達成したクエストのstatへXP（0〜150）を付与。未達成のstatは0にすること\n- adviceは参加者の成長を認め、明日への具体的なアドバイスを含む2〜3文（150文字以内）\n\nJSONのみ返答:\n{"quests":[true,false,true],"xp":{"MIND":80,"SKILL":0,"KNOWHOW":100},"advice":"本日の振り返りへの詳しいフィードバック"}';
+  var prompt='あなたはプレインターン卒業プログラムの成長判定AIです。\n\n【参加者名】'+state.playerName+'\n【本日の目標クエスト（'+state.dailyGoal.stat+'）】\n'+state.dailyGoal.action+'\n\n【振り返りレポート】\n"'+text+'"\n\n【判定ルール】\n- このクエストをレポートから達成したか判定（true/false）\n- XP: 内容の質に応じて0〜150\n- adviceは参加者の成長を認め、明日への具体的なアドバイスを2〜3文（150文字以内）\n\nJSONのみ返答:\n{"achieved":true,"xp":100,"advice":"フィードバック"}';
 
   var btn=document.getElementById('achieve-btn');
   btn.textContent='判定中…';btn.disabled=true;
@@ -1297,57 +1303,52 @@ function judgeDailyReport(){
     var raw=d.content[0].text.replace(/```[a-z]*\n?/g,'').trim();
     try{
       var result=JSON.parse(raw);
-      applyQuestResults(result.quests||[false,false,false],result.xp||{MIND:0,SKILL:0,KNOWHOW:0},result.advice||null,text);
-    }catch(e){applyQuestResults([false,false,false],{MIND:50,SKILL:50,KNOWHOW:50},null,text);}
+      applyQuestResults(state.dailyGoal.stat,result.xp||50,result.advice||null,text);
+    }catch(e){applyQuestResults(state.dailyGoal.stat,50,null,text);}
   }).catch(function(){
     btn.textContent='✅ 今日の記録を提出';btn.disabled=false;
     alert('通信エラーが発生しました');
   });
 }
 
-function applyQuestResults(questResults,xpMap,advice,reportText){
+// stat: 'MIND'|'SKILL'|'KNOWHOW', aiXp: AI付与XP(0-150), advice: string|null
+function applyQuestResults(stat,aiXp,advice,reportText){
   var streakM=getStreakMult();
   var hasNumbers=/\d/.test(reportText);
   var hasReflection=reportText.length>=30;
   var qualityBonus=(hasNumbers&&hasReflection)?1.2:1.0;
-  var totalXp=0;
 
-  state.quests.forEach(function(q,i){
-    if(questResults[i]){
-      q.done=true;
-      // 達成したクエストのstatだけXP付与
-      var questXp=Math.round(BASE_QUEST_XP*streakM*qualityBonus);
-      var aiXp=Math.round(((xpMap&&xpMap[q.stat])||0)*streakM*qualityBonus);
-      var xp=questXp+aiXp;
-      totalXp+=xp;
-      addXp(state.stats[q.stat],xp);
-      if(state.dailyGoal&&state.dailyGoal.stat===q.stat&&state.dailyGoal.action===q.action){
-        state.dailyGoal=null;
-      }
-    }
+  // 選んだstatのクエストだけ達成マーク
+  var targetQuest=null;
+  state.quests.forEach(function(q){
+    if(q.stat===stat){q.done=true;targetQuest=q;}
   });
+
+  // そのstatだけXP付与
+  var xp=Math.round((BASE_QUEST_XP+aiXp)*streakM*qualityBonus);
+  addXp(state.stats[stat],xp);
+
+  // 目標クリア
+  state.dailyGoal=null;
 
   var today=todayStr();
-  var dayData=getDayData(today);
-  dayData.xp+=totalXp;
+  getDayData(today).xp+=xp;
 
-  // 日報を各クエストのstatで魔導書に記録
-  state.quests.forEach(function(q,i){
-    addToGrimoire(reportText, q.stat, questResults[i]?'✅ '+q.action:'❌ '+q.action, true);
-  });
+  // 魔導書に記録（選んだstatのみ）
+  if(targetQuest) addToGrimoire(reportText,stat,'✅ '+targetQuest.action,true);
 
-  state.log.push({stat:'MIND',skill:'日次レポート',xp:totalXp,text:reportText,inGrimoire:true,date:todayStr()});
+  state.log.push({stat:stat,skill:'日次レポート',xp:xp,text:reportText,inGrimoire:true,date:today});
   if(state.log.length>50)state.log=state.log.slice(-50);
   syncToFirebase();
   save();
   renderAll();
 
-  showDailyResult(questResults,advice,streakM,qualityBonus,totalXp);
+  showDailyResult(stat,xp,advice);
 }
 
-function showDailyResult(questResults,advice,streakM,qualityBonus,totalXp){
-  var achieved=questResults.filter(Boolean).length;
-  flashOverlay('今日の結果',achieved+'/3 達成  +'+totalXp+' XP','#9b59b6');
+function showDailyResult(stat,totalXp,advice){
+  var color=STAT_COLORS[stat]||'#9b59b6';
+  flashOverlay(stat+' クリア！','+'+totalXp+' XP',color);
   setTimeout(function(){
     // AIフィードバックをステータスダイアログに表示
     var advSec=document.getElementById('rpg-advice');
