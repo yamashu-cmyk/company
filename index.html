@@ -299,6 +299,15 @@
     /* ── FIRST VISIT MODAL ── */
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.94);display:flex;align-items:center;justify-content:center;z-index:200;padding:28px}
     .modal-overlay.hidden{display:none}
+    .meeting-modal{position:fixed;inset:0;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;z-index:270;padding:28px}
+    .meeting-modal.hidden{display:none}
+    .meeting-card{background:#0a0a0a;border:2px solid #ffcc00;border-radius:16px;padding:32px 24px;width:100%;max-width:360px;text-align:center;box-shadow:0 0 40px rgba(255,204,0,.3)}
+    .meeting-icon{font-size:56px;margin-bottom:12px}
+    .meeting-title{font-size:24px;font-weight:bold;font-family:var(--font-cyber);color:#ffcc00;letter-spacing:4px;margin-bottom:16px;text-shadow:0 0 20px #ffcc0088}
+    .meeting-msg{font-size:14px;color:#aaa;line-height:1.8;margin-bottom:24px}
+    .meeting-msg strong{color:#fff}
+    .meeting-ok-btn{background:#ffcc00;color:#000;border:none;border-radius:10px;font-family:inherit;font-size:16px;font-weight:bold;padding:14px 40px;cursor:pointer;letter-spacing:2px;transition:opacity .15s}
+    .meeting-ok-btn:hover{opacity:.85}
     .modal-card{background:#0c0c0c;border:1px solid #2a2a2a;border-radius:14px;padding:28px 24px;width:100%;max-width:400px}
     .modal-title{font-size:17px;font-weight:bold;letter-spacing:3px;margin-bottom:10px}
     .modal-sub{font-size:13px;color:#555;margin-bottom:22px;line-height:1.7}
@@ -375,6 +384,16 @@
 <div class="levelup-overlay" id="levelup-overlay">
   <div class="levelup-big" id="levelup-big"></div>
   <div class="levelup-sub" id="levelup-sub"></div>
+</div>
+
+<!-- ── MEETING TRIGGER MODAL ── -->
+<div class="meeting-modal hidden" id="meeting-modal">
+  <div class="meeting-card">
+    <div class="meeting-icon">🏆</div>
+    <div class="meeting-title">LEVEL 10 達成！</div>
+    <div class="meeting-msg">素晴らしい成長だ！<br>次のステップに進む準備ができた。<br><br>管理者に連絡して<br><strong>戦略会議（面談）</strong>をセットしよう！</div>
+    <button class="meeting-ok-btn" id="meeting-ok-btn">わかった！</button>
+  </div>
 </div>
 
 <!-- ── GRIMOIRE PANEL ── -->
@@ -655,6 +674,9 @@ function syncToFirebase(){} // 無効化
 // ══════════════════════════════════════════
 //  STATE
 // ══════════════════════════════════════════
+var TOTAL_LV_MAX = 20; // 合計レベル上限（100%）
+var MEETING_TRIGGER_LV = 10; // 面談トリガー総レベル
+
 var state = {
   playerName:'',
   pin:'',
@@ -663,7 +685,8 @@ var state = {
   grimoire:{MIND:[],SKILL:[],KNOWHOW:[]},
   quests:[], questDate:null,
   questRefreshCount:0, questRefreshDate:'',
-  dailyGoal:null
+  dailyGoal:null,
+  meetingTriggerShown:false
 };
 STATS.forEach(function(s){ state.stats[s.key]={level:1,xp:0}; });
 
@@ -696,7 +719,8 @@ function loadUserData(d){
   if(d.questDate)         state.questDate=d.questDate;
   if(d.questRefreshCount) state.questRefreshCount=d.questRefreshCount;
   if(d.questRefreshDate)  state.questRefreshDate=d.questRefreshDate;
-  if(d.dailyGoal)         state.dailyGoal=d.dailyGoal;
+  if(d.dailyGoal)              state.dailyGoal=d.dailyGoal;
+  if(d.meetingTriggerShown)    state.meetingTriggerShown=d.meetingTriggerShown;
 }
 
 var ACTIVE_USER_KEY='lq_active_user';
@@ -882,10 +906,13 @@ function renderConditionBar(){
 function updateFooterState(){}
 
 // ── PROGRESS RING ──
+function getTotalLevel(){
+  var t=0;STATS.forEach(function(s){t+=state.stats[s.key].level;});return t;
+}
 function getAchievementRate(){
-  var sum=0;
-  STATS.forEach(function(s){sum+=state.stats[s.key].level-1;});
-  return Math.min(100,Math.max(0,Math.round(sum/(STATS.length*9)*100)));
+  var totalLv=getTotalLevel();
+  var minLv=STATS.length; // 全stat Lv.1 = 合計3
+  return Math.min(100,Math.max(0,Math.round((totalLv-minLv)/(TOTAL_LV_MAX-minLv)*100)));
 }
 function renderProgressRing(){
   var svg=document.getElementById('progress-ring-svg');if(!svg)return;
@@ -1445,6 +1472,10 @@ function applyQuestResults(stat,aiXp,advice,reportText){
   var didLevelUp=state.stats[stat].level>prevLv;
   var newLevel=state.stats[stat].level;
 
+  // 面談トリガー検出（合計レベルがMEETING_TRIGGER_LV以上かつ未表示）
+  var totalLvNow=getTotalLevel();
+  var shouldTriggerMeeting=!state.meetingTriggerShown&&totalLvNow>=MEETING_TRIGGER_LV;
+
   // 目標クリア
   state.dailyGoal=null;
 
@@ -1460,21 +1491,31 @@ function applyQuestResults(stat,aiXp,advice,reportText){
   save();
   renderAll();
 
-  showDailyResult(stat,xp,advice,didLevelUp,newLevel);
+  showDailyResult(stat,xp,advice,didLevelUp,newLevel,shouldTriggerMeeting);
 }
 
-function showDailyResult(stat,totalXp,advice,didLevelUp,newLevel){
+function showDailyResult(stat,totalXp,advice,didLevelUp,newLevel,triggerMeeting){
   showXpBurst(stat,totalXp);
   if(didLevelUp){
     setTimeout(function(){showLevelUpEffect(stat,newLevel);},1800);
   }
-  // レベルアップあり→5秒後、なし→2.8秒後にフィードバック表示
   var delay=didLevelUp?5000:2800;
   setTimeout(function(){
-    // AIアドバイスをshowStatusDialogに直接渡す（上書きされない）
     showStatusDialog(advice||null);
+    // 面談トリガーはフィードバックの後に表示
+    if(triggerMeeting){
+      setTimeout(showMeetingTrigger, 1200);
+    }
   },delay);
   document.getElementById('report-input').value='';
+}
+
+function showMeetingTrigger(){
+  state.meetingTriggerShown=true;
+  save();
+  var modal=document.getElementById('meeting-modal');
+  if(modal)modal.classList.remove('hidden');
+  vibe([300,100,300,100,500]);
 }
 
 document.getElementById('achieve-btn').addEventListener('click',judgeDailyReport);
@@ -1775,6 +1816,7 @@ on('grim-tabs','click',function(e){
   renderGrimoireEntries();
 });
 on('rpg-ok-btn','click',hideStatusDialog);
+on('meeting-ok-btn','click',function(){var m=document.getElementById('meeting-modal');if(m)m.classList.add('hidden');});
 on('levelup-overlay','click',function(){this.classList.remove('show');});
 on('settings-close-btn','click',closeSettings);
 on('settings-save-btn','click',saveSettings);

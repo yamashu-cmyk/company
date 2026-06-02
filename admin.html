@@ -63,6 +63,23 @@
     .card-log-entry{background:#000;border-radius:4px;padding:6px 8px;margin-bottom:4px;font-size:10px;color:#666;line-height:1.4}
     .card-log-date{font-size:9px;color:#333;margin-bottom:2px;font-family:var(--cyber)}
     .empty{text-align:center;padding:60px 20px;color:#222;font-size:12px;letter-spacing:2px;grid-column:1/-1;line-height:2}
+    .badge-meeting{color:#ffcc00;border-color:#ffcc00;background:#1a1400}
+    .badge-meeting-done{color:#4c4;border-color:#4c4;background:#0a2a0a}
+    /* 介入記録エリア */
+    .card-actions{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid #111;flex-wrap:wrap}
+    .action-btn{font-size:10px;padding:4px 10px;border-radius:6px;border:1px solid #222;background:#0a0a0a;color:#555;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap}
+    .action-btn:hover{border-color:#444;color:#fff}
+    .action-btn.active-called{border-color:#3498db;color:#3498db;background:#0a101a}
+    .action-btn.active-meeting{border-color:#ffcc00;color:#ffcc00;background:#1a1400}
+    .action-btn.active-done{border-color:#4c4;color:#4c4;background:#0a1a0a}
+    .card-memo{margin-top:6px}
+    .memo-input{width:100%;background:#000;border:1px solid #111;border-radius:6px;color:#666;font-size:11px;padding:6px 10px;font-family:inherit;outline:none;transition:border-color .15s}
+    .memo-input:focus{border-color:#333;color:#fff}
+    .memo-input::placeholder{color:#222}
+    .alert-bar2{background:#1a1400;border-bottom:1px solid #ffcc0044;padding:8px 16px;display:flex;align-items:center;gap:8px}
+    .alert-bar2.hidden{display:none}
+    .alert-label2{font-size:9px;letter-spacing:3px;color:#ffcc00;font-family:var(--cyber);flex-shrink:0}
+    .alert-names2{font-size:12px;color:#ffe066;flex:1}
   </style>
 </head>
 <body>
@@ -73,6 +90,12 @@
     <span class="header-title">👥 管理者ダッシュボード</span>
   </div>
   <button class="btn" id="refresh-btn">🔄 更新</button>
+</div>
+
+<!-- Lv.10面談未実施アラート -->
+<div class="alert-bar2 hidden" id="alert-bar2">
+  <span class="alert-label2">🏆 面談未実施</span>
+  <span class="alert-names2" id="alert-names2"></span>
 </div>
 
 <!-- 昨日さぼった人アラート -->
@@ -87,6 +110,7 @@
   <div class="stat-chip"><div class="stat-chip-num" id="avg-lv">—</div><div class="stat-chip-label">平均Lv</div></div>
   <div class="stat-chip"><div class="stat-chip-num" id="active-today">0</div><div class="stat-chip-label">本日活動</div></div>
   <div class="stat-chip danger"><div class="stat-chip-num" id="skipped-yesterday">0</div><div class="stat-chip-label">昨日未提出</div></div>
+  <div class="stat-chip" style="border-color:#ffcc0033"><div class="stat-chip-num" id="meeting-pending" style="color:#ffcc00">0</div><div class="stat-chip-label" style="color:#ffcc0088">面談待ち</div></div>
 </div>
 
 <div class="grid" id="grid">
@@ -95,13 +119,27 @@
 
 <script>
 var STATS=[{key:'MIND',cls:'mind'},{key:'SKILL',cls:'skill'},{key:'KNOWHOW',cls:'knowhow'}];
-var MAX_LV_TOTAL=STATS.length*10; // 各stat Lv.10 × 3 = 30 で100%
+var MAX_LV_TOTAL=20; // 合計Lv.20 = 100%
+var MEETING_TRIGGER_LV=10; // 面談トリガー総レベル
 
 var profiles=[];
+
+// ── 介入記録（adminNotes）──
+var adminNotes={};
+function loadAdminNotes(){try{adminNotes=JSON.parse(localStorage.getItem('lq_admin_notes')||'{}');}catch(_){adminNotes={};}}
+function saveAdminNotes(){localStorage.setItem('lq_admin_notes',JSON.stringify(adminNotes));}
+function getNote(name){return adminNotes[name]||(adminNotes[name]={called:false,meeting:false,meetingDone:false,memo:''});}
 
 function todayStr(){return new Date().toISOString().slice(0,10);}
 function yesterdayStr(){var d=new Date();d.setDate(d.getDate()-1);return d.toISOString().slice(0,10);}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function totalLv(p){
+  if(!p.stats)return 0;
+  return Object.values(p.stats).reduce(function(s,st){return s+(st.level||1);},0);
+}
+function reachedMeetingLv(p){return totalLv(p)>=MEETING_TRIGGER_LV;}
+function meetingPending(p){return reachedMeetingLv(p)&&!getNote(p.playerName).meetingDone;}
 
 function loadLocal(){
   try{
@@ -136,11 +174,6 @@ function loadLocal(){
       if(raw){var d=JSON.parse(raw);if(d&&d.playerName){d._source='local';profiles.push(d);}}
     }
   }catch(_){}
-}
-
-function totalLv(p){
-  if(!p.stats)return 0;
-  return Object.values(p.stats).reduce(function(s,st){return s+(st.level||1);},0);
 }
 
 function calcStreak(p){
@@ -180,21 +213,27 @@ function skippedYesterday(p){
 
 function updateSummary(){
   var skipped=profiles.filter(skippedYesterday);
+  var meetPending=profiles.filter(meetingPending);
   document.getElementById('total-users').textContent=profiles.length;
   document.getElementById('total-reports').textContent=profiles.reduce(function(s,p){return s+((p.log&&p.log.length)||0);},0);
   document.getElementById('avg-lv').textContent=profiles.length?Math.round(profiles.reduce(function(s,p){return s+totalLv(p);},0)/profiles.length):'—';
   document.getElementById('active-today').textContent=profiles.filter(isActiveToday).length;
   document.getElementById('skipped-yesterday').textContent=skipped.length;
+  document.getElementById('meeting-pending').textContent=meetPending.length;
 
-  // アラートバー
+  // 昨日未提出アラート
   var alertBar=document.getElementById('alert-bar');
-  var alertNames=document.getElementById('alert-names');
   if(skipped.length>0){
-    alertNames.textContent=skipped.map(function(p){return p.playerName;}).join('、')+' が昨日提出していません';
+    document.getElementById('alert-names').textContent=skipped.map(function(p){return p.playerName;}).join('、')+' が昨日提出していません';
     alertBar.classList.remove('hidden');
-  } else {
-    alertBar.classList.add('hidden');
-  }
+  } else {alertBar.classList.add('hidden');}
+
+  // 面談未実施アラート
+  var alertBar2=document.getElementById('alert-bar2');
+  if(meetPending.length>0){
+    document.getElementById('alert-names2').textContent=meetPending.map(function(p){return p.playerName;}).join('、')+' がLv.'+MEETING_TRIGGER_LV+'到達。面談未実施';
+    alertBar2.classList.remove('hidden');
+  } else {alertBar2.classList.add('hidden');}
 }
 
 function render(){
@@ -225,10 +264,15 @@ function render(){
       return '<span class="stat-badge '+s.cls+'">'+s.key+' Lv'+(st?st.level:1)+'</span>';
     }).join('');
 
+    var note=getNote(p.playerName);
+    var isMeetPending=meetingPending(p);
+
     var badges='';
     if(isLocal)badges+='<span class="badge badge-local">本端末</span>';
     if(activeToday)badges+='<span class="badge badge-active">✓ 本日提出</span>';
     if(saboった)badges+='<span class="badge badge-skipped">⚠ 昨日未提出</span>';
+    if(isMeetPending)badges+='<span class="badge badge-meeting">🏆 面談未実施</span>';
+    if(reachedMeetingLv(p)&&note.meetingDone)badges+='<span class="badge badge-meeting-done">✓ 面談済み</span>';
 
     var recentLogs=(p.log||[]).filter(function(e){return e.text&&e.text.length>0;}).slice(-2).reverse();
     var logsHtml=recentLogs.length?'<div class="card-logs"><div class="card-log-title">最近の日報</div>'+recentLogs.map(function(e){
@@ -247,7 +291,13 @@ function render(){
       +'<div class="progress-pct">進捗 '+pct+'%（卒業目安 Lv'+MAX_LV_TOTAL+'）</div>'
       +'<div class="stat-row">'+statBadges+'</div>'
       +'<div class="meta-row"><span>🔥 '+streak+'日連続</span><span>📝 '+logCount+'件</span><span>最終: '+last+'</span></div>'
-      +logsHtml;
+      +logsHtml
+      +'<div class="card-actions">'
+        +'<button class="action-btn'+(note.called?' active-called':'')+'" data-name="'+esc(p.playerName)+'" data-act="called">'+(note.called?'✓ 声かけ済み':'声かけ')+'</button>'
+        +'<button class="action-btn'+(note.meeting?' active-meeting':'')+'" data-name="'+esc(p.playerName)+'" data-act="meeting">'+(note.meeting?'📅 面談設定済み':'面談設定')+'</button>'
+        +(reachedMeetingLv(p)?'<button class="action-btn'+(note.meetingDone?' active-done':'')+'" data-name="'+esc(p.playerName)+'" data-act="meetingDone">'+(note.meetingDone?'✓ 面談完了':'面談完了にする')+'</button>':'')
+      +'</div>'
+      +'<div class="card-memo"><input class="memo-input" data-name="'+esc(p.playerName)+'" placeholder="管理者メモ（例: 5/20に声かけ済み）" value="'+esc(note.memo||'')+'"></div>';
     grid.appendChild(card);
   });
   updateSummary();
@@ -257,7 +307,32 @@ document.getElementById('refresh-btn').addEventListener('click',function(){
   profiles=[];loadLocal();render();
 });
 
+// 介入ボタン操作（イベント委任）
+document.getElementById('grid').addEventListener('click',function(e){
+  var btn=e.target.closest('.action-btn');
+  if(!btn)return;
+  var name=btn.getAttribute('data-name');
+  var act=btn.getAttribute('data-act');
+  var n=getNote(name);
+  if(act==='called'){n.called=!n.called;}
+  else if(act==='meeting'){n.meeting=!n.meeting;}
+  else if(act==='meetingDone'){n.meetingDone=!n.meetingDone;}
+  saveAdminNotes();
+  render();
+});
+
+// メモ保存（フォーカスアウト時）
+document.getElementById('grid').addEventListener('blur',function(e){
+  var inp=e.target.closest('.memo-input');
+  if(!inp)return;
+  var name=inp.getAttribute('data-name');
+  var n=getNote(name);
+  n.memo=inp.value;
+  saveAdminNotes();
+},true);
+
 // Init
+loadAdminNotes();
 loadLocal();
 render();
 </script>
