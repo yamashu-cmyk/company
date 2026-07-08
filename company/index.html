@@ -1,0 +1,1845 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="theme-color" content="#000000">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Life Quest OS">
+  <link rel="apple-touch-icon" id="apple-icon">
+  <title>Life Quest OS</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+    :root{--str:#ff4444;--int:#00eeff;--cha:#ff44ff;--vit:#44ff88;--dex:#ffee00;--mind:#9b59b6;--skill:#3498db;--knowhow:#e74c3c;--font-cyber:'Orbitron','Courier New',monospace}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+    html,body{height:100%;overflow:hidden}
+    body{color:#fff;font-family:'Courier New',Courier,monospace;background:url('../Gemini_Generated_Image_ulplw3ulplw3ulpl.png') center top/cover no-repeat fixed}
+    @media(min-width:600px){body{display:flex;align-items:center;justify-content:center}.app-shell{width:480px;border-left:1px solid rgba(255,255,255,.1);border-right:1px solid rgba(255,255,255,.1)}}
+
+    /* ── APP SHELL ── */
+    .app-shell{width:100%;height:100dvh;display:flex;flex-direction:column;overflow:hidden;position:relative}
+
+    /* ── SCENE TOP: Boss + Dragon ── */
+    .scene-top{position:relative;flex-shrink:0;height:42dvh;overflow:hidden}
+    @media(max-height:700px){.scene-top{height:38dvh}}
+
+    /* Boss goal row */
+    .boss-row{position:absolute;top:0;left:0;right:0;z-index:10;display:flex;align-items:center;gap:10px;padding:10px 14px 9px;background:rgba(0,0,0,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+    .boss-row-text{flex:1;min-width:0}
+    .boss-row-label{font-size:8px;letter-spacing:3px;color:var(--str);font-family:var(--font-cyber);text-shadow:0 0 8px var(--str);margin-bottom:3px}
+    .boss-row-goal{font-size:15px;font-weight:bold;line-height:1.3;word-break:break-all;cursor:pointer;text-shadow:0 1px 4px rgba(0,0,0,.9);min-height:20px}
+    .boss-edit-input{display:none;width:100%;background:transparent;border:none;border-bottom:2px solid var(--str);color:#fff;font-family:inherit;font-size:15px;outline:none;padding:2px 0}
+
+    /* Progress ring */
+    .progress-ring-wrap{flex-shrink:0;position:relative;width:58px;height:58px;display:flex;align-items:center;justify-content:center}
+    #progress-ring-svg{position:absolute;inset:0;width:100%;height:100%}
+    .progress-info{text-align:center;z-index:1;pointer-events:none}
+    .progress-pct{font-size:11px;font-weight:900;font-family:var(--font-cyber);color:#fff;line-height:1}
+    .progress-sublabel{font-size:7px;color:#888;letter-spacing:1px;margin-top:1px}
+
+    /* Dragon */
+    .scene-dragon{position:absolute;top:60px;right:0;bottom:10px;z-index:5;width:65%;pointer-events:none;display:flex;align-items:flex-end;justify-content:flex-end}
+    .scene-dragon img{width:100%;height:100%;object-fit:contain;object-position:center bottom}
+
+    /* HUD bar at bottom of scene-top */
+    .hud-bar{position:absolute;bottom:0;left:0;right:0;z-index:12;display:flex;align-items:center;justify-content:space-between;padding:5px 14px;background:rgba(0,0,0,.60);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-top:1px solid rgba(255,255,255,.06)}
+    .hud-title{font-size:10px;font-weight:900;letter-spacing:3px;font-family:var(--font-cyber);text-shadow:0 0 10px rgba(255,255,255,.25)}
+    .hud-right{display:flex;align-items:center;gap:6px}
+    .hdr-btn{background:none;border:none;color:#666;font-size:17px;cursor:pointer;padding:3px 7px;line-height:1;transition:color .2s;position:relative;z-index:1}
+    .hdr-btn:hover,.hdr-btn:active{color:#fff}
+    .condition-bar{display:flex;gap:4px;align-items:center}
+    .cond-badge{font-size:8px;padding:1px 6px;border-radius:3px;letter-spacing:1px;font-weight:bold;border:1px solid currentColor}
+    .cond-badge.namari{color:#ff6622}.cond-badge.chozetsu{color:#ffee00}.cond-badge.offday{color:#44aaff}
+    .ai-badge{font-size:8px;letter-spacing:2px;padding:2px 6px;border-radius:3px;border:1px solid #1a1a1a;color:#2a2a2a;cursor:pointer;transition:color .2s,border-color .2s,text-shadow .2s;white-space:nowrap}
+    .ai-badge.active{color:#00eeff;border-color:#00eeff44;text-shadow:0 0 6px #00eeff88}
+
+    /* ── SCENE MIDDLE ── */
+    .scene-middle{flex:1;display:flex;align-items:stretch;position:relative;overflow:hidden;background:rgba(0,0,0,.30);min-height:0}
+
+    /* Hero column — 絶対配置で大きく */
+    .scene-hero-col{position:absolute;bottom:0;left:0;z-index:7;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
+    .scene-hero-col img{width:160px;height:auto;display:block;image-rendering:pixelated;filter:drop-shadow(0 0 12px rgba(68,255,136,.7))}
+    .hero-lbl{font-size:7px;letter-spacing:2px;color:#44ff88;font-family:var(--font-cyber);text-shadow:0 0 6px #44ff88;margin-top:2px;text-align:center}
+
+    /* Center column */
+    .scene-center-col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:6px 2px 6px 110px;position:relative;z-index:6}
+    .radar-section{display:flex;justify-content:center;align-items:center;cursor:pointer;border-radius:50%;transition:filter .2s;width:100%;max-width:110px}
+    .radar-section:active{filter:brightness(1.3)}
+    .radar-svg{overflow:visible;width:100%;height:auto;display:block}
+    .radar-tap-hint{font-size:7px;color:#333;letter-spacing:1px;text-align:center;font-family:var(--font-cyber)}
+    .streak-row{display:flex;align-items:center;gap:4px;padding:4px 8px;border-radius:8px;background:rgba(0,0,0,.65);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+    .streak-flame{font-size:16px;filter:drop-shadow(0 0 5px #ff9900)}
+    .streak-count{font-size:16px;font-weight:900;font-family:var(--font-cyber);color:#ffcc00;text-shadow:0 0 10px #ff9900}
+    .streak-sub{font-size:8px;color:#888;letter-spacing:1px}
+    #streak-best{font-size:8px;color:#555;letter-spacing:.5px;margin-left:2px}
+
+    /* Quest column */
+    .scene-quest-col{flex:0 0 46%;max-width:46%;min-width:0;display:flex;flex-direction:column;padding:6px 4px 4px 2px;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;position:relative;z-index:6}
+    .scene-quest-col::-webkit-scrollbar{display:none}
+    .quest-panel-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;padding:0 2px}
+    .quest-panel-title{font-size:7px;letter-spacing:2px;color:#555;font-family:var(--font-cyber)}
+    .quests-refresh{background:none;border:1px solid #222;border-radius:3px;color:#444;font-size:9px;padding:2px 6px;cursor:pointer;font-family:var(--font-cyber);letter-spacing:1px;transition:color .2s,border-color .2s}
+    .quests-refresh:hover{color:#fff;border-color:#555}.quests-refresh.loading{color:#222;pointer-events:none}
+    .quest-card{display:flex;align-items:flex-start;gap:5px;padding:5px 6px;border-radius:6px;min-width:0;overflow:hidden;background:rgba(0,0,0,.72);border:1px solid rgba(255,255,255,.07);cursor:pointer;transition:border-color .2s,background .2s;backdrop-filter:blur(6px);margin-bottom:4px}
+    .quest-card:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.2)}.quest-card.done{opacity:.35;pointer-events:none}
+    .quest-check{width:14px;height:14px;border-radius:3px;border:1px solid #444;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;margin-top:1px}
+    .quest-card.done .quest-check{background:#222;border-color:#444}
+    .quest-body{flex:1;min-width:0}
+    .quest-action{font-size:10px;line-height:1.3;color:#ddd;margin-bottom:3px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-all;min-width:0}
+    .quest-body{flex:1;min-width:0;overflow:hidden}
+    .quest-card.done .quest-action{text-decoration:line-through;color:#444}
+    .quest-meta{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+    .quest-stat{font-size:8px;font-weight:bold;font-family:var(--font-cyber);padding:1px 4px;border-radius:2px;border:1px solid currentColor}
+    .quest-stat.str{color:var(--str)}.quest-stat.int{color:var(--int)}.quest-stat.cha{color:var(--cha)}.quest-stat.vit{color:var(--vit)}.quest-stat.dex{color:var(--dex)}
+    .quest-diff{font-size:9px}.quest-xp{font-size:8px;color:#ffcc00;font-family:var(--font-cyber)}
+    .quest-reason{font-size:9px;color:#444;margin-top:2px;line-height:1.3;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+    .quest-empty{text-align:center;padding:12px 4px;color:#333;font-size:10px;line-height:1.8}
+    .log-section{padding:6px 10px 0;display:flex;flex-direction:column;gap:4px}
+    .log-entry{background:rgba(255,255,255,.03);border:1px solid #111;border-radius:6px;padding:6px 10px;display:flex;flex-direction:column;gap:2px}
+    .log-entry-header{display:flex;align-items:center;gap:6px;font-size:9px;font-family:var(--font-cyber)}
+    .log-stat{padding:1px 5px;border-radius:3px;border:1px solid currentColor;font-size:8px;font-weight:bold}
+    .log-stat.mind{color:#9b59b6}.log-stat.skill{color:#3498db}.log-stat.knowhow{color:#e74c3c}
+    .log-xp{color:#ffcc00}.log-date{color:#333;margin-left:auto}
+    .log-text{font-size:11px;color:#888;line-height:1.4;margin-top:2px;word-break:break-all}
+    .log-empty{color:#333;font-size:11px;text-align:center;padding:10px;letter-spacing:1px}
+    .daily-goal-bar{margin:6px 12px 0;padding:8px 12px;background:rgba(255,204,0,.07);border:1px solid rgba(255,204,0,.25);border-radius:8px;display:flex;align-items:flex-start;gap:8px}
+    .daily-goal-bar.hidden{display:none}
+    .daily-goal-label{font-size:9px;letter-spacing:2px;color:#ffcc00;font-family:var(--font-cyber);flex-shrink:0;margin-top:1px}
+    .daily-goal-text{font-size:12px;color:#fff;line-height:1.4;flex:1}
+
+    /* ── FOOTER ── */
+    .scene-footer{flex-shrink:0;padding:5px 12px 8px;background:rgba(0,0,0,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid rgba(255,255,255,.05);display:flex;flex-direction:column;gap:5px;position:relative;z-index:15}
+    .last-hint{font-size:10px;color:#333;cursor:pointer;padding:0 2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color .2s;user-select:none}
+    .last-hint:hover{color:#666}.last-hint.hidden{display:none}
+    .achievement-input{width:100%;background:#080808;border:1px solid #1e1e1e;border-radius:9px;color:#fff;font-family:inherit;font-size:15px;padding:11px 15px;outline:none;transition:border-color .2s}
+    .achievement-input:focus{border-color:#333}.achievement-input::placeholder{color:#2a2a2a}
+    .footer-btns{display:flex;gap:8px}
+    .achieve-btn{flex:1;background:#0f0f0f;border:1px solid #282828;border-radius:9px;color:#fff;font-family:inherit;font-size:14px;font-weight:bold;letter-spacing:2px;padding:11px 8px;cursor:pointer;transition:transform .1s,border-color .15s}
+    .achieve-btn:hover{border-color:#444}.achieve-btn:active{transform:scale(.97)}.achieve-btn.offmode{color:#555;border-color:#1a1a1a;letter-spacing:1px;font-size:12px}
+    @keyframes btn-flash{0%{background:#1c1c1c;box-shadow:0 0 24px rgba(255,255,255,.12)}45%{background:#181818;box-shadow:0 0 36px rgba(255,255,255,.18)}100%{background:#0f0f0f;box-shadow:none}}
+    .achieve-btn.flash{animation:btn-flash .45s ease-out}
+    .offday-btn{flex-shrink:0;background:none;border:1px solid #1a1a1a;border-radius:9px;color:#444;font-family:inherit;font-size:10px;padding:11px 10px;cursor:pointer;transition:color .2s,border-color .2s;white-space:nowrap;letter-spacing:1px}
+    .offday-btn:hover{color:#777;border-color:#333}.offday-btn.active{color:#44aaff;border-color:#44aaff}
+    .achieve-btn.loading{color:#333;border-color:#111;pointer-events:none;letter-spacing:1px;font-size:12px}
+    .quick-chips{display:flex;gap:6px;overflow-x:auto;padding:0 0 4px;scrollbar-width:none}
+    .quick-chips::-webkit-scrollbar{display:none}
+    .report-label{font-size:10px;color:#444;letter-spacing:2px;padding:0 2px;margin-bottom:2px}
+    .report-input{width:100%;background:#080808;border:1px solid #1e1e1e;border-radius:9px;color:#fff;font-family:inherit;font-size:14px;padding:11px 15px;outline:none;resize:none;transition:border-color .2s;line-height:1.5}
+    .report-input:focus{border-color:#333}.report-input::placeholder{color:#1e1e1e}
+    .quick-chip{flex-shrink:0;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:20px;color:#bbb;font-family:inherit;font-size:11px;padding:4px 11px;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s}
+    .quick-chip:active{background:rgba(255,255,255,.22);color:#fff}
+    .quick-chip[data-stat="STR"]{border-left:3px solid #e74c3c}
+    .quick-chip[data-stat="INT"]{border-left:3px solid #3498db}
+    .quick-chip[data-stat="CHA"]{border-left:3px solid #e91e8c}
+    .quick-chip[data-stat="VIT"]{border-left:3px solid #2ecc71}
+    .quick-chip[data-stat="DEX"]{border-left:3px solid #f39c12}
+
+    /* ── XP POPUP (legacy) ── */
+    .xp-popup{position:fixed;pointer-events:none;z-index:50;font-size:12px;font-weight:bold;font-family:'Courier New',monospace;text-shadow:0 0 8px currentColor;animation:xp-float 1.3s ease-out forwards}
+    @keyframes xp-float{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-44px)}}
+
+    /* ── XP BURST ── */
+    @keyframes xp-burst{0%{transform:translate(-50%,-50%) scale(0);opacity:0}35%{transform:translate(-50%,-60%) scale(1.5);opacity:1}65%{transform:translate(-50%,-65%) scale(1.1);opacity:1}100%{transform:translate(-50%,-80%) scale(1.2);opacity:0}}
+    @keyframes edge-flash{0%{opacity:0}20%{opacity:1}100%{opacity:0}}
+    @keyframes particle-scatter{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--px),var(--py)) scale(0)}}
+    .xp-burst-num{position:fixed;top:50%;left:50%;pointer-events:none;z-index:220;
+      font-size:60px;font-weight:bold;font-family:var(--font-cyber);letter-spacing:2px;
+      animation:xp-burst 1.4s cubic-bezier(.22,1,.36,1) forwards;white-space:nowrap}
+    .screen-edge-flash{position:fixed;inset:0;pointer-events:none;z-index:210;
+      border-radius:0;animation:edge-flash .5s ease-out forwards}
+    .xp-particle{position:fixed;width:10px;height:10px;border-radius:50%;pointer-events:none;z-index:215;
+      animation:particle-scatter 1s ease-out forwards}
+
+    /* ── LEVEL UP (new) ── */
+    @keyframes lu-zoom{0%{transform:scale(0.1);opacity:0}50%{transform:scale(1.2);opacity:1}70%{transform:scale(.95)}100%{transform:scale(1);opacity:1}}
+    @keyframes lu-num-pop{0%{transform:scale(0);opacity:0}60%{transform:scale(1.3);opacity:1}80%{transform:scale(.9)}100%{transform:scale(1);opacity:1}}
+    @keyframes lu-glow{0%,100%{text-shadow:0 0 20px currentColor,0 0 40px currentColor}50%{text-shadow:0 0 60px currentColor,0 0 120px currentColor,0 0 180px currentColor}}
+    @keyframes rainbow{0%{color:#ff6b6b}16%{color:#ffcc00}33%{color:#6bff6b}50%{color:#6bffff}66%{color:#6b6bff}83%{color:#ff6bff}100%{color:#ff6b6b}}
+    @keyframes lu-bg-in{0%{opacity:0}30%{opacity:.7}70%{opacity:.5}100%{opacity:0}}
+    .lu-screen{position:fixed;inset:0;z-index:260;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;pointer-events:none}
+    .lu-screen.hidden{display:none}
+    .lu-bg{position:absolute;inset:0;pointer-events:none}
+    .lu-label{font-size:52px;font-weight:bold;font-family:var(--font-cyber);letter-spacing:6px;z-index:1;animation:lu-zoom .6s cubic-bezier(.22,1,.36,1) forwards,lu-glow 1.2s .6s ease-in-out infinite,rainbow 2s .6s linear infinite}
+    .lu-stat-name{font-size:16px;letter-spacing:6px;z-index:1;opacity:.8;margin-top:4px}
+    .lu-num{font-size:100px;font-weight:bold;font-family:var(--font-cyber);z-index:1;animation:lu-num-pop .5s .5s cubic-bezier(.22,1,.36,1) both,lu-glow 1.2s 1s ease-in-out infinite}
+    .lu-particle{position:absolute;border-radius:50%;pointer-events:none;animation:particle-scatter 1.2s ease-out forwards}
+
+    /* ── LEVEL UP (legacy, keep for fallback) ── */
+    .levelup-overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;pointer-events:none;opacity:0}
+    .levelup-overlay.show{animation:lu-fade 2.4s ease-out forwards;pointer-events:auto}
+    @keyframes lu-fade{0%{opacity:0}10%{opacity:1}72%{opacity:1}100%{opacity:0}}
+    .levelup-big{font-size:46px;font-weight:bold;letter-spacing:5px}
+    .levelup-sub{font-size:15px;letter-spacing:4px;margin-top:10px;color:rgba(255,255,255,.6)}
+
+    /* ── STATUS DIALOG ── */
+    .status-dialog{position:fixed;inset:0;background:rgba(0,0,0,.82);display:flex;align-items:flex-end;justify-content:center;z-index:150;padding:16px;animation:sd-fade .3s ease-out}
+    .status-dialog.hidden{display:none}
+    @keyframes sd-fade{from{opacity:0}to{opacity:1}}
+    .rpg-box{background:#050505;border:2px solid #444;border-radius:4px;padding:18px 20px 16px;width:100%;max-width:480px;box-shadow:0 0 0 4px #000,0 0 0 6px #222;animation:sd-up .3s cubic-bezier(.34,1.56,.64,1)}
+    @keyframes sd-up{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+    .rpg-header{font-size:9px;letter-spacing:4px;color:#555;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+    .rpg-cursor{animation:blink 1s step-end infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+    .rpg-header-line{flex:1;height:1px;background:#1a1a1a}
+    .rpg-advice{background:#0a0a0a;border:1px solid #1a1a1a;border-radius:4px;padding:10px 12px;margin-bottom:14px}
+    .rpg-advice-label{font-size:8px;letter-spacing:3px;color:#555;margin-bottom:6px}
+    .rpg-advice-text{font-size:12px;color:#888;line-height:1.6;font-style:italic}
+    .rpg-advice-meta{font-size:9px;color:#333;margin-top:5px;text-align:right}
+    .rpg-cond-name{font-size:18px;font-weight:bold;margin-bottom:8px}
+    .rpg-message{font-size:13px;line-height:1.7;color:#888;margin-bottom:16px;min-height:60px;white-space:pre-line}
+    .rpg-footer{display:flex;justify-content:space-between;align-items:center}
+    .rpg-mult{font-size:12px;font-weight:bold;letter-spacing:2px}
+    .rpg-ok-btn{background:none;border:1px solid #555;color:#fff;font-family:inherit;font-size:12px;padding:7px 18px;cursor:pointer;letter-spacing:2px;transition:border-color .15s,background .15s}
+    .rpg-ok-btn:hover{border-color:#fff;background:#111}
+
+    /* ── STAT DETAIL OVERLAY ── */
+    .stat-detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:flex-end;justify-content:center;z-index:170;padding:14px;animation:sd-fade .25s ease-out}
+    .stat-detail-overlay.hidden{display:none}
+    .stat-detail-card{background:#080808;border:1px solid #2a2a2a;border-radius:14px 14px 10px 10px;padding:20px 18px 18px;width:100%;max-width:480px}
+    .sd-title{font-size:10px;letter-spacing:4px;color:#555;font-family:var(--font-cyber);margin-bottom:16px}
+    .sd-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #111}
+    .sd-row:last-child{border-bottom:none}
+    .sd-icon{font-size:18px;width:24px;text-align:center;flex-shrink:0}
+    .sd-info{flex:1}.sd-name{font-size:11px;font-weight:bold;font-family:var(--font-cyber);letter-spacing:2px}
+    .sd-sub{font-size:9px;color:#555;margin-top:1px}
+    .sd-bar-wrap{flex:1;height:6px;background:#111;border-radius:3px;overflow:hidden}
+    .sd-bar{height:100%;border-radius:3px;transition:width .5s ease}
+    .sd-lv{font-size:12px;font-weight:bold;font-family:var(--font-cyber);width:38px;text-align:right;flex-shrink:0}
+    .sd-close{width:100%;margin-top:14px;background:none;border:1px solid #222;border-radius:8px;color:#666;font-family:var(--font-cyber);font-size:12px;padding:10px;cursor:pointer;letter-spacing:2px;transition:color .2s,border-color .2s}
+    .sd-close:hover{color:#fff;border-color:#555}
+
+    /* ── GRIMOIRE PANEL ── */
+    .grimoire-panel{position:fixed;inset:0;background:#000;display:flex;flex-direction:column;z-index:160;animation:grim-in .25s ease-out}
+    .grimoire-panel.hidden{display:none}
+    @keyframes grim-in{from{transform:translateX(100%)}to{transform:translateX(0)}}
+    @media(min-width:600px){.grimoire-panel{left:50%;transform:translateX(-50%);width:480px;border-left:1px solid #111;border-right:1px solid #111}.grimoire-panel.hidden{display:none}}
+    .grim-header{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:13px 18px 11px;border-bottom:1px solid #111}
+    .grim-title{font-size:13px;font-weight:bold;letter-spacing:3px}
+    .grim-close{background:none;border:none;color:#555;font-size:18px;cursor:pointer;padding:4px;line-height:1;transition:color .2s}.grim-close:hover{color:#fff}
+    .grim-tabs{flex-shrink:0;display:flex;padding:0 18px;border-bottom:1px solid #111;overflow-x:auto;scrollbar-width:none}.grim-tabs::-webkit-scrollbar{display:none}
+    .gtab{background:none;border:none;border-bottom:2px solid transparent;color:#444;font-family:inherit;font-size:10px;letter-spacing:1px;padding:8px 10px;cursor:pointer;white-space:nowrap;transition:color .2s,border-color .2s}.gtab:hover{color:#888}
+    .gtab.active{color:#fff;border-bottom-color:#fff}.gtab.active.mind{color:var(--mind);border-bottom-color:var(--mind)}.gtab.active.skill{color:var(--skill);border-bottom-color:var(--skill)}.gtab.active.knowhow{color:var(--knowhow);border-bottom-color:var(--knowhow)}
+    .grim-entries{flex:1;overflow-y:auto;padding:0 18px;-webkit-overflow-scrolling:touch}
+    .grim-entry{display:flex;gap:10px;padding:12px 0;border-bottom:1px solid #0d0d0d}
+    .ge-stat{font-size:10px;font-weight:bold;flex-shrink:0;padding-top:2px;width:50px}
+    .ge-stat.mind{color:var(--mind)}.ge-stat.skill{color:var(--skill)}.ge-stat.knowhow{color:var(--knowhow)}
+    .ge-body{flex:1;min-width:0}.ge-text{font-size:13px;line-height:1.5;color:#ccc}.ge-meta{font-size:10px;color:#333;margin-top:4px}
+    .ge-empty{padding:40px 0;text-align:center;color:#333;font-size:13px;line-height:2}
+    .grim-footer{flex-shrink:0;padding:12px 18px 16px;border-top:1px solid #111;display:flex;gap:8px}
+    .grim-action-btn{flex:1;background:none;border:1px solid #222;border-radius:8px;color:#666;font-family:inherit;font-size:12px;padding:11px 8px;cursor:pointer;letter-spacing:1px;transition:color .2s,border-color .2s;text-align:center}.grim-action-btn:hover{color:#fff;border-color:#555}.grim-action-btn.danger{color:#ff4444}
+
+    /* ── SETTINGS OVERLAY ── */
+    .settings-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);display:flex;align-items:flex-end;justify-content:center;z-index:180;padding:16px;animation:sd-fade .25s ease-out}
+    .settings-overlay.hidden{display:none}
+    .settings-card{background:#0a0a0a;border:1px solid #2a2a2a;border-radius:14px 14px 10px 10px;padding:22px 20px 20px;width:100%;max-width:480px}
+    .settings-title{font-size:11px;letter-spacing:4px;color:#444;margin-bottom:18px}
+    .settings-group{margin-bottom:14px}.settings-label{font-size:9px;letter-spacing:3px;color:#555;margin-bottom:6px}
+    .settings-hint{font-size:8px;color:#2a2a2a;letter-spacing:1px;margin-left:4px}
+    .settings-input{width:100%;background:#000;border:1px solid #222;border-radius:7px;color:#fff;font-family:inherit;font-size:14px;padding:11px 13px;outline:none;transition:border-color .2s;margin-bottom:4px}
+    .settings-input:focus{border-color:#444}.settings-input::placeholder{color:#2a2a2a}
+    .settings-note{font-size:9px;color:#2e2e2e;line-height:1.5;padding:0 2px}
+    .settings-btns{display:flex;gap:8px;margin-top:8px}
+    .settings-btn{flex:1;background:none;border:1px solid #222;border-radius:8px;color:#555;font-family:inherit;font-size:13px;padding:11px 8px;cursor:pointer;letter-spacing:1px;transition:color .2s,border-color .2s}.settings-btn:hover{color:#fff;border-color:#555}
+    .settings-btn.primary{background:#fff;color:#000;border-color:#fff;font-weight:bold}.settings-btn.primary:hover{opacity:.85}
+    .settings-io-row{display:flex;gap:8px}.settings-io-row .settings-btn{font-size:12px;padding:9px 8px}
+
+    /* ── ADMIN DASHBOARD ── */
+    .admin-shell{display:flex;flex-direction:column;height:100dvh;background:#050505;color:#fff;font-family:inherit}
+    .admin-shell.hidden{display:none}
+    .admin-header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid #1a1a1a;font-size:13px;letter-spacing:2px;flex-shrink:0}
+    .admin-import-btn{background:#111;border:1px solid #333;border-radius:8px;color:#ccc;font-family:inherit;font-size:12px;padding:8px 14px;cursor:pointer;letter-spacing:1px;transition:background .15s}.admin-import-btn:hover{background:#1a1a1a}
+    .admin-grid{flex:1;overflow-y:auto;padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;align-content:start}
+    .admin-card{background:#0d0d0d;border:1px solid #1e1e1e;border-radius:12px;padding:16px}
+    .admin-card-name{font-size:10px;letter-spacing:3px;color:#444;margin-bottom:4px}
+    .admin-card-boss{font-size:13px;font-weight:bold;margin-bottom:10px;line-height:1.4;color:#ccc}
+    .admin-stat-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+    .admin-stat-chip{font-size:10px;padding:3px 8px;border-radius:10px;border:1px solid #1e1e1e;color:#666}
+    .admin-meta{font-size:10px;color:#333;display:flex;justify-content:space-between;margin-top:4px}
+    .admin-total-lv{font-size:24px;font-weight:bold;color:#fff;margin-bottom:6px}
+    .admin-empty{color:#333;font-size:12px;text-align:center;grid-column:1/-1;padding:80px 0;letter-spacing:2px}
+    .admin-drop-hint{margin:0 16px 0;padding:10px 16px;border:1px dashed #222;border-radius:8px;color:#333;font-size:11px;text-align:center;letter-spacing:1px;transition:border-color .2s,color .2s}
+    .admin-drop-hint.drag-over{border-color:#3498db;color:#3498db}
+    .admin-progress-bar{height:5px;background:#111;border-radius:3px;margin:8px 0;overflow:hidden}
+    .admin-progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#3498db,#9b59b6);transition:width .4s}
+    .admin-progress-pct{font-size:10px;color:#555;text-align:right;margin-top:2px;margin-bottom:8px}
+    .admin-streak-row{display:flex;gap:12px;font-size:11px;color:#555;margin-bottom:8px}
+
+    /* ── AUTH ── */
+    .auth-overlay{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:300;padding:28px}
+    .auth-overlay.hidden{display:none}
+    .auth-card{width:100%;max-width:360px;display:flex;flex-direction:column;gap:14px}
+    .auth-card.hidden{display:none}
+    .auth-logo{font-size:11px;letter-spacing:4px;color:#444;text-align:center}
+    .auth-title{font-size:18px;font-weight:bold;text-align:center;letter-spacing:3px;color:#fff}
+    .auth-name-display{font-size:26px;font-weight:bold;text-align:center;color:#fff;letter-spacing:2px}
+    .auth-sub{font-size:12px;color:#444;text-align:center;letter-spacing:1px}
+    .auth-input{background:#0a0a0a;border:1px solid #1e1e1e;border-radius:9px;color:#fff;font-family:inherit;font-size:16px;padding:13px 16px;outline:none;transition:border-color .2s;text-align:center}
+    .auth-input:focus{border-color:#444}
+    .auth-input::placeholder{color:#2a2a2a}
+    .pin-input{font-size:22px;letter-spacing:10px}
+    .auth-btn{background:#fff;color:#000;border:none;border-radius:9px;font-family:inherit;font-size:15px;font-weight:bold;padding:14px;cursor:pointer;letter-spacing:2px;transition:opacity .15s}
+    .auth-btn:hover{opacity:.85}
+    .auth-error{font-size:12px;color:#e74c3c;text-align:center;letter-spacing:1px}
+    .auth-error.hidden{display:none}
+    .account-list{display:flex;flex-direction:column;gap:8px}
+    .account-btn{background:#0d0d0d;border:1px solid #1e1e1e;border-radius:9px;color:#fff;font-family:inherit;font-size:16px;font-weight:bold;padding:14px;cursor:pointer;letter-spacing:1px;transition:all .15s;text-align:left;display:flex;align-items:center;justify-content:space-between}
+    .account-btn:hover{background:#1a1a1a;border-color:#444}
+    .account-btn-arrow{color:#444;font-size:18px}
+    .auth-btn-sub{background:none;border:1px solid #1e1e1e;border-radius:9px;color:#555;font-family:inherit;font-size:13px;padding:11px;cursor:pointer;letter-spacing:1px;transition:all .15s}
+    .auth-btn-sub:hover{border-color:#444;color:#fff}
+    .auth-back{background:none;border:none;color:#333;font-size:12px;cursor:pointer;letter-spacing:1px;text-align:center;padding:4px;font-family:inherit}
+    .auth-back:hover{color:#888}
+    @keyframes auth-shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-10px)}40%,80%{transform:translateX(10px)}}
+
+    /* ── FIRST VISIT MODAL ── */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.94);display:flex;align-items:center;justify-content:center;z-index:200;padding:28px}
+    .modal-overlay.hidden{display:none}
+    .meeting-modal{position:fixed;inset:0;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;z-index:270;padding:28px}
+    .meeting-modal.hidden{display:none}
+    .meeting-card{background:#0a0a0a;border:2px solid #ffcc00;border-radius:16px;padding:32px 24px;width:100%;max-width:360px;text-align:center;box-shadow:0 0 40px rgba(255,204,0,.3)}
+    .meeting-icon{font-size:56px;margin-bottom:12px}
+    .meeting-title{font-size:24px;font-weight:bold;font-family:var(--font-cyber);color:#ffcc00;letter-spacing:4px;margin-bottom:16px;text-shadow:0 0 20px #ffcc0088}
+    .meeting-msg{font-size:14px;color:#aaa;line-height:1.8;margin-bottom:24px}
+    .meeting-msg strong{color:#fff}
+    .meeting-ok-btn{background:#ffcc00;color:#000;border:none;border-radius:10px;font-family:inherit;font-size:16px;font-weight:bold;padding:14px 40px;cursor:pointer;letter-spacing:2px;transition:opacity .15s}
+    .meeting-ok-btn:hover{opacity:.85}
+    .modal-card{background:#0c0c0c;border:1px solid #2a2a2a;border-radius:14px;padding:28px 24px;width:100%;max-width:400px}
+    .modal-title{font-size:17px;font-weight:bold;letter-spacing:3px;margin-bottom:10px}
+    .modal-sub{font-size:13px;color:#555;margin-bottom:22px;line-height:1.7}
+    .modal-input{width:100%;background:#000;border:1px solid #333;border-radius:8px;color:#fff;font-family:inherit;font-size:15px;padding:13px 15px;outline:none;margin-bottom:12px}
+    .modal-input:focus{border-color:#555}.modal-input::placeholder{color:#333}
+    .modal-btn{width:100%;background:#fff;border:none;border-radius:8px;color:#000;font-family:inherit;font-size:15px;font-weight:bold;padding:14px;cursor:pointer;letter-spacing:1px;transition:opacity .15s}.modal-btn:hover{opacity:.9}
+
+    /* ── CHIPS (hidden, for compat) ── */
+    .skill-chips{display:none}
+
+    /* ── WHITE BACKGROUND REMOVAL ── */
+    .scene-hero-col img{
+      filter:url(#remove-white) drop-shadow(0 0 8px rgba(68,255,136,.5));
+      image-rendering:pixelated;
+    }
+    .scene-dragon img{
+      filter:url(#remove-white) drop-shadow(0 0 14px rgba(255,80,80,.4));
+    }
+  </style>
+
+  <!-- SVG filter to cut out near-white pixels -->
+  <svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <filter id="remove-white" color-interpolation-filters="sRGB" x="0" y="0" width="100%" height="100%">
+        <!-- alpha = -2R -2G -2B +7A -1  →  white→0, dark/color→opaque -->
+        <feColorMatrix type="matrix"
+          values="1 0 0 0 0
+                  0 1 0 0 0
+                  0 0 1 0 0
+                  -2 -2 -2 7 -1"/>
+      </filter>
+    </defs>
+  </svg>
+</head>
+<body>
+
+<!-- ── STATUS DIALOG ── -->
+<div class="status-dialog hidden" id="status-dialog">
+  <div class="rpg-box">
+    <div class="rpg-header"><span class="rpg-cursor">▌</span>DAILY BRIEFING<div class="rpg-header-line"></div></div>
+    <div class="rpg-advice hidden" id="rpg-advice">
+      <div class="rpg-advice-label">〔過去の自分より〕</div>
+      <div class="rpg-advice-text" id="rpg-advice-text"></div>
+      <div class="rpg-advice-meta" id="rpg-advice-meta"></div>
+    </div>
+    <div class="rpg-cond-name" id="rpg-cond-name"></div>
+    <div class="rpg-message"   id="rpg-message"></div>
+    <div class="rpg-footer">
+      <span class="rpg-mult" id="rpg-mult"></span>
+      <button class="rpg-ok-btn" id="rpg-ok-btn">了解！</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── STAT DETAIL OVERLAY ── -->
+<div class="stat-detail-overlay hidden" id="stat-detail-overlay">
+  <div class="stat-detail-card">
+    <div class="sd-title">STATUS DETAILS</div>
+    <div id="sd-rows"></div>
+    <button class="sd-close" id="sd-close">✕ 閉じる</button>
+  </div>
+</div>
+
+<!-- ── LEVEL UP NEW ── -->
+<div class="lu-screen hidden" id="lu-screen">
+  <div class="lu-bg" id="lu-bg"></div>
+  <div class="lu-label">LEVEL UP!</div>
+  <div class="lu-stat-name" id="lu-stat-name"></div>
+  <div class="lu-num" id="lu-num"></div>
+  <div id="lu-particles"></div>
+</div>
+
+<!-- ── LEVEL UP (legacy) ── -->
+<div class="levelup-overlay" id="levelup-overlay">
+  <div class="levelup-big" id="levelup-big"></div>
+  <div class="levelup-sub" id="levelup-sub"></div>
+</div>
+
+<!-- ── MEETING TRIGGER MODAL ── -->
+<div class="meeting-modal hidden" id="meeting-modal">
+  <div class="meeting-card">
+    <div class="meeting-icon">🏆</div>
+    <div class="meeting-title">LEVEL 10 達成！</div>
+    <div class="meeting-msg">素晴らしい成長だ！<br>次のステップに進む準備ができた。<br><br>管理者に連絡して<br><strong>戦略会議（面談）</strong>をセットしよう！</div>
+    <button class="meeting-ok-btn" id="meeting-ok-btn">わかった！</button>
+  </div>
+</div>
+
+<!-- ── GRIMOIRE PANEL ── -->
+<div class="grimoire-panel hidden" id="grimoire-panel">
+  <div class="grim-header">
+    <div class="grim-title">📖 魔導書</div>
+    <button class="grim-close" id="grim-close">✕</button>
+  </div>
+  <div class="grim-tabs" id="grim-tabs">
+    <button class="gtab active" data-stat="ALL">ALL</button>
+    <button class="gtab mind" data-stat="MIND">🧠 MIND</button>
+    <button class="gtab skill" data-stat="SKILL">⚡ SKILL</button>
+    <button class="gtab knowhow" data-stat="KNOWHOW">📚 KNOWHOW</button>
+  </div>
+  <div class="grim-entries" id="grim-entries"></div>
+  <div class="grim-footer">
+    <button class="grim-action-btn" id="export-btn">↓ バックアップ</button>
+    <label class="grim-action-btn" style="cursor:pointer">
+      ↑ インポート
+      <input type="file" id="import-input" accept=".json" style="display:none">
+    </label>
+    <button class="grim-action-btn danger" id="reset-btn">⚠ リセット</button>
+  </div>
+</div>
+
+<!-- ── SETTINGS OVERLAY ── -->
+<div class="settings-overlay hidden" id="settings-overlay">
+  <div class="settings-card">
+    <div class="settings-title">⚙ SETTINGS</div>
+    <div class="settings-group">
+      <div class="settings-label">PLAYER NAME</div>
+      <input class="settings-input" id="player-name-input" type="text" placeholder="名前（ダッシュボード表示用）" maxlength="20">
+    </div>
+    <div class="settings-group">
+      <div class="settings-label">CLAUDE API KEY<span class="settings-hint">（AI自動判定）</span></div>
+      <input class="settings-input" id="api-key-input" type="password" placeholder="sk-ant-..." autocomplete="off" spellcheck="false">
+      <div class="settings-note">APIキーはこの端末のLocalStorageのみに保存されます。</div>
+    </div>
+    <div class="settings-btns">
+      <button class="settings-btn" id="settings-close-btn">✕ キャンセル</button>
+      <button class="settings-btn primary" id="settings-save-btn">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── FIRST VISIT MODAL ── -->
+<!-- ── AUTH OVERLAY ── -->
+<div class="auth-overlay" id="auth-overlay">
+  <div class="auth-card" id="auth-main">
+    <div class="auth-logo">⚔ LIFE QUEST OS</div>
+    <div class="auth-title">プレインターン卒業</div>
+    <div class="auth-sub" id="auth-main-sub">名前と暗証番号を入力してください</div>
+    <!-- ブラウザのオートコンプリートを無効化するダミーフィールド -->
+    <input type="text" style="display:none" aria-hidden="true">
+    <input type="password" style="display:none" aria-hidden="true">
+    <input class="auth-input" id="login-name" type="text" placeholder="プレイヤー名"
+      maxlength="20" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+      name="lq-name-field">
+    <input class="auth-input pin-input" id="login-pin" type="password" inputmode="numeric"
+      placeholder="暗証番号 (4桁)" maxlength="4" pattern="[0-9]*"
+      autocomplete="new-password" name="lq-pin-field">
+    <input class="auth-input pin-input" id="login-pin2" type="password" inputmode="numeric"
+      placeholder="暗証番号 (確認)" maxlength="4" pattern="[0-9]*"
+      autocomplete="new-password" name="lq-pin2-field" style="display:none">
+    <div class="auth-sub" id="auth-new-hint" style="color:#555;font-size:10px;display:none">※ 初めての方：確認用にもう一度入力してください</div>
+    <button class="auth-btn" id="login-btn">ログイン</button>
+    <div class="auth-error hidden" id="login-error"></div>
+  </div>
+</div>
+
+<!-- ── APP SHELL ── -->
+<div class="app-shell">
+
+  <!-- SCENE TOP: Boss goal + Dragon -->
+  <div class="scene-top">
+
+    <!-- Boss goal row (top) -->
+    <div class="boss-row" id="boss-card">
+      <div class="boss-row-text">
+        <div class="boss-row-label">▶ FINAL BOSS — 最終目標</div>
+        <div class="boss-row-goal" id="boss-text"></div>
+        <input class="boss-edit-input" id="boss-edit-input" type="text" maxlength="80">
+      </div>
+      <div class="progress-ring-wrap">
+        <svg id="progress-ring-svg" viewBox="0 0 58 58" fill="none" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="progress-info">
+          <div class="progress-pct" id="progress-pct">0%</div>
+          <div class="progress-sublabel">達成率</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Daily goal bar -->
+    <div class="daily-goal-bar hidden" id="daily-goal-bar">
+      <div class="daily-goal-label">🎯 今日の目標</div>
+      <div class="daily-goal-text" id="daily-goal-text"></div>
+    </div>
+
+    <!-- Dragon image -->
+    <div class="scene-dragon">
+      <img src="../dragon_cyber.png" alt="">
+    </div>
+
+    <!-- HUD bar (overlaid at bottom of scene-top) -->
+    <div class="hud-bar">
+      <div class="hud-title">⚔ LIFE QUEST OS</div>
+      <div class="hud-right">
+        <div class="condition-bar" id="condition-bar"></div>
+        <span class="ai-badge" id="ai-badge" title="APIキー設定">AI OFF</span>
+        <button class="hdr-btn" id="book-btn" title="魔導書">📖</button>
+            <button class="hdr-btn" id="gear-btn" title="設定">⚙</button>
+      </div>
+    </div>
+
+  </div><!-- /scene-top -->
+
+  <!-- SCENE MIDDLE: Hero + Radar + Quests -->
+  <div class="scene-middle">
+
+    <!-- Hero (left) -->
+    <div class="scene-hero-col">
+      <img src="../51f6063e-7a76-4eb4-a790-2f60272e1d2c.jpg" alt="">
+      <div class="hero-lbl">⚔ HERO</div>
+    </div>
+
+    <!-- Center: Radar only -->
+    <div class="scene-center-col">
+      <div class="radar-section" id="radar-section" title="タップでステータス詳細">
+        <svg class="radar-svg" id="radar-svg" viewBox="0 0 200 200"></svg>
+      </div>
+      <div class="radar-tap-hint">TAP → STATUS</div>
+    </div>
+
+    <!-- Quests (right) + Streak below -->
+    <div class="scene-quest-col">
+      <div class="quest-panel-hdr">
+        <span class="quest-panel-title">ACTIVE QUESTS</span>
+        <button class="quests-refresh" id="quest-refresh-btn">↺</button>
+      </div>
+      <div id="quest-list"></div>
+      <div class="streak-row" id="streak-section" style="margin-top:6px">
+        <span class="streak-flame">🔥</span>
+        <span class="streak-count" id="streak-count">0</span>
+        <span class="streak-sub">日連続</span>
+        <span id="streak-best"></span>
+      </div>
+    </div>
+
+  </div><!-- /scene-middle -->
+
+  <!-- FOOTER -->
+  <footer class="scene-footer">
+    <div class="report-label">📋 今日の振り返り<span id="report-goal-hint" style="color:#555;font-size:10px;margin-left:6px">← クエストをタップして目標を選んでください</span></div>
+    <textarea class="report-input" id="report-input" rows="2" maxlength="400"
+      placeholder="例: 営業5件訪問し成約率40%。初対面で目線を意識したら相手の話が増えた。"
+      autocomplete="off" spellcheck="false"></textarea>
+    <button class="achieve-btn" id="achieve-btn">✅ 今日の記録を提出</button>
+  </footer>
+
+</div><!-- /app-shell -->
+
+<!-- ── ADMIN AUTH ── -->
+<div class="auth-overlay hidden" id="admin-auth">
+  <div class="auth-card">
+    <div class="auth-logo">⚔ LIFE QUEST OS</div>
+    <div class="auth-title">管理者ダッシュボード</div>
+    <div class="auth-sub" id="admin-auth-sub">暗証番号を入力してください</div>
+    <input class="auth-input pin-input" id="admin-pin-input" type="password"
+      inputmode="numeric" placeholder="● ● ● ●" maxlength="4" autocomplete="off">
+    <button class="auth-btn" id="admin-pin-btn">入力</button>
+    <div class="auth-error hidden" id="admin-pin-error">暗証番号が違います</div>
+  </div>
+</div>
+
+<!-- ── ADMIN DASHBOARD ── -->
+<div class="admin-shell hidden" id="admin-shell">
+  <div class="admin-header">
+    <span>👥 LIFE QUEST OS — 管理者</span>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="admin-import-btn" id="admin-refresh-btn">🔄 更新</button>
+      <label class="admin-import-btn">
+        ＋ 参加者追加
+        <input type="file" id="admin-import-input" accept=".json" multiple style="display:none">
+      </label>
+    </div>
+  </div>
+  <div class="admin-drop-hint" id="admin-drop-hint">参加者から受け取ったJSONをここにドロップ</div>
+  <div class="admin-grid" id="admin-grid">
+    <div class="admin-empty">データを読み込んでいます...</div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  PWA SETUP
+// ══════════════════════════════════════════
+(function(){
+  var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192"><rect width="192" height="192" fill="#000"/><text x="96" y="150" font-size="128" text-anchor="middle" font-family="Arial,sans-serif">⚔</text></svg>';
+  var iconUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
+  document.getElementById('apple-icon').href = iconUrl;
+  try {
+    var manifest = {name:'Life Quest OS',short_name:'LQ OS',start_url:'.',display:'standalone',background_color:'#000000',theme_color:'#000000',icons:[{src:iconUrl,sizes:'192x192',type:'image/svg+xml'}]};
+    var lnk = document.createElement('link'); lnk.rel = 'manifest';
+    lnk.href = URL.createObjectURL(new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'}));
+    document.head.appendChild(lnk);
+  } catch(_){}
+})();
+
+// ══════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════
+var STAT_COLORS = {MIND:'#9b59b6', SKILL:'#3498db', KNOWHOW:'#e74c3c'};
+var STAT_ICONS  = {MIND:'🧠', SKILL:'⚡', KNOWHOW:'📚'};
+var STATS = [
+  {key:'MIND',   cls:'mind',    sub:'マインド'},
+  {key:'SKILL',  cls:'skill',   sub:'スキル'},
+  {key:'KNOWHOW',cls:'knowhow', sub:'ノウハウ'},
+];
+var BASE_QUEST_XP = 100;
+var QUEST_POOL = {
+  MIND: [
+    '失敗を恐れず新しく試みたことを記録した',
+    '組織の一員として恥じない振る舞いを徹底した',
+    '相手の感情や背景を推測して行動した',
+    '周囲からの指摘を素直に受け入れた',
+    '昨日より前進したポイントを言葉にした',
+  ],
+  SKILL: [
+    '相手の目を見て信頼関係を築いた',
+    '相槌を使い分け相手の本音を引き出した',
+    '問いかけで相手の考えを深掘りした',
+    '復唱・要約で認識を合わせた',
+    '姿勢・表情で相手に安心感を与えた',
+  ],
+  KNOWHOW: [
+    'スクリプト・インプット：トークの全体流れとアプローチから着座までの文句を完璧に暗記した',
+    'プラン・マスター：自社の主要プランの月額料金・データ容量・基本仕様をすべて頭に叩き込んだ',
+    'エネミー・リサーチ：主要な他社プランの料金やデメリットを把握し自社との明確な違いを整理した',
+    'マイルール・チェック：遅刻・欠勤連絡のルートや日報の提出期限など組織の基本ルールを正しく記憶した',
+    'キャンペーン・ナレッジ：今週の店舗限定割引や特典の適用条件をミスなく把握した',
+    'FAQデータベース：エリアは大丈夫？解約金は？などの定番の質問と回答を覚えた',
+    'コンプライアンス遵守：契約・案内時に絶対に言ってはいけないNGワードや法的ルールを正確に記憶した',
+    '商材アップデート：最新端末のスペックや最新の5G対応エリアの情報を仕入れた',
+    'ターゲット・アナリティクス：店舗に来る客層の年齢層や時間帯ごとの特徴を把握した',
+    'サクセス・ケーススタディ：先輩が過去に成約させた代表的な成功トークのパターンをインプットした',
+  ],
+};
+function getTodayQuests(avoidActions){
+  avoidActions=avoidActions||[];
+  var dayNum=Math.floor(Date.now()/86400000);
+  return ['MIND','SKILL','KNOWHOW'].map(function(stat){
+    var pool=QUEST_POOL[stat];
+    var candidates=pool.filter(function(a){return avoidActions.indexOf(a)<0;});
+    if(candidates.length===0)candidates=pool.slice();
+    // シードベースで選択（同じ日は同じ基準、更新時は避けリストで変わる）
+    var seed=dayNum+avoidActions.length*37;
+    var idx=seed%candidates.length;
+    return{stat:stat,action:candidates[idx],done:false};
+  });
+}
+
+var LEARN_KW = ['学んだ','気づ','発見','わかった','分かった','理解','ポイント','コツ','効果的','重要','役立','覚えた','実感','刺さった','ためになった','learned','realized','insight','discovered','tip','key'];
+var BASE_EXP = 50;
+
+// placeholder arrays to avoid any references breaking
+var SKILL_MAP = [];
+var HARD_WORDS = [];
+var EASY_WORDS = [];
+
+// ── API KEY ──
+var apiKey = '';
+function loadApiKey(){try{apiKey=localStorage.getItem('lq_apikey')||'';}catch(_){}}
+function saveApiKey(k){try{if(k)localStorage.setItem('lq_apikey',k);else localStorage.removeItem('lq_apikey');}catch(_){}}
+loadApiKey();
+
+function syncToFirebase(){} // 無効化
+
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+var TOTAL_LV_MAX = 20; // 合計レベル上限（100%）
+var MEETING_TRIGGER_LV = 10; // 面談トリガー総レベル
+
+var state = {
+  playerName:'',
+  pin:'',
+  boss:'プレインターン卒業', stats:{}, skills:{}, log:[],
+  days:{}, chozetsuDate:null, lastDialogDate:null,
+  grimoire:{MIND:[],SKILL:[],KNOWHOW:[]},
+  quests:[], questDate:null,
+  questRefreshCount:0, questRefreshDate:'',
+  dailyGoal:null,
+  meetingTriggerShown:false
+};
+STATS.forEach(function(s){ state.stats[s.key]={level:1,xp:0}; });
+
+// ── マルチアカウント ──
+var ACCOUNTS_KEY='lq_accounts';
+function getAccountsList(){try{return JSON.parse(localStorage.getItem(ACCOUNTS_KEY)||'[]');}catch(_){return[];}}
+function saveAccountsList(list){localStorage.setItem(ACCOUNTS_KEY,JSON.stringify(list));}
+function userKey(name){return 'lq_user_'+name;}
+
+function save(){
+  if(!state.playerName)return;
+  try{
+    localStorage.setItem(userKey(state.playerName),JSON.stringify(state));
+    localStorage.setItem('lifequest',JSON.stringify(state)); // 後方互換
+  }catch(_){}
+}
+
+function loadUserData(d){
+  if(d.playerName)     state.playerName=d.playerName;
+  if(d.pin)            state.pin=d.pin;
+  state.boss='プレインターン卒業';
+  if(d.log)            state.log=d.log;
+  if(d.skills)         state.skills=d.skills;
+  if(d.days)           state.days=d.days;
+  if(d.chozetsuDate)   state.chozetsuDate=d.chozetsuDate;
+  if(d.lastDialogDate) state.lastDialogDate=d.lastDialogDate;
+  if(d.grimoire){STATS.forEach(function(s){if(d.grimoire[s.key])state.grimoire[s.key]=d.grimoire[s.key];});}
+  if(d.stats){STATS.forEach(function(s){if(d.stats[s.key])state.stats[s.key]=d.stats[s.key];});}
+  if(d.quests)            state.quests=d.quests;
+  if(d.questDate)         state.questDate=d.questDate;
+  if(d.questRefreshCount) state.questRefreshCount=d.questRefreshCount;
+  if(d.questRefreshDate)  state.questRefreshDate=d.questRefreshDate;
+  if(d.dailyGoal)              state.dailyGoal=d.dailyGoal;
+  if(d.meetingTriggerShown)    state.meetingTriggerShown=d.meetingTriggerShown;
+}
+
+var ACTIVE_USER_KEY='lq_active_user';
+
+function load(){
+  try{
+    // 旧データの移行（lifequest→lq_user_xxx）
+    var oldRaw=localStorage.getItem('lifequest');
+    if(oldRaw){
+      var old=JSON.parse(oldRaw);
+      if(old&&old.playerName&&!localStorage.getItem(userKey(old.playerName))){
+        var list=getAccountsList();
+        if(list.indexOf(old.playerName)<0){list.push(old.playerName);saveAccountsList(list);}
+        localStorage.setItem(userKey(old.playerName),oldRaw);
+      }
+    }
+    // localStorageからアクティブユーザーを読み込む（ブラウザを閉じても保持）
+    var active=localStorage.getItem(ACTIVE_USER_KEY);
+    if(!active)return;
+    var raw=localStorage.getItem(userKey(active));
+    if(!raw){
+      // lq_user_xxx がない場合 lifequest から再試行
+      if(oldRaw){var od=JSON.parse(oldRaw);if(od&&od.playerName===active)loadUserData(od);}
+      return;
+    }
+    loadUserData(JSON.parse(raw));
+  }catch(_){}
+}
+
+function loadUserByName(name){
+  // stateをリセットしてから指定ユーザーのデータをロード
+  state.playerName='';state.pin='';state.boss='プレインターン卒業';
+  state.stats={};state.skills={};state.log=[];state.days={};
+  state.chozetsuDate=null;state.lastDialogDate=null;
+  state.grimoire={MIND:[],SKILL:[],KNOWHOW:[]};
+  state.quests=[];state.questDate=null;
+  state.questRefreshCount=0;state.questRefreshDate='';state.dailyGoal=null;
+  STATS.forEach(function(s){state.stats[s.key]={level:1,xp:0};});
+  try{
+    var raw=localStorage.getItem(userKey(name));
+    if(raw)loadUserData(JSON.parse(raw));
+  }catch(_){}
+}
+
+// ══════════════════════════════════════════
+//  DATE HELPERS
+// ══════════════════════════════════════════
+function dateOffset(n){var d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);}
+function todayStr(){return dateOffset(0);}
+function yesterdayStr(){return dateOffset(-1);}
+function tomorrowStr(){return dateOffset(1);}
+function fmtDate(iso){var p=iso.split('-');return p[1]+'/'+p[2];}
+function getDayData(ds){if(!state.days[ds])state.days[ds]={xp:0,hasStr:false,hasVit:false,isOff:false};return state.days[ds];}
+
+// ══════════════════════════════════════════
+//  CONDITION SYSTEM
+// ══════════════════════════════════════════
+function isOffDay(){var d=state.days[todayStr()];return !!(d&&d.isOff);}
+function isNamari(){
+  var n=0;
+  for(var i=1;i<=2;i++){var ds=dateOffset(-i),day=state.days[ds];if(!day)continue;if(day.isOff)continue;if(day.hasStr)return false;n++;}
+  return n>=2;
+}
+function isChozetsu(){return state.chozetsuDate===todayStr();}
+function getConditionMult(){if(isOffDay())return 0;var m=1.0;if(isNamari())m*=0.7;if(isChozetsu())m*=1.5;return m;}
+function toggleOffDay(){
+  var d=getDayData(todayStr());d.isOff=!d.isOff;save();
+  renderConditionBar();updateFooterState();
+  if(d.isOff)flashOverlay('SAVE POINT','今日は戦略的停滞日','#44aaff');
+}
+
+// ══════════════════════════════════════════
+//  SKILL / STAT DETECTION
+// ══════════════════════════════════════════
+function fallbackSkillName(text,stat){return stat+'スキル';}
+
+// ══════════════════════════════════════════
+//  LEVEL LOGIC
+// ══════════════════════════════════════════
+function addXp(obj,amt){obj.xp+=amt;var lv=false;while(obj.xp>=obj.level*100){obj.xp-=obj.level*100;obj.level++;lv=true;}return lv;}
+function xpPct(obj){return Math.min(100,Math.round(obj.xp/(obj.level*100)*100));}
+
+// ══════════════════════════════════════════
+//  GRIMOIRE
+// ══════════════════════════════════════════
+function shouldAddToGrimoire(text,statKey){
+  var l=text.toLowerCase();
+  if(LEARN_KW.some(function(w){return l.indexOf(w)!==-1;}))return true;
+  if(statKey==='INT'&&text.length>14)return true;
+  return false;
+}
+function addToGrimoire(text,statKey,skillName,force){
+  if(!force&&!shouldAddToGrimoire(text,statKey))return false;
+  var list=state.grimoire[statKey];
+  for(var i=0;i<list.length;i++){if(list[i].text===text)return false;}
+  list.push({text:text,skill:skillName,date:todayStr()});
+  if(list.length>100)list.shift();
+  return true;
+}
+function getRandomAdvice(){
+  var all=[];
+  STATS.forEach(function(s){state.grimoire[s.key].forEach(function(e){all.push({stat:s.key,cls:s.cls,text:e.text,skill:e.skill,date:e.date});});});
+  if(all.length<2)return null;
+  return all[Math.floor(Math.random()*all.length)];
+}
+
+// ══════════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════════
+function renderStats(){
+  var sec=document.getElementById('stats-section');if(!sec)return;
+  sec.innerHTML='';
+  STATS.forEach(function(s){
+    var st=state.stats[s.key];
+    var block=document.createElement('div');block.className='stat-block';block.id='block-'+s.key;
+    var row=document.createElement('div');row.className='stat-row';row.id='row-'+s.key;
+    row.innerHTML='<div class="stat-icon '+s.cls+'">'+STAT_ICONS[s.key]+'</div>'
+      +'<div class="stat-label '+s.cls+'"><div class="stat-key">'+s.key+'</div><div class="stat-sub">'+s.sub+'</div></div>'
+      +'<div class="gauge-track"><div class="gauge-fill '+s.cls+'" id="gf-'+s.key+'" style="width:'+xpPct(st)+'%"></div></div>'
+      +'<div class="stat-level" id="lv-'+s.key+'">Lv.'+st.level+'</div>';
+    var chips=document.createElement('div');chips.className='skill-chips';chips.id='chips-'+s.key;
+    block.appendChild(row);block.appendChild(chips);sec.appendChild(block);
+  });
+  STATS.forEach(function(s){renderChips(s.key,false);});
+}
+function renderChips(sk,hl){
+  var con=document.getElementById('chips-'+sk);if(!con)return;
+  var cls=STATS.filter(function(s){return s.key===sk;})[0].cls;
+  var arr=[];Object.keys(state.skills).forEach(function(n){var s=state.skills[n];if(s.stat===sk)arr.push({name:n,level:s.level,xp:s.xp});});
+  arr.sort(function(a,b){return b.level-a.level||b.xp-a.xp;});
+  con.innerHTML='';
+  arr.slice(0,6).forEach(function(s,i){
+    var c=document.createElement('span');c.className='chip '+cls+(hl&&i===0?' new':'');c.textContent=s.name+' Lv.'+s.level;con.appendChild(c);
+  });
+}
+function updateGauge(k){
+  var f=document.getElementById('gf-'+k),l=document.getElementById('lv-'+k);
+  if(f)f.style.width=xpPct(state.stats[k])+'%';
+  if(l)l.textContent='Lv.'+state.stats[k].level;
+  renderProgressRing();
+}
+function renderLog(){
+  var sec=document.getElementById('log-section');if(!sec)return;
+  sec.innerHTML='';
+  var entries=state.log.filter(function(e){return e.text&&e.text.length>0;}).slice(-5).reverse();
+  if(entries.length===0){
+    sec.innerHTML='<div class="log-empty">日報の記録はまだありません</div>';
+    return;
+  }
+  entries.forEach(function(e){
+    var s=STATS.filter(function(x){return x.key===e.stat;})[0];
+    var cls=s?s.cls:'mind';
+    var statKey=e.stat||'MIND';
+    var el=document.createElement('div');el.className='log-entry';
+    var xpL=e.xp>0?'+'+e.xp+' XP':'';
+    var dateL=e.date?e.date:'';
+    el.innerHTML='<div class="log-entry-header">'
+      +'<span class="log-stat '+cls+'">'+statKey+'</span>'
+      +(xpL?'<span class="log-xp">'+xpL+'</span>':'')
+      +(dateL?'<span class="log-date">'+dateL+'</span>':'')
+      +'</div>'
+      +'<div class="log-text">'+esc(e.text)+'</div>';
+    sec.appendChild(el);
+  });
+}
+function renderBoss(){
+  var el=document.getElementById('boss-text');if(el)el.textContent=state.boss||'';
+}
+function updateAiBadge(){
+  var b=document.getElementById('ai-badge');if(!b)return;
+  if(apiKey){b.textContent='🤖 AI ON';b.classList.add('active');}
+  else{b.textContent='AI OFF';b.classList.remove('active');}
+}
+function renderConditionBar(){
+  var bar=document.getElementById('condition-bar');if(!bar)return;
+  bar.innerHTML='';
+  var off=isOffDay(),nam=!off&&isNamari(),cho=!off&&isChozetsu();
+  function badge(cls,txt){var b=document.createElement('span');b.className='cond-badge '+cls;b.textContent=txt;bar.appendChild(b);}
+  if(off)badge('offday','💤 オフ');
+  else if(nam)badge('namari','⚠×0.7');
+  else if(cho)badge('chozetsu','✨×1.5');
+}
+function updateFooterState(){}
+
+// ── PROGRESS RING ──
+function getTotalLevel(){
+  var t=0;STATS.forEach(function(s){t+=state.stats[s.key].level;});return t;
+}
+function getAchievementRate(){
+  var totalLv=getTotalLevel();
+  var minLv=STATS.length; // 全stat Lv.1 = 合計3
+  return Math.min(100,Math.max(0,Math.round((totalLv-minLv)/(TOTAL_LV_MAX-minLv)*100)));
+}
+function renderProgressRing(){
+  var svg=document.getElementById('progress-ring-svg');if(!svg)return;
+  var rate=getAchievementRate();
+  var r=24,cx=29,cy=29,circ=2*Math.PI*r;
+  var offset=circ*(1-rate/100);
+  var color=rate>=80?'#ffee00':rate>=50?'#ff44ff':rate>=20?'#00eeff':'#ff4444';
+  svg.innerHTML='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="3.5"/>'
+    +'<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="3.5"'
+    +' stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+offset.toFixed(1)+'"'
+    +' stroke-linecap="round" transform="rotate(-90 '+cx+' '+cy+')"'
+    +' style="transition:stroke-dashoffset .8s ease;filter:drop-shadow(0 0 4px '+color+')"/>';
+  var pct=document.getElementById('progress-pct');if(pct)pct.textContent=rate+'%';
+}
+
+// ── GRIMOIRE PANEL ──
+var grimFilterStat='ALL';
+function openGrimoire(){document.getElementById('grimoire-panel').classList.remove('hidden');renderGrimoireEntries();}
+function closeGrimoire(){document.getElementById('grimoire-panel').classList.add('hidden');}
+function renderGrimoireEntries(){
+  var con=document.getElementById('grim-entries');con.innerHTML='';
+  var entries=[];
+  if(grimFilterStat==='ALL'){
+    STATS.forEach(function(s){state.grimoire[s.key].forEach(function(e){entries.push({stat:s.key,cls:s.cls,text:e.text,skill:e.skill,date:e.date});});});
+  } else {
+    var s=STATS.filter(function(x){return x.key===grimFilterStat;})[0];
+    state.grimoire[grimFilterStat].forEach(function(e){entries.push({stat:grimFilterStat,cls:s.cls,text:e.text,skill:e.skill,date:e.date});});
+  }
+  entries.reverse();
+  if(entries.length===0){
+    var em=document.createElement('div');em.className='ge-empty';
+    em.innerHTML='まだ知識がありません。<br>「学んだ」「気づいた」などを<br>含めて記録しよう。';
+    con.appendChild(em);return;
+  }
+  entries.forEach(function(e){
+    var row=document.createElement('div');row.className='grim-entry';
+    row.innerHTML='<div class="ge-stat '+e.cls+'">['+e.stat+']</div>'
+      +'<div class="ge-body"><div class="ge-text">'+esc(e.text)+'</div>'
+      +'<div class="ge-meta">'+esc(e.skill||'')+(e.skill?'  ·  ':'')+fmtDate(e.date)+'</div></div>';
+    con.appendChild(row);
+  });
+}
+
+// ── BACKUP / IMPORT / RESET ──
+// ══════════════════════════════════════════
+//  ADMIN DASHBOARD
+// ══════════════════════════════════════════
+// ══════════════════════════════════════════
+//  AUTH
+// ══════════════════════════════════════════
+function showAuth(){
+  document.getElementById('auth-overlay').classList.remove('hidden');
+  document.getElementById('login-name').value='';
+  document.getElementById('login-pin').value='';
+  document.getElementById('login-error').classList.add('hidden');
+  setTimeout(function(){document.getElementById('login-name').focus();},80);
+}
+
+function hideAuth(){
+  document.getElementById('auth-overlay').classList.add('hidden');
+  localStorage.setItem(ACTIVE_USER_KEY,state.playerName);
+  state.boss='プレインターン卒業';
+  save();
+  renderAll();
+  setTimeout(showStatusDialog,600);
+}
+
+function updateLoginForm(){
+  var name=document.getElementById('login-name').value.trim();
+  var list=getAccountsList();
+  var isNew=name.length>0&&list.indexOf(name)<0;
+  var pin2=document.getElementById('login-pin2');
+  var hint=document.getElementById('auth-new-hint');
+  var btn=document.getElementById('login-btn');
+  if(isNew){
+    pin2.style.display=''; hint.style.display='';
+    btn.textContent='新規登録';
+  } else {
+    pin2.style.display='none'; hint.style.display='none';
+    btn.textContent='ログイン';
+    // 名前が確定したら事前にデータをロードしておく（PIN入力後に即表示可能）
+    if(name.length>0&&list.indexOf(name)>=0){
+      loadUserByName(name);
+      renderAll();
+    }
+  }
+}
+
+function doLogin(){
+  var name=document.getElementById('login-name').value.trim();
+  var pin=document.getElementById('login-pin').value;
+  var pin2=document.getElementById('login-pin2').value;
+  var err=document.getElementById('login-error');
+  err.classList.add('hidden');
+  if(!name){err.textContent='名前を入力してください';err.classList.remove('hidden');return;}
+  if(!/^\d{4}$/.test(pin)){err.textContent='暗証番号は4桁の数字を入力してください';err.classList.remove('hidden');return;}
+  var list=getAccountsList();
+  if(list.indexOf(name)>=0){
+    // 既存アカウント → データが未ロードなら先にロード
+    if(state.playerName!==name)loadUserByName(name);
+    if(pin===state.pin){
+      hideAuth();
+    } else {
+      err.textContent='暗証番号が違います';err.classList.remove('hidden');
+      document.getElementById('login-pin').value='';
+      document.getElementById('login-pin').focus();
+      var card=document.getElementById('auth-main');
+      card.style.animation='none';void card.offsetWidth;card.style.animation='auth-shake .4s ease';
+    }
+  } else {
+    // 新規アカウント作成
+    if(pin!==pin2){err.textContent='暗証番号が一致しません';err.classList.remove('hidden');return;}
+    list.push(name);saveAccountsList(list);
+    loadUserByName(name);
+    state.playerName=name;state.pin=pin;
+    save();hideAuth();
+  }
+}
+
+function doSetup(){}
+function switchAccount(){}
+
+// ── ADMIN PIN AUTH ──
+var ADMIN_PIN_KEY='lq_admin_pin';
+function showAdminAuth(){
+  var stored=localStorage.getItem(ADMIN_PIN_KEY);
+  var sub=document.getElementById('admin-auth-sub');
+  if(!stored&&sub)sub.textContent='管理者暗証番号を設定してください（初回）';
+  else if(sub)sub.textContent='暗証番号を入力してください';
+  document.getElementById('admin-auth').classList.remove('hidden');
+}
+function showDashboard(){
+  document.getElementById('admin-auth').classList.add('hidden');
+  document.getElementById('admin-shell').classList.remove('hidden');
+  initAdminDashboard();
+}
+function verifyAdminPin(){
+  var pin=document.getElementById('admin-pin-input').value;
+  var err=document.getElementById('admin-pin-error');
+  var stored=localStorage.getItem(ADMIN_PIN_KEY);
+  if(!/^\d{4}$/.test(pin)){err.textContent='4桁の数字を入力してください';err.classList.remove('hidden');return;}
+  if(!stored){
+    localStorage.setItem(ADMIN_PIN_KEY,pin);
+    sessionStorage.setItem('lq_admin_auth','1');
+    showDashboard();
+  } else if(pin===stored){
+    err.classList.add('hidden');
+    sessionStorage.setItem('lq_admin_auth','1');
+    showDashboard();
+  } else {
+    err.textContent='暗証番号が違います';err.classList.remove('hidden');
+    document.getElementById('admin-pin-input').value='';
+    document.getElementById('admin-pin-input').focus();
+    var card=document.querySelector('#admin-auth .auth-card');
+    if(card){card.style.animation='none';void card.offsetWidth;card.style.animation='auth-shake .4s ease';}
+  }
+}
+
+// ══════════════════════════════════════════
+//  ADMIN DASHBOARD
+// ══════════════════════════════════════════
+var adminProfiles=[];
+var adminInitialized=false;
+function initAdminDashboard(){
+  // 自分のデータを自動ロード
+  loadLocalProfileToAdmin();
+  renderAdminGrid();
+
+  if(adminInitialized)return;
+  adminInitialized=true;
+
+  document.getElementById('admin-import-input').addEventListener('change',function(e){
+    Array.from(e.target.files).forEach(function(file){
+      var reader=new FileReader();
+      reader.onload=function(ev){
+        try{
+          var d=JSON.parse(ev.target.result);
+          // 同名プレイヤーは上書き
+          var idx=adminProfiles.findIndex(function(p){return p.playerName===d.playerName&&p._source!=='local';});
+          if(idx>=0)adminProfiles[idx]=d;else adminProfiles.push(d);
+          renderAdminGrid();
+        }catch(_){alert(file.name+' の読み込みに失敗しました');}
+      };
+      reader.readAsText(file);
+    });
+    e.target.value='';
+  });
+
+  document.getElementById('admin-refresh-btn').addEventListener('click',function(){
+    loadLocalProfileToAdmin();
+    renderAdminGrid();
+  });
+
+  // ドラッグ＆ドロップ
+  var shell=document.getElementById('admin-shell');
+  var hint=document.getElementById('admin-drop-hint');
+  shell.addEventListener('dragover',function(e){e.preventDefault();if(hint)hint.classList.add('drag-over');});
+  shell.addEventListener('dragleave',function(){if(hint)hint.classList.remove('drag-over');});
+  shell.addEventListener('drop',function(e){
+    e.preventDefault();
+    if(hint)hint.classList.remove('drag-over');
+    Array.from(e.dataTransfer.files).forEach(function(file){
+      if(!file.name.endsWith('.json'))return;
+      var reader=new FileReader();
+      reader.onload=function(ev){
+        try{
+          var d=JSON.parse(ev.target.result);
+          var idx=adminProfiles.findIndex(function(p){return p.playerName===d.playerName&&p._source!=='local';});
+          if(idx>=0)adminProfiles[idx]=d;else adminProfiles.push(d);
+          renderAdminGrid();
+        }catch(_){alert(file.name+' の読み込みに失敗しました');}
+      };
+      reader.readAsText(file);
+    });
+  });
+}
+function loadLocalProfileToAdmin(){
+  try{
+    var raw=localStorage.getItem('lifequest');
+    if(!raw)return;
+    var d=JSON.parse(raw);
+    if(!d||!d.playerName)return;
+    d._source='local';
+    var idx=adminProfiles.findIndex(function(p){return p._source==='local';});
+    if(idx>=0)adminProfiles[idx]=d;else adminProfiles.unshift(d);
+  }catch(_){}
+}
+function adminTotalLevel(p){
+  if(!p.stats)return 0;
+  return Object.values(p.stats).reduce(function(s,st){return s+(st.level||1);},0);
+}
+function adminStreak(p){
+  if(!p.days)return 0;
+  var streak=0;
+  for(var i=0;;i++){
+    var d=new Date();d.setDate(d.getDate()-i);
+    var ds=d.toISOString().slice(0,10);
+    var day=p.days[ds];
+    if(day&&day.isOff){continue;}
+    if(day&&day.xp>0){streak++;}else{break;}
+  }
+  return streak;
+}
+function adminLastDate(p){
+  if(!p.days)return null;
+  var dates=Object.keys(p.days).filter(function(ds){var d=p.days[ds];return d&&d.xp>0;});
+  if(!dates.length)return null;
+  return dates.sort().pop();
+}
+function renderAdminGrid(){
+  var grid=document.getElementById('admin-grid');
+  if(adminProfiles.length===0){
+    grid.innerHTML='<div class="admin-empty">データがありません<br><small style="color:#333;font-size:10px;margin-top:8px;display:block">アプリを使用後に「🔄 更新」を押すか<br>参加者のJSONを追加してください</small></div>';
+    return;
+  }
+  grid.innerHTML='';
+  var sorted=adminProfiles.slice().sort(function(a,b){return adminTotalLevel(b)-adminTotalLevel(a);});
+  sorted.forEach(function(p,i){
+    var card=document.createElement('div');
+    card.className='admin-card';
+    var isLocal=p._source==='local';
+    var totalLv=adminTotalLevel(p);
+    var maxLv=STATS.length*20; // 3stat×Lv20
+    var pct=Math.min(100,Math.round(totalLv/maxLv*100));
+    var statChips=STATS.map(function(s){
+      var st=p.stats&&p.stats[s.key];
+      var lv=st?st.level:1;
+      var xp=st?st.xp:0;
+      var color=STAT_COLORS[s.key]||'#555';
+      return '<span class="admin-stat-chip" style="border-color:'+color+'44;color:'+color+'">'+s.key+' Lv'+lv+'</span>';
+    }).join('');
+    var streak=adminStreak(p);
+    var logCount=(p.log&&p.log.length)||0;
+    var lastDate=adminLastDate(p)||'—';
+    var displayName=p.playerName||('Player '+(i+1));
+    var badge=isLocal?'<span style="font-size:9px;background:#1a2a1a;color:#3a8;border:1px solid #3a8;border-radius:4px;padding:1px 5px;margin-left:4px">本端末</span>':'';
+    card.innerHTML=
+      '<div class="admin-card-name">#'+(i+1)+(isLocal?' · このデバイス':'')+'</div>'+
+      '<div style="font-size:18px;font-weight:bold;color:#fff;margin-bottom:6px;display:flex;align-items:center;gap:6px">'+esc(displayName)+badge+'</div>'+
+      '<div class="admin-total-lv">Total Lv. '+totalLv+'</div>'+
+      '<div class="admin-progress-bar"><div class="admin-progress-fill" style="width:'+pct+'%"></div></div>'+
+      '<div class="admin-progress-pct">進捗 '+pct+'%（目安：Lv'+maxLv+'で卒業）</div>'+
+      '<div class="admin-stat-row">'+statChips+'</div>'+
+      '<div class="admin-streak-row"><span>🔥 '+streak+'日連続</span><span>📝 '+logCount+'件</span><span>最終: '+lastDate+'</span></div>';
+    grid.appendChild(card);
+  });
+}
+
+function exportData(){
+  try{
+    var blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');a.href=url;a.download='lifequest-'+todayStr()+'.json';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(function(){URL.revokeObjectURL(url);},1000);
+  }catch(e){alert('エクスポート失敗: '+e.message);}
+}
+function importData(file){
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      var d=JSON.parse(ev.target.result);
+      if(d.playerName) state.playerName=d.playerName;
+      if(d.boss)  state.boss=d.boss;
+      if(d.stats) state.stats=d.stats;
+      if(d.skills)state.skills=d.skills;
+      if(d.log)   state.log=d.log;
+      if(d.days)  state.days=d.days;
+      if(d.chozetsuDate)state.chozetsuDate=d.chozetsuDate;
+      if(d.grimoire){STATS.forEach(function(s){if(d.grimoire[s.key])state.grimoire[s.key]=d.grimoire[s.key];});}
+      save();renderAll();renderGrimoireEntries();alert('インポート完了！');
+    }catch(e){alert('インポート失敗: '+e.message);}
+  };
+  reader.readAsText(file);
+}
+function resetData(){
+  if(!confirm('全データをリセットしますか？\nこの操作は取り消せません。'))return;
+  localStorage.removeItem('lifequest');location.reload();
+}
+
+// ── RADAR CHART ──
+function renderRadarChart(){
+  var svg=document.getElementById('radar-svg');if(!svg)return;
+  var cx=100,cy=100,maxR=72,minR=8;
+  var angles=[-90,-90+120,-90+240];
+  var maxLv=Math.max.apply(null,STATS.map(function(s){return state.stats[s.key].level;}));
+  maxLv=Math.max(maxLv,3);
+  var grid='';
+  for(var ri=1;ri<=3;ri++){
+    var gpts=angles.map(function(a){
+      var r2=minR+(maxR-minR)*(ri/3),rd=a*Math.PI/180;
+      return (cx+r2*Math.cos(rd)).toFixed(1)+','+(cy+r2*Math.sin(rd)).toFixed(1);
+    }).join(' ');
+    grid+='<polygon points="'+gpts+'" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="1"/>';
+  }
+  var spokes='';
+  angles.forEach(function(a){
+    var rd=a*Math.PI/180;
+    spokes+='<line x1="'+cx+'" y1="'+cy+'" x2="'+(cx+maxR*Math.cos(rd)).toFixed(1)+'" y2="'+(cy+maxR*Math.sin(rd)).toFixed(1)+'" stroke="rgba(255,255,255,.07)" stroke-width="1"/>';
+  });
+  var dataPts=STATS.map(function(s,i){
+    var lv=state.stats[s.key].level;
+    var scale=(lv-1)/Math.max(maxLv-1,1);
+    var r=minR+(maxR-minR)*scale;
+    var rd=angles[i]*Math.PI/180;
+    return{x:cx+r*Math.cos(rd),y:cy+r*Math.sin(rd),c:STAT_COLORS[s.key]};
+  });
+  var polyPts=dataPts.map(function(p){return p.x.toFixed(1)+','+p.y.toFixed(1);}).join(' ');
+  var labels='',dots='';
+  STATS.forEach(function(s,i){
+    var rd=angles[i]*Math.PI/180;
+    var lx=(cx+(maxR+14)*Math.cos(rd)).toFixed(1);
+    var ly=(cy+(maxR+14)*Math.sin(rd)+4).toFixed(1);
+    var c=STAT_COLORS[s.key];
+    labels+='<text x="'+lx+'" y="'+ly+'" text-anchor="middle" fill="'+c+'" font-size="9" font-family="\'Courier New\',monospace" opacity=".85">'+s.key+'</text>';
+    dots+='<circle cx="'+dataPts[i].x.toFixed(1)+'" cy="'+dataPts[i].y.toFixed(1)+'" r="3" fill="'+c+'" style="filter:drop-shadow(0 0 3px '+c+')"/>';
+  });
+  svg.innerHTML=grid+spokes
+    +'<polygon points="'+polyPts+'" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.35)" stroke-width="1.5" stroke-linejoin="round"/>'
+    +dots+labels;
+}
+
+// ── STREAK CALC ──
+function calcStreak(){
+  var streak=0;
+  // 今日まだ提出していなければ昨日から数える（アプリを開いただけで0にならない）
+  var todayHasXp=state.days[todayStr()]&&state.days[todayStr()].xp>0;
+  var start=todayHasXp?0:1;
+  for(var i=start;;i++){
+    var ds=dateOffset(-i);
+    var day=state.days[ds];
+    if(!day){break;}
+    if(day.isOff){continue;}
+    if(day.xp>0){streak++;}
+    else{break;}
+  }
+  return streak;
+}
+function getStreakMult(){
+  var s=calcStreak();
+  if(s>=7)return 1.5;
+  if(s>=3)return 1.2;
+  return 1.0;
+}
+
+// ── STREAK RENDER ──
+function renderStreak(){
+  var streak=calcStreak();
+  var el=document.getElementById('streak-count');
+  var best=document.getElementById('streak-best');
+  if(el)el.textContent=streak;
+  if(best){
+    if(streak>=7)best.textContent='🔥×1.5 EXP';
+    else if(streak>=3)best.textContent='🔥×1.2 EXP';
+    else if(streak>0)best.textContent='継続中！';
+    else best.textContent='';
+  }
+  var flame=document.querySelector('.streak-flame');
+  if(flame)flame.style.filter=streak>0?'drop-shadow(0 0 '+(6+Math.min(streak,10)*2)+'px #ff9900)':'none';
+}
+
+// ── DAILY GOAL ──
+function renderDailyGoal(){
+  var bar=document.getElementById('daily-goal-bar');
+  var txt=document.getElementById('daily-goal-text');
+  var hint=document.getElementById('report-goal-hint');
+  if(!bar||!txt)return;
+  if(state.dailyGoal){
+    txt.textContent=state.dailyGoal.action;
+    bar.classList.remove('hidden');
+    if(hint){hint.style.color=STAT_COLORS[state.dailyGoal.stat]||'#ffcc00';hint.textContent='目標: '+state.dailyGoal.stat+'  ✓ 設定済み';}
+  } else {
+    bar.classList.add('hidden');
+    if(hint){hint.style.color='#555';hint.textContent='← クエストをタップして目標を選んでください';}
+  }
+}
+
+// ── RENDER QUESTS ──
+function renderQuests(){
+  var con=document.getElementById('quest-list');if(!con)return;
+  var today=todayStr();
+  // 古いstat(ACTION等)が残っていたら強制リフレッシュ
+  var hasStale=state.quests&&state.quests.some(function(q){return !QUEST_POOL[q.stat];});
+  if(state.questDate!==today||hasStale){
+    state.quests=getTodayQuests();
+    state.questDate=today;
+    if(state.questRefreshDate!==today){state.questRefreshCount=0;state.questRefreshDate=today;}
+    // 古いdailyGoalをクリア
+    if(hasStale)state.dailyGoal=null;
+    save();
+  }
+  con.innerHTML='';
+  state.quests.forEach(function(q,i){
+    var c=STAT_COLORS[q.stat];
+    var isGoal=state.dailyGoal&&state.dailyGoal.action===q.action&&state.dailyGoal.stat===q.stat;
+    var card=document.createElement('div');
+    card.className='quest-card'+(q.done?' done':'')+(isGoal?' goal-active':'');
+    card.style.borderColor=isGoal?(c||'#ffcc00'):'';
+    card.innerHTML='<div class="quest-check">'+(q.done?'✓':'○')+'</div>'
+      +'<div class="quest-body">'
+        +'<div class="quest-action">'+q.action+'</div>'
+        +'<div class="quest-meta"><span class="quest-stat" style="color:'+c+';border-color:'+c+'44">'+q.stat+'</span>'
+        +(isGoal?'<span style="font-size:8px;color:#ffcc00;font-family:var(--font-cyber)">🎯 目標中</span>':'')
+        +(q.done?'<span class="quest-xp">+'+BASE_QUEST_XP+' XP</span>':'')+'</div>'
+      +'</div>';
+    if(!q.done){
+      card.addEventListener('click',function(){
+        if(isGoal){
+          state.dailyGoal=null;
+        } else {
+          state.dailyGoal={stat:q.stat,action:q.action};
+        }
+        save();
+        renderQuests();
+        renderDailyGoal();
+      });
+    }
+    con.appendChild(card);
+  });
+}
+
+function refreshQuests(){
+  var today=todayStr();
+  // 現在のクエスト内容を避けリストに追加して別のクエストを出す
+  var avoid=state.quests.map(function(q){return q.action;});
+  state.quests=getTodayQuests(avoid);
+  state.questDate=today;
+  // 目標中クエストが変わったらクリア
+  if(state.dailyGoal){
+    var still=state.quests.some(function(q){return q.stat===state.dailyGoal.stat&&q.action===state.dailyGoal.action;});
+    if(!still)state.dailyGoal=null;
+  }
+  save();
+  renderQuests();
+  renderDailyGoal();
+}
+
+// ── DAILY REPORT JUDGMENT ──
+function judgeDailyReport(){
+  var text=document.getElementById('report-input').value.trim();
+  if(!text){alert('振り返り内容を入力してください');return;}
+
+  // クエストを選んでいない場合は先に選ぶよう促す
+  if(!state.dailyGoal){
+    alert('上のクエストをタップして今日の目標を選んでから提出してください');return;
+  }
+
+  var today=todayStr();
+  if(state.questDate!==today){state.quests=getTodayQuests();state.questDate=today;}
+
+  // 選んだクエストが既に達成済みなら終了
+  var goalQuest=state.quests.filter(function(q){return q.stat===state.dailyGoal.stat&&q.action===state.dailyGoal.action;})[0];
+  if(goalQuest&&goalQuest.done){alert('そのクエストは本日達成済みです。');return;}
+
+  if(!apiKey){
+    // APIキーなし→フォールバックフィードバック
+    var fallbacks=[
+      '継続が一番の力！明日もこの調子で挑戦しよう。',
+      '振り返りが成長を加速させる。明日につなげよう！',
+      '記録する習慣が未来の自分を作る。よくできた！',
+      '数字と気づきを書けると成長が見える。次も頑張れ！',
+      '一歩一歩が卒業への道。明日もクエストに挑戦！',
+    ];
+    var fb=fallbacks[Math.floor(Math.random()*fallbacks.length)];
+    applyQuestResults(state.dailyGoal.stat,80,fb,text);
+    return;
+  }
+
+  var goalStat=state.dailyGoal.stat;
+  var goalAction=state.dailyGoal.action;
+
+  var prompt='あなたはインターン育成AIです。\n参加者名:'+state.playerName+'\nクエスト('+goalStat+'):'+goalAction+'\n振り返り:"'+text+'"\n\n達成判定とフィードバックをJSONのみで返答:\n{"achieved":true,"xp":80,"advice":"頑張りを褒めて次につながる一言（30〜50文字）"}';
+
+  var btn=document.getElementById('achieve-btn');
+  btn.textContent='AI判定中…';btn.disabled=true;
+
+  fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:200,temperature:0.3,messages:[{role:'user',content:prompt}]})
+  }).then(function(r){return r.json();}).then(function(d){
+    btn.textContent='✅ 今日の記録を提出';btn.disabled=false;
+    var advice=null,xp=50;
+    try{
+      if(d&&d.content&&d.content[0]){
+        var raw=d.content[0].text.replace(/```[a-z]*\n?/g,'').trim();
+        var result=JSON.parse(raw);
+        xp=result.xp||50;
+        advice=result.advice||null;
+      }
+    }catch(e){}
+    applyQuestResults(goalStat,xp,advice,text);
+  }).catch(function(e){
+    btn.textContent='✅ 今日の記録を提出';btn.disabled=false;
+    // 通信エラー時もフォールバックで結果を反映（送信はできる）
+    applyQuestResults(goalStat,50,null,text);
+  });
+}
+
+// stat: 'MIND'|'SKILL'|'KNOWHOW', aiXp: AI付与XP(0-150), advice: string|null
+function applyQuestResults(stat,aiXp,advice,reportText){
+  var streakM=getStreakMult();
+  var hasNumbers=/\d/.test(reportText);
+  var hasReflection=reportText.length>=30;
+  var qualityBonus=(hasNumbers&&hasReflection)?1.2:1.0;
+
+  // 選んだstatのクエストだけ達成マーク
+  var targetQuest=null;
+  state.quests.forEach(function(q){
+    if(q.stat===stat){q.done=true;targetQuest=q;}
+  });
+
+  // そのstatだけXP付与・レベルアップ検出
+  var xp=Math.round((BASE_QUEST_XP+aiXp)*streakM*qualityBonus);
+  var prevLv=state.stats[stat].level;
+  addXp(state.stats[stat],xp);
+  var didLevelUp=state.stats[stat].level>prevLv;
+  var newLevel=state.stats[stat].level;
+
+  // 面談トリガー検出（合計レベルがMEETING_TRIGGER_LV以上かつ未表示）
+  var totalLvNow=getTotalLevel();
+  var shouldTriggerMeeting=!state.meetingTriggerShown&&totalLvNow>=MEETING_TRIGGER_LV;
+
+  // 目標クリア
+  state.dailyGoal=null;
+
+  var today=todayStr();
+  getDayData(today).xp+=xp;
+
+  // 魔導書に記録（選んだstatのみ）
+  if(targetQuest) addToGrimoire(reportText,stat,'✅ '+targetQuest.action,true);
+
+  state.log.push({stat:stat,skill:'日次レポート',xp:xp,text:reportText,inGrimoire:true,date:today});
+  if(state.log.length>50)state.log=state.log.slice(-50);
+  syncToFirebase();
+  save();
+  renderAll();
+
+  showDailyResult(stat,xp,advice,didLevelUp,newLevel,shouldTriggerMeeting);
+}
+
+function showDailyResult(stat,totalXp,advice,didLevelUp,newLevel,triggerMeeting){
+  showXpBurst(stat,totalXp);
+  if(didLevelUp){
+    setTimeout(function(){showLevelUpEffect(stat,newLevel);},1800);
+  }
+  var delay=didLevelUp?5000:2800;
+  setTimeout(function(){
+    showStatusDialog(advice||null);
+    // 面談トリガーはフィードバックの後に表示
+    if(triggerMeeting){
+      setTimeout(showMeetingTrigger, 1200);
+    }
+  },delay);
+  document.getElementById('report-input').value='';
+}
+
+function showMeetingTrigger(){
+  state.meetingTriggerShown=true;
+  save();
+  var modal=document.getElementById('meeting-modal');
+  if(modal)modal.classList.remove('hidden');
+  vibe([300,100,300,100,500]);
+}
+
+document.getElementById('achieve-btn').addEventListener('click',judgeDailyReport);
+
+// ── STAT DETAIL OVERLAY ──
+function openStatDetail(){
+  var overlay=document.getElementById('stat-detail-overlay');
+  var rows=document.getElementById('sd-rows');
+  if(!overlay||!rows)return;
+  rows.innerHTML='';
+  STATS.forEach(function(s){
+    var st=state.stats[s.key];
+    var pct=xpPct(st);
+    var row=document.createElement('div');row.className='sd-row';
+    row.innerHTML='<div class="sd-icon">'+STAT_ICONS[s.key]+'</div>'
+      +'<div class="sd-info"><div class="sd-name" style="color:'+STAT_COLORS[s.key]+';text-shadow:0 0 8px '+STAT_COLORS[s.key]+'">'+s.key+'</div><div class="sd-sub">'+s.sub+'</div></div>'
+      +'<div class="sd-bar-wrap"><div class="sd-bar" style="width:'+pct+'%;background:'+STAT_COLORS[s.key]+';box-shadow:0 0 6px '+STAT_COLORS[s.key]+'"></div></div>'
+      +'<div class="sd-lv" style="color:'+STAT_COLORS[s.key]+'">Lv.'+st.level+'</div>';
+    rows.appendChild(row);
+  });
+  overlay.classList.remove('hidden');
+}
+function closeStatDetail(){
+  var o=document.getElementById('stat-detail-overlay');if(o)o.classList.add('hidden');
+}
+
+function renderAll(){
+  renderBoss();renderStats();renderLog();renderConditionBar();
+  updateAiBadge();
+  renderRadarChart();renderProgressRing();renderStreak();renderQuests();renderDailyGoal();
+}
+
+// ══════════════════════════════════════════
+//  XP POPUP & OVERLAY
+// ══════════════════════════════════════════
+function showXpPopup(sk,xp,cm,off){
+  var el=document.createElement('div');el.className='xp-popup';
+  if(off){el.textContent='OFF DAY';el.style.color='#44aaff';}
+  else{
+    var label='+'+xp+' EXP';var dm=parseFloat(cm.toFixed(2));
+    if(dm!==1.0)label+=' ×'+(dm%1===0?dm.toFixed(0):dm.toFixed(2));
+    el.textContent=label;el.style.color=STAT_COLORS[sk];
+  }
+  // Position near radar
+  var radar=document.getElementById('radar-section');
+  if(radar){
+    var rect=radar.getBoundingClientRect();
+    el.style.left=(rect.left+rect.width/2-30)+'px';
+    el.style.top=(rect.top+10)+'px';
+  } else {
+    el.style.left='50%';el.style.top='40%';el.style.transform='translateX(-50%)';
+  }
+  document.body.appendChild(el);
+  setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},1400);
+}
+// ── 振動ヘルパー ──
+function vibe(pattern){try{if(navigator.vibrate)navigator.vibrate(pattern);}catch(_){}}
+
+// ── パーティクル生成 ──
+function spawnParticles(container,color,count,isAbsolute){
+  var cx=isAbsolute?window.innerWidth/2:container.offsetWidth/2;
+  var cy=isAbsolute?window.innerHeight/2:container.offsetHeight/2;
+  for(var i=0;i<count;i++){
+    var p=document.createElement('div');
+    p.className=isAbsolute?'xp-particle':'lu-particle';
+    var angle=Math.random()*Math.PI*2;
+    var dist=80+Math.random()*200;
+    var px=Math.cos(angle)*dist;
+    var py=Math.sin(angle)*dist;
+    var size=6+Math.random()*10;
+    var shapes=['50%','2px','0'];
+    p.style.cssText='width:'+size+'px;height:'+size+'px;background:'+color+
+      ';left:'+(isAbsolute?window.innerWidth/2:cx)+'px;top:'+(isAbsolute?window.innerHeight/2:cy)+'px;'+
+      'border-radius:'+shapes[Math.floor(Math.random()*shapes.length)]+
+      ';--px:'+px+'px;--py:'+py+'px'+
+      ';animation-delay:'+(Math.random()*0.3)+'s;animation-duration:'+(0.7+Math.random()*0.6)+'s';
+    container.appendChild(p);
+  }
+}
+
+// ── XP取得演出 ──
+function showXpBurst(stat,xp){
+  var color=STAT_COLORS[stat]||'#ffcc00';
+  // 画面縁フラッシュ
+  var flash=document.createElement('div');
+  flash.className='screen-edge-flash';
+  flash.style.boxShadow='inset 0 0 120px 40px '+color;
+  document.body.appendChild(flash);
+  setTimeout(function(){if(flash.parentNode)flash.parentNode.removeChild(flash);},600);
+  // XP数字バースト
+  var num=document.createElement('div');
+  num.className='xp-burst-num';
+  num.textContent='+'+xp+' XP';
+  num.style.color=color;
+  num.style.textShadow='0 0 30px '+color+',0 0 60px '+color;
+  document.body.appendChild(num);
+  // パーティクル
+  for(var i=0;i<20;i++){
+    var p=document.createElement('div');
+    p.className='xp-particle';
+    var angle=Math.random()*Math.PI*2;
+    var dist=60+Math.random()*160;
+    var px=Math.cos(angle)*dist;
+    var py=Math.sin(angle)*dist;
+    var size=6+Math.random()*8;
+    p.style.cssText='width:'+size+'px;height:'+size+'px;background:'+color+
+      ';left:'+window.innerWidth/2+'px;top:'+window.innerHeight/2+'px;'+
+      'border-radius:'+(Math.random()>0.5?'50%':'2px')+
+      ';--px:'+px+'px;--py:'+py+'px'+
+      ';animation-delay:'+(Math.random()*0.15)+'s;animation-duration:'+(0.8+Math.random()*0.5)+'s';
+    document.body.appendChild(p);
+    setTimeout(function(el){return function(){if(el.parentNode)el.parentNode.removeChild(el);};}(p),1500);
+  }
+  vibe(150);
+  setTimeout(function(){if(num.parentNode)num.parentNode.removeChild(num);},1600);
+}
+
+// ── レベルアップ演出 ──
+var luScreenTimer=null;
+function showLevelUpEffect(stat,newLevel){
+  var color=STAT_COLORS[stat]||'#ffcc00';
+  var screen=document.getElementById('lu-screen');
+  var bg=document.getElementById('lu-bg');
+  var statName=document.getElementById('lu-stat-name');
+  var numEl=document.getElementById('lu-num');
+  var particles=document.getElementById('lu-particles');
+  if(!screen)return;
+  // リセット
+  screen.classList.remove('hidden');
+  particles.innerHTML='';
+  // 背景色フラッシュ
+  bg.style.background=color;
+  bg.style.animation='none';void bg.offsetWidth;
+  bg.style.animation='lu-bg-in 3.5s ease-out forwards';
+  // テキスト更新
+  statName.textContent=stat;
+  statName.style.color=color;
+  numEl.textContent='Lv. '+newLevel;
+  numEl.style.color=color;
+  // アニメーション再起動
+  ['lu-label','lu-stat-name','lu-num'].forEach(function(id){
+    var el=document.getElementById(id);if(!el)return;
+    el.style.animation='none';void el.offsetWidth;el.style.animation='';
+  });
+  // パーティクル大爆発
+  for(var i=0;i<50;i++){
+    var p=document.createElement('div');
+    p.className='lu-particle';
+    var angle=Math.random()*Math.PI*2;
+    var dist=120+Math.random()*300;
+    var px=Math.cos(angle)*dist;
+    var py=Math.sin(angle)*dist;
+    var size=8+Math.random()*14;
+    var colors=[color,'#ffcc00','#fff','#ff6b6b','#6bffff'];
+    var c=colors[Math.floor(Math.random()*colors.length)];
+    p.style.cssText='width:'+size+'px;height:'+size+'px;background:'+c+
+      ';left:50%;top:50%;margin-left:'+(-(size/2))+'px;margin-top:'+(-(size/2))+'px;'+
+      'border-radius:'+(Math.random()>0.4?'50%':'3px')+
+      ';--px:'+px+'px;--py:'+py+'px'+
+      ';animation-delay:'+(Math.random()*0.4)+'s;animation-duration:'+(0.9+Math.random()*0.8)+'s';
+    particles.appendChild(p);
+  }
+  vibe([200,80,200,80,400]);
+  if(luScreenTimer)clearTimeout(luScreenTimer);
+  luScreenTimer=setTimeout(function(){screen.classList.add('hidden');particles.innerHTML='';},3600);
+}
+
+var luTimer=null;
+function flashOverlay(big,sub,color){
+  var ov=document.getElementById('levelup-overlay');
+  var bEl=document.getElementById('levelup-big'),sEl=document.getElementById('levelup-sub');
+  bEl.textContent=big;bEl.style.color=color;bEl.style.textShadow='0 0 32px '+color;
+  sEl.textContent=sub;sEl.style.color=color;
+  ov.classList.remove('show');void ov.offsetWidth;ov.classList.add('show');
+  if(luTimer)clearTimeout(luTimer);
+  luTimer=setTimeout(function(){ov.classList.remove('show');},2400);
+}
+
+// ══════════════════════════════════════════
+//  STATUS DIALOG
+// ══════════════════════════════════════════
+function buildCondInfo(){
+  var off=isOffDay(),nam=!off&&isNamari(),cho=!off&&isChozetsu();
+  if(off) return{name:'💤 オフデイ',color:'#44aaff',mult:null,msg:'今日は戦略的停滞日だ。\nレベルは上がらないが、\nデバフも発生しない。\n体を休め、明日に備えよ。'};
+  if(nam&&cho)return{name:'⚠ なまり ／ ✨ 絶好調',color:'#ff6622',mult:'×1.05',msg:'身体はなまっているが\n昨日の休息が後押しする。\n今すぐ行動を起こせ！'};
+  if(nam) return{name:'⚠ なまり',color:'#ff6622',mult:'×0.7',msg:'2日間、行動（STR）が\n途絶えている。\n全EXPが0.7倍になっている。\n今すぐ動け、勇者よ！'};
+  if(cho) return{name:'✨ 絶好調',color:'#ffee00',mult:'×1.5',msg:'昨日の戦略的休息が\n実を結んだ。\n全EXPが1.5倍になっている。\n今こそ全力で駆け抜けろ！'};
+  return    {name:'✅ 良好',color:'#ffffff',mult:null,msg:'コンディションは良好だ。\n今日も冒険に出よう！'};
+}
+var typeTimer=null;
+function showStatusDialog(aiAdviceText){
+  var today=todayStr();
+  // AIアドバイスがある場合は毎回表示、ない場合は1日1回
+  if(!aiAdviceText&&state.lastDialogDate===today)return;
+  var info=buildCondInfo();
+  var nameEl=document.getElementById('rpg-cond-name');
+  var msgEl=document.getElementById('rpg-message');
+  var multEl=document.getElementById('rpg-mult');
+  var advSec=document.getElementById('rpg-advice');
+  var advTxt=document.getElementById('rpg-advice-text');
+  var advMeta=document.getElementById('rpg-advice-meta');
+  var advLabel=document.querySelector('#rpg-advice .rpg-advice-label');
+  nameEl.textContent=info.name;nameEl.style.color=info.color;nameEl.style.textShadow='0 0 12px '+info.color;
+  multEl.textContent=info.mult||'';multEl.style.color=info.color;
+  msgEl.textContent='';
+  if(aiAdviceText){
+    // AIフィードバックを優先表示
+    if(advLabel)advLabel.textContent='💬 AIからのフィードバック';
+    advTxt.textContent=aiAdviceText;
+    advMeta.textContent='';
+    advSec.classList.remove('hidden');
+  } else {
+    var advice=getRandomAdvice();
+    if(advice){
+      if(advLabel)advLabel.textContent='〔過去の自分より〕';
+      advTxt.textContent='"'+advice.text+'"';
+      advMeta.textContent='── '+advice.stat+(advice.skill?'  ·  '+advice.skill:'')+'  ('+fmtDate(advice.date)+')';
+      advSec.classList.remove('hidden');
+    } else {advSec.classList.add('hidden');}
+  }
+  document.getElementById('status-dialog').classList.remove('hidden');
+  if(typeTimer)clearInterval(typeTimer);
+  var txt=info.msg,i=0;
+  typeTimer=setInterval(function(){msgEl.textContent+=txt[i];i++;if(i>=txt.length)clearInterval(typeTimer);},28);
+  if(!aiAdviceText){state.lastDialogDate=today;save();}
+}
+function hideStatusDialog(){
+  if(typeTimer)clearInterval(typeTimer);
+  document.getElementById('status-dialog').classList.add('hidden');
+}
+
+
+// ── SETTINGS PANEL ──
+function openSettings(){
+  document.getElementById('player-name-input').value=state.playerName;
+  document.getElementById('api-key-input').value=apiKey;
+  document.getElementById('settings-overlay').classList.remove('hidden');
+  setTimeout(function(){document.getElementById('player-name-input').focus();},80);
+}
+function closeSettings(){
+  document.getElementById('settings-overlay').classList.add('hidden');
+}
+function saveSettings(){
+  var name=document.getElementById('player-name-input').value.trim();
+  var key=document.getElementById('api-key-input').value.trim();
+  if(name&&name!==state.playerName){state.playerName=name;save();}
+  if(key!==apiKey){apiKey=key;saveApiKey(key);}
+  updateAiBadge();closeSettings();
+}
+
+// ── BOSS EDIT ──
+function enterBossEdit(){
+  document.getElementById('boss-text').style.display='none';
+  var inp=document.getElementById('boss-edit-input');inp.style.display='block';inp.value=state.boss;inp.focus();inp.select();
+}
+function saveBossEdit(){
+  var inp=document.getElementById('boss-edit-input');var v=inp.value.trim();
+  if(v){state.boss=v;save();}
+  inp.style.display='none';document.getElementById('boss-text').style.display='block';renderBoss();
+}
+
+// ── MODAL ──
+function openModal(){document.getElementById('modal').classList.remove('hidden');setTimeout(function(){document.getElementById('modal-input').focus();},80);}
+function closeModal(){document.getElementById('modal').classList.add('hidden');}
+
+// ── UTIL ──
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+if(location.href.includes('admin')){
+  document.getElementById('app-shell').style.display='none';
+  document.querySelectorAll('.auth-overlay').forEach(function(el){
+    el.classList.add('hidden');
+    el.style.display='none';
+  });
+  showDashboard();
+} else {
+  load();
+  state.boss='プレインターン卒業';
+  renderAll(); // データが読み込めていればここで正しく表示される
+  showAuth();  // 常にPIN画面を表示（データは裏で描画済み）
+}
+
+// Events (all null-safe)
+function on(id,ev,fn){var el=document.getElementById(id);if(el)el.addEventListener(ev,fn);}
+on('gear-btn','click',openSettings);
+on('boss-edit-input','blur',saveBossEdit);
+on('boss-edit-input','keydown',function(e){if(e.key==='Enter')saveBossEdit();});
+on('book-btn','click',openGrimoire);
+on('grim-close','click',closeGrimoire);
+on('grim-tabs','click',function(e){
+  var btn=e.target.closest('[data-stat]');if(!btn)return;
+  grimFilterStat=btn.getAttribute('data-stat');
+  document.querySelectorAll('.gtab').forEach(function(t){t.classList.remove('active');});
+  btn.classList.add('active');
+  renderGrimoireEntries();
+});
+on('rpg-ok-btn','click',hideStatusDialog);
+on('meeting-ok-btn','click',function(){var m=document.getElementById('meeting-modal');if(m)m.classList.add('hidden');});
+on('levelup-overlay','click',function(){this.classList.remove('show');});
+on('settings-close-btn','click',closeSettings);
+on('settings-save-btn','click',saveSettings);
+on('settings-overlay','click',function(e){if(e.target===this)closeSettings();});
+on('ai-badge','click',openSettings);
+on('radar-section','click',openStatDetail);
+on('admin-pin-btn','click',verifyAdminPin);
+on('admin-pin-input','keydown',function(e){if(e.key==='Enter')verifyAdminPin();});
+on('sd-close','click',closeStatDetail);
+on('stat-detail-overlay','click',function(e){if(e.target===this)closeStatDetail();});
+on('export-btn','click',exportData);
+on('import-input','change',function(e){if(e.target.files[0])importData(e.target.files[0]);e.target.value='';});
+on('reset-btn','click',resetData);
+on('achieve-btn','click',judgeDailyReport);
+on('quest-refresh-btn','click',refreshQuests);
+on('login-btn','click',doLogin);
+on('login-name','input',updateLoginForm);
+on('login-name','keydown',function(e){if(e.key==='Enter'){var p=document.getElementById('login-pin');if(p)p.focus();}});
+on('login-pin','keydown',function(e){if(e.key==='Enter'){
+  var isNew=getAccountsList().indexOf(document.getElementById('login-name').value.trim())<0;
+  if(isNew){var p=document.getElementById('login-pin2');if(p)p.focus();}else doLogin();
+}});
+on('login-pin2','keydown',function(e){if(e.key==='Enter')doLogin();});
+</script>
+</body>
+</html>

@@ -10,15 +10,15 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Life Quest OS">
+  <meta name="apple-mobile-web-app-title" content="Life Quest OS — Personal">
   <link rel="apple-touch-icon" id="apple-icon">
-  <title>Life Quest OS</title>
+  <title>Life Quest OS — Personal</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
     :root{--str:#ff4444;--int:#00eeff;--cha:#ff44ff;--vit:#44ff88;--dex:#ffee00;--mind:#9b59b6;--skill:#3498db;--knowhow:#e74c3c;--font-cyber:'Orbitron','Courier New',monospace}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
     html,body{height:100%;overflow:hidden}
-    body{color:#fff;font-family:'Courier New',Courier,monospace;background:url('Gemini_Generated_Image_ulplw3ulplw3ulpl.png') center top/cover no-repeat fixed}
+    body{color:#fff;font-family:'Courier New',Courier,monospace;background:url('../Gemini_Generated_Image_ulplw3ulplw3ulpl.png') center top/cover no-repeat fixed}
     @media(min-width:600px){body{display:flex;align-items:center;justify-content:center}.app-shell{width:480px;border-left:1px solid rgba(255,255,255,.1);border-right:1px solid rgba(255,255,255,.1)}}
 
     /* ── APP SHELL ── */
@@ -494,7 +494,7 @@
 
     <!-- Dragon image -->
     <div class="scene-dragon">
-      <img src="dragon_cyber.png" alt="">
+      <img src="../dragon_cyber.png" alt="">
     </div>
 
     <!-- HUD bar (overlaid at bottom of scene-top) -->
@@ -515,7 +515,7 @@
 
     <!-- Hero (left) -->
     <div class="scene-hero-col">
-      <img src="51f6063e-7a76-4eb4-a790-2f60272e1d2c.jpg" alt="">
+      <img src="../51f6063e-7a76-4eb4-a790-2f60272e1d2c.jpg" alt="">
       <div class="hero-lbl">⚔ HERO</div>
     </div>
 
@@ -595,7 +595,7 @@
   var iconUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
   document.getElementById('apple-icon').href = iconUrl;
   try {
-    var manifest = {name:'Life Quest OS',short_name:'LQ OS',start_url:'.',display:'standalone',background_color:'#000000',theme_color:'#000000',icons:[{src:iconUrl,sizes:'192x192',type:'image/svg+xml'}]};
+    var manifest = {name:'Life Quest OS — Personal',short_name:'LQ Personal',start_url:'.',display:'standalone',background_color:'#000000',theme_color:'#000000',icons:[{src:iconUrl,sizes:'192x192',type:'image/svg+xml'}]};
     var lnk = document.createElement('link'); lnk.rel = 'manifest';
     lnk.href = URL.createObjectURL(new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'}));
     document.head.appendChild(lnk);
