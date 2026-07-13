@@ -15,7 +15,7 @@
   <title>Life Quest OS</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
-    :root{--str:#ff4444;--int:#00eeff;--cha:#ff44ff;--vit:#44ff88;--dex:#ffee00;--mind:#9b59b6;--skill:#3498db;--knowhow:#e74c3c;--font-cyber:'Orbitron','Courier New',monospace}
+    :root{--str:#ff4444;--mind:#9b59b6;--skill:#3498db;--knowhow:#e74c3c;--font-cyber:'Orbitron','Courier New',monospace}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
     html,body{height:100%;overflow:hidden}
     body{color:#fff;font-family:'Courier New',Courier,monospace;background:url('../Gemini_Generated_Image_ulplw3ulplw3ulpl.png') center top/cover no-repeat fixed}
@@ -32,8 +32,7 @@
     .boss-row{position:absolute;top:0;left:0;right:0;z-index:10;display:flex;align-items:center;gap:10px;padding:10px 14px 9px;background:rgba(0,0,0,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
     .boss-row-text{flex:1;min-width:0}
     .boss-row-label{font-size:8px;letter-spacing:3px;color:var(--str);font-family:var(--font-cyber);text-shadow:0 0 8px var(--str);margin-bottom:3px}
-    .boss-row-goal{font-size:15px;font-weight:bold;line-height:1.3;word-break:break-all;cursor:pointer;text-shadow:0 1px 4px rgba(0,0,0,.9);min-height:20px}
-    .boss-edit-input{display:none;width:100%;background:transparent;border:none;border-bottom:2px solid var(--str);color:#fff;font-family:inherit;font-size:15px;outline:none;padding:2px 0}
+    .boss-row-goal{font-size:15px;font-weight:bold;line-height:1.3;word-break:break-all;text-shadow:0 1px 4px rgba(0,0,0,.9);min-height:20px}
 
     /* Progress ring */
     .progress-ring-wrap{flex-shrink:0;position:relative;width:58px;height:58px;display:flex;align-items:center;justify-content:center}
@@ -95,18 +94,7 @@
     .quest-card.done .quest-action{text-decoration:line-through;color:#444}
     .quest-meta{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
     .quest-stat{font-size:8px;font-weight:bold;font-family:var(--font-cyber);padding:1px 4px;border-radius:2px;border:1px solid currentColor}
-    .quest-stat.str{color:var(--str)}.quest-stat.int{color:var(--int)}.quest-stat.cha{color:var(--cha)}.quest-stat.vit{color:var(--vit)}.quest-stat.dex{color:var(--dex)}
-    .quest-diff{font-size:9px}.quest-xp{font-size:8px;color:#ffcc00;font-family:var(--font-cyber)}
-    .quest-reason{font-size:9px;color:#444;margin-top:2px;line-height:1.3;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-    .quest-empty{text-align:center;padding:12px 4px;color:#333;font-size:10px;line-height:1.8}
-    .log-section{padding:6px 10px 0;display:flex;flex-direction:column;gap:4px}
-    .log-entry{background:rgba(255,255,255,.03);border:1px solid #111;border-radius:6px;padding:6px 10px;display:flex;flex-direction:column;gap:2px}
-    .log-entry-header{display:flex;align-items:center;gap:6px;font-size:9px;font-family:var(--font-cyber)}
-    .log-stat{padding:1px 5px;border-radius:3px;border:1px solid currentColor;font-size:8px;font-weight:bold}
-    .log-stat.mind{color:#9b59b6}.log-stat.skill{color:#3498db}.log-stat.knowhow{color:#e74c3c}
-    .log-xp{color:#ffcc00}.log-date{color:#333;margin-left:auto}
-    .log-text{font-size:11px;color:#888;line-height:1.4;margin-top:2px;word-break:break-all}
-    .log-empty{color:#333;font-size:11px;text-align:center;padding:10px;letter-spacing:1px}
+    .quest-xp{font-size:8px;color:#ffcc00;font-family:var(--font-cyber)}
     .daily-goal-bar{margin:6px 12px 0;padding:8px 12px;background:rgba(255,204,0,.07);border:1px solid rgba(255,204,0,.25);border-radius:8px;display:flex;align-items:flex-start;gap:8px}
     .daily-goal-bar.hidden{display:none}
     .daily-goal-label{font-size:9px;letter-spacing:2px;color:#ffcc00;font-family:var(--font-cyber);flex-shrink:0;margin-top:1px}
@@ -114,34 +102,16 @@
 
     /* ── FOOTER ── */
     .scene-footer{flex-shrink:0;padding:5px 12px 8px;background:rgba(0,0,0,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid rgba(255,255,255,.05);display:flex;flex-direction:column;gap:5px;position:relative;z-index:15}
-    .last-hint{font-size:10px;color:#333;cursor:pointer;padding:0 2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color .2s;user-select:none}
-    .last-hint:hover{color:#666}.last-hint.hidden{display:none}
-    .achievement-input{width:100%;background:#080808;border:1px solid #1e1e1e;border-radius:9px;color:#fff;font-family:inherit;font-size:15px;padding:11px 15px;outline:none;transition:border-color .2s}
-    .achievement-input:focus{border-color:#333}.achievement-input::placeholder{color:#2a2a2a}
-    .footer-btns{display:flex;gap:8px}
     .achieve-btn{flex:1;background:#0f0f0f;border:1px solid #282828;border-radius:9px;color:#fff;font-family:inherit;font-size:14px;font-weight:bold;letter-spacing:2px;padding:11px 8px;cursor:pointer;transition:transform .1s,border-color .15s}
     .achieve-btn:hover{border-color:#444}.achieve-btn:active{transform:scale(.97)}.achieve-btn.offmode{color:#555;border-color:#1a1a1a;letter-spacing:1px;font-size:12px}
     @keyframes btn-flash{0%{background:#1c1c1c;box-shadow:0 0 24px rgba(255,255,255,.12)}45%{background:#181818;box-shadow:0 0 36px rgba(255,255,255,.18)}100%{background:#0f0f0f;box-shadow:none}}
     .achieve-btn.flash{animation:btn-flash .45s ease-out}
-    .offday-btn{flex-shrink:0;background:none;border:1px solid #1a1a1a;border-radius:9px;color:#444;font-family:inherit;font-size:10px;padding:11px 10px;cursor:pointer;transition:color .2s,border-color .2s;white-space:nowrap;letter-spacing:1px}
-    .offday-btn:hover{color:#777;border-color:#333}.offday-btn.active{color:#44aaff;border-color:#44aaff}
     .achieve-btn.loading{color:#333;border-color:#111;pointer-events:none;letter-spacing:1px;font-size:12px}
-    .quick-chips{display:flex;gap:6px;overflow-x:auto;padding:0 0 4px;scrollbar-width:none}
-    .quick-chips::-webkit-scrollbar{display:none}
     .report-label{font-size:10px;color:#444;letter-spacing:2px;padding:0 2px;margin-bottom:2px}
     .report-input{width:100%;background:#080808;border:1px solid #1e1e1e;border-radius:9px;color:#fff;font-family:inherit;font-size:14px;padding:11px 15px;outline:none;resize:none;transition:border-color .2s;line-height:1.5}
     .report-input:focus{border-color:#333}.report-input::placeholder{color:#1e1e1e}
-    .quick-chip{flex-shrink:0;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:20px;color:#bbb;font-family:inherit;font-size:11px;padding:4px 11px;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s}
-    .quick-chip:active{background:rgba(255,255,255,.22);color:#fff}
-    .quick-chip[data-stat="STR"]{border-left:3px solid #e74c3c}
-    .quick-chip[data-stat="INT"]{border-left:3px solid #3498db}
-    .quick-chip[data-stat="CHA"]{border-left:3px solid #e91e8c}
-    .quick-chip[data-stat="VIT"]{border-left:3px solid #2ecc71}
-    .quick-chip[data-stat="DEX"]{border-left:3px solid #f39c12}
 
     /* ── XP POPUP (legacy) ── */
-    .xp-popup{position:fixed;pointer-events:none;z-index:50;font-size:12px;font-weight:bold;font-family:'Courier New',monospace;text-shadow:0 0 8px currentColor;animation:xp-float 1.3s ease-out forwards}
-    @keyframes xp-float{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-44px)}}
 
     /* ── XP BURST ── */
     @keyframes xp-burst{0%{transform:translate(-50%,-50%) scale(0);opacity:0}35%{transform:translate(-50%,-60%) scale(1.5);opacity:1}65%{transform:translate(-50%,-65%) scale(1.1);opacity:1}100%{transform:translate(-50%,-80%) scale(1.2);opacity:0}}
@@ -169,12 +139,6 @@
     .lu-num{font-size:100px;font-weight:bold;font-family:var(--font-cyber);z-index:1;animation:lu-num-pop .5s .5s cubic-bezier(.22,1,.36,1) both,lu-glow 1.2s 1s ease-in-out infinite}
     .lu-particle{position:absolute;border-radius:50%;pointer-events:none;animation:particle-scatter 1.2s ease-out forwards}
 
-    /* ── LEVEL UP (legacy, keep for fallback) ── */
-    .levelup-overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;pointer-events:none;opacity:0}
-    .levelup-overlay.show{animation:lu-fade 2.4s ease-out forwards;pointer-events:auto}
-    @keyframes lu-fade{0%{opacity:0}10%{opacity:1}72%{opacity:1}100%{opacity:0}}
-    .levelup-big{font-size:46px;font-weight:bold;letter-spacing:5px}
-    .levelup-sub{font-size:15px;letter-spacing:4px;margin-top:10px;color:rgba(255,255,255,.6)}
 
     /* ── STATUS DIALOG ── */
     .status-dialog{position:fixed;inset:0;background:rgba(0,0,0,.82);display:flex;align-items:flex-end;justify-content:center;z-index:150;padding:16px;animation:sd-fade .3s ease-out}
@@ -246,28 +210,6 @@
     .settings-btns{display:flex;gap:8px;margin-top:8px}
     .settings-btn{flex:1;background:none;border:1px solid #222;border-radius:8px;color:#555;font-family:inherit;font-size:13px;padding:11px 8px;cursor:pointer;letter-spacing:1px;transition:color .2s,border-color .2s}.settings-btn:hover{color:#fff;border-color:#555}
     .settings-btn.primary{background:#fff;color:#000;border-color:#fff;font-weight:bold}.settings-btn.primary:hover{opacity:.85}
-    .settings-io-row{display:flex;gap:8px}.settings-io-row .settings-btn{font-size:12px;padding:9px 8px}
-
-    /* ── ADMIN DASHBOARD ── */
-    .admin-shell{display:flex;flex-direction:column;height:100dvh;background:#050505;color:#fff;font-family:inherit}
-    .admin-shell.hidden{display:none}
-    .admin-header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid #1a1a1a;font-size:13px;letter-spacing:2px;flex-shrink:0}
-    .admin-import-btn{background:#111;border:1px solid #333;border-radius:8px;color:#ccc;font-family:inherit;font-size:12px;padding:8px 14px;cursor:pointer;letter-spacing:1px;transition:background .15s}.admin-import-btn:hover{background:#1a1a1a}
-    .admin-grid{flex:1;overflow-y:auto;padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;align-content:start}
-    .admin-card{background:#0d0d0d;border:1px solid #1e1e1e;border-radius:12px;padding:16px}
-    .admin-card-name{font-size:10px;letter-spacing:3px;color:#444;margin-bottom:4px}
-    .admin-card-boss{font-size:13px;font-weight:bold;margin-bottom:10px;line-height:1.4;color:#ccc}
-    .admin-stat-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
-    .admin-stat-chip{font-size:10px;padding:3px 8px;border-radius:10px;border:1px solid #1e1e1e;color:#666}
-    .admin-meta{font-size:10px;color:#333;display:flex;justify-content:space-between;margin-top:4px}
-    .admin-total-lv{font-size:24px;font-weight:bold;color:#fff;margin-bottom:6px}
-    .admin-empty{color:#333;font-size:12px;text-align:center;grid-column:1/-1;padding:80px 0;letter-spacing:2px}
-    .admin-drop-hint{margin:0 16px 0;padding:10px 16px;border:1px dashed #222;border-radius:8px;color:#333;font-size:11px;text-align:center;letter-spacing:1px;transition:border-color .2s,color .2s}
-    .admin-drop-hint.drag-over{border-color:#3498db;color:#3498db}
-    .admin-progress-bar{height:5px;background:#111;border-radius:3px;margin:8px 0;overflow:hidden}
-    .admin-progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#3498db,#9b59b6);transition:width .4s}
-    .admin-progress-pct{font-size:10px;color:#555;text-align:right;margin-top:2px;margin-bottom:8px}
-    .admin-streak-row{display:flex;gap:12px;font-size:11px;color:#555;margin-bottom:8px}
 
     /* ── AUTH ── */
     .auth-overlay{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:300;padding:28px}
@@ -276,7 +218,6 @@
     .auth-card.hidden{display:none}
     .auth-logo{font-size:11px;letter-spacing:4px;color:#444;text-align:center}
     .auth-title{font-size:18px;font-weight:bold;text-align:center;letter-spacing:3px;color:#fff}
-    .auth-name-display{font-size:26px;font-weight:bold;text-align:center;color:#fff;letter-spacing:2px}
     .auth-sub{font-size:12px;color:#444;text-align:center;letter-spacing:1px}
     .auth-input{background:#0a0a0a;border:1px solid #1e1e1e;border-radius:9px;color:#fff;font-family:inherit;font-size:16px;padding:13px 16px;outline:none;transition:border-color .2s;text-align:center}
     .auth-input:focus{border-color:#444}
@@ -286,19 +227,9 @@
     .auth-btn:hover{opacity:.85}
     .auth-error{font-size:12px;color:#e74c3c;text-align:center;letter-spacing:1px}
     .auth-error.hidden{display:none}
-    .account-list{display:flex;flex-direction:column;gap:8px}
-    .account-btn{background:#0d0d0d;border:1px solid #1e1e1e;border-radius:9px;color:#fff;font-family:inherit;font-size:16px;font-weight:bold;padding:14px;cursor:pointer;letter-spacing:1px;transition:all .15s;text-align:left;display:flex;align-items:center;justify-content:space-between}
-    .account-btn:hover{background:#1a1a1a;border-color:#444}
-    .account-btn-arrow{color:#444;font-size:18px}
-    .auth-btn-sub{background:none;border:1px solid #1e1e1e;border-radius:9px;color:#555;font-family:inherit;font-size:13px;padding:11px;cursor:pointer;letter-spacing:1px;transition:all .15s}
-    .auth-btn-sub:hover{border-color:#444;color:#fff}
-    .auth-back{background:none;border:none;color:#333;font-size:12px;cursor:pointer;letter-spacing:1px;text-align:center;padding:4px;font-family:inherit}
-    .auth-back:hover{color:#888}
     @keyframes auth-shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-10px)}40%,80%{transform:translateX(10px)}}
 
     /* ── FIRST VISIT MODAL ── */
-    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.94);display:flex;align-items:center;justify-content:center;z-index:200;padding:28px}
-    .modal-overlay.hidden{display:none}
     .meeting-modal{position:fixed;inset:0;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;z-index:270;padding:28px}
     .meeting-modal.hidden{display:none}
     .meeting-card{background:#0a0a0a;border:2px solid #ffcc00;border-radius:16px;padding:32px 24px;width:100%;max-width:360px;text-align:center;box-shadow:0 0 40px rgba(255,204,0,.3)}
@@ -308,15 +239,7 @@
     .meeting-msg strong{color:#fff}
     .meeting-ok-btn{background:#ffcc00;color:#000;border:none;border-radius:10px;font-family:inherit;font-size:16px;font-weight:bold;padding:14px 40px;cursor:pointer;letter-spacing:2px;transition:opacity .15s}
     .meeting-ok-btn:hover{opacity:.85}
-    .modal-card{background:#0c0c0c;border:1px solid #2a2a2a;border-radius:14px;padding:28px 24px;width:100%;max-width:400px}
-    .modal-title{font-size:17px;font-weight:bold;letter-spacing:3px;margin-bottom:10px}
-    .modal-sub{font-size:13px;color:#555;margin-bottom:22px;line-height:1.7}
-    .modal-input{width:100%;background:#000;border:1px solid #333;border-radius:8px;color:#fff;font-family:inherit;font-size:15px;padding:13px 15px;outline:none;margin-bottom:12px}
-    .modal-input:focus{border-color:#555}.modal-input::placeholder{color:#333}
-    .modal-btn{width:100%;background:#fff;border:none;border-radius:8px;color:#000;font-family:inherit;font-size:15px;font-weight:bold;padding:14px;cursor:pointer;letter-spacing:1px;transition:opacity .15s}.modal-btn:hover{opacity:.9}
 
-    /* ── CHIPS (hidden, for compat) ── */
-    .skill-chips{display:none}
 
     /* ── WHITE BACKGROUND REMOVAL ── */
     .scene-hero-col img{
@@ -378,12 +301,6 @@
   <div class="lu-stat-name" id="lu-stat-name"></div>
   <div class="lu-num" id="lu-num"></div>
   <div id="lu-particles"></div>
-</div>
-
-<!-- ── LEVEL UP (legacy) ── -->
-<div class="levelup-overlay" id="levelup-overlay">
-  <div class="levelup-big" id="levelup-big"></div>
-  <div class="levelup-sub" id="levelup-sub"></div>
 </div>
 
 <!-- ── MEETING TRIGGER MODAL ── -->
@@ -475,7 +392,6 @@
       <div class="boss-row-text">
         <div class="boss-row-label">▶ FINAL BOSS — 最終目標</div>
         <div class="boss-row-goal" id="boss-text"></div>
-        <input class="boss-edit-input" id="boss-edit-input" type="text" maxlength="80">
       </div>
       <div class="progress-ring-wrap">
         <svg id="progress-ring-svg" viewBox="0 0 58 58" fill="none" xmlns="http://www.w3.org/2000/svg"></svg>
@@ -555,35 +471,6 @@
 
 </div><!-- /app-shell -->
 
-<!-- ── ADMIN AUTH ── -->
-<div class="auth-overlay hidden" id="admin-auth">
-  <div class="auth-card">
-    <div class="auth-logo">⚔ LIFE QUEST OS</div>
-    <div class="auth-title">管理者ダッシュボード</div>
-    <div class="auth-sub" id="admin-auth-sub">暗証番号を入力してください</div>
-    <input class="auth-input pin-input" id="admin-pin-input" type="password"
-      inputmode="numeric" placeholder="● ● ● ●" maxlength="4" autocomplete="off">
-    <button class="auth-btn" id="admin-pin-btn">入力</button>
-    <div class="auth-error hidden" id="admin-pin-error">暗証番号が違います</div>
-  </div>
-</div>
-
-<!-- ── ADMIN DASHBOARD ── -->
-<div class="admin-shell hidden" id="admin-shell">
-  <div class="admin-header">
-    <span>👥 LIFE QUEST OS — 管理者</span>
-    <div style="display:flex;gap:8px;align-items:center">
-      <button class="admin-import-btn" id="admin-refresh-btn">🔄 更新</button>
-      <label class="admin-import-btn">
-        ＋ 参加者追加
-        <input type="file" id="admin-import-input" accept=".json" multiple style="display:none">
-      </label>
-    </div>
-  </div>
-  <div class="admin-drop-hint" id="admin-drop-hint">参加者から受け取ったJSONをここにドロップ</div>
-  <div class="admin-grid" id="admin-grid">
-    <div class="admin-empty">データを読み込んでいます...</div>
-  </div>
 </div>
 
 <script>
@@ -656,20 +543,12 @@ function getTodayQuests(avoidActions){
 }
 
 var LEARN_KW = ['学んだ','気づ','発見','わかった','分かった','理解','ポイント','コツ','効果的','重要','役立','覚えた','実感','刺さった','ためになった','learned','realized','insight','discovered','tip','key'];
-var BASE_EXP = 50;
-
-// placeholder arrays to avoid any references breaking
-var SKILL_MAP = [];
-var HARD_WORDS = [];
-var EASY_WORDS = [];
 
 // ── API KEY ──
 var apiKey = '';
 function loadApiKey(){try{apiKey=localStorage.getItem('lq_apikey')||'';}catch(_){}}
 function saveApiKey(k){try{if(k)localStorage.setItem('lq_apikey',k);else localStorage.removeItem('lq_apikey');}catch(_){}}
 loadApiKey();
-
-function syncToFirebase(){} // 無効化
 
 // ══════════════════════════════════════════
 //  STATE
@@ -770,8 +649,6 @@ function loadUserByName(name){
 // ══════════════════════════════════════════
 function dateOffset(n){var d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);}
 function todayStr(){return dateOffset(0);}
-function yesterdayStr(){return dateOffset(-1);}
-function tomorrowStr(){return dateOffset(1);}
 function fmtDate(iso){var p=iso.split('-');return p[1]+'/'+p[2];}
 function getDayData(ds){if(!state.days[ds])state.days[ds]={xp:0,hasStr:false,hasVit:false,isOff:false};return state.days[ds];}
 
@@ -785,17 +662,6 @@ function isNamari(){
   return n>=2;
 }
 function isChozetsu(){return state.chozetsuDate===todayStr();}
-function getConditionMult(){if(isOffDay())return 0;var m=1.0;if(isNamari())m*=0.7;if(isChozetsu())m*=1.5;return m;}
-function toggleOffDay(){
-  var d=getDayData(todayStr());d.isOff=!d.isOff;save();
-  renderConditionBar();updateFooterState();
-  if(d.isOff)flashOverlay('SAVE POINT','今日は戦略的停滞日','#44aaff');
-}
-
-// ══════════════════════════════════════════
-//  SKILL / STAT DETECTION
-// ══════════════════════════════════════════
-function fallbackSkillName(text,stat){return stat+'スキル';}
 
 // ══════════════════════════════════════════
 //  LEVEL LOGIC
@@ -830,62 +696,6 @@ function getRandomAdvice(){
 // ══════════════════════════════════════════
 //  RENDER
 // ══════════════════════════════════════════
-function renderStats(){
-  var sec=document.getElementById('stats-section');if(!sec)return;
-  sec.innerHTML='';
-  STATS.forEach(function(s){
-    var st=state.stats[s.key];
-    var block=document.createElement('div');block.className='stat-block';block.id='block-'+s.key;
-    var row=document.createElement('div');row.className='stat-row';row.id='row-'+s.key;
-    row.innerHTML='<div class="stat-icon '+s.cls+'">'+STAT_ICONS[s.key]+'</div>'
-      +'<div class="stat-label '+s.cls+'"><div class="stat-key">'+s.key+'</div><div class="stat-sub">'+s.sub+'</div></div>'
-      +'<div class="gauge-track"><div class="gauge-fill '+s.cls+'" id="gf-'+s.key+'" style="width:'+xpPct(st)+'%"></div></div>'
-      +'<div class="stat-level" id="lv-'+s.key+'">Lv.'+st.level+'</div>';
-    var chips=document.createElement('div');chips.className='skill-chips';chips.id='chips-'+s.key;
-    block.appendChild(row);block.appendChild(chips);sec.appendChild(block);
-  });
-  STATS.forEach(function(s){renderChips(s.key,false);});
-}
-function renderChips(sk,hl){
-  var con=document.getElementById('chips-'+sk);if(!con)return;
-  var cls=STATS.filter(function(s){return s.key===sk;})[0].cls;
-  var arr=[];Object.keys(state.skills).forEach(function(n){var s=state.skills[n];if(s.stat===sk)arr.push({name:n,level:s.level,xp:s.xp});});
-  arr.sort(function(a,b){return b.level-a.level||b.xp-a.xp;});
-  con.innerHTML='';
-  arr.slice(0,6).forEach(function(s,i){
-    var c=document.createElement('span');c.className='chip '+cls+(hl&&i===0?' new':'');c.textContent=s.name+' Lv.'+s.level;con.appendChild(c);
-  });
-}
-function updateGauge(k){
-  var f=document.getElementById('gf-'+k),l=document.getElementById('lv-'+k);
-  if(f)f.style.width=xpPct(state.stats[k])+'%';
-  if(l)l.textContent='Lv.'+state.stats[k].level;
-  renderProgressRing();
-}
-function renderLog(){
-  var sec=document.getElementById('log-section');if(!sec)return;
-  sec.innerHTML='';
-  var entries=state.log.filter(function(e){return e.text&&e.text.length>0;}).slice(-5).reverse();
-  if(entries.length===0){
-    sec.innerHTML='<div class="log-empty">日報の記録はまだありません</div>';
-    return;
-  }
-  entries.forEach(function(e){
-    var s=STATS.filter(function(x){return x.key===e.stat;})[0];
-    var cls=s?s.cls:'mind';
-    var statKey=e.stat||'MIND';
-    var el=document.createElement('div');el.className='log-entry';
-    var xpL=e.xp>0?'+'+e.xp+' XP':'';
-    var dateL=e.date?e.date:'';
-    el.innerHTML='<div class="log-entry-header">'
-      +'<span class="log-stat '+cls+'">'+statKey+'</span>'
-      +(xpL?'<span class="log-xp">'+xpL+'</span>':'')
-      +(dateL?'<span class="log-date">'+dateL+'</span>':'')
-      +'</div>'
-      +'<div class="log-text">'+esc(e.text)+'</div>';
-    sec.appendChild(el);
-  });
-}
 function renderBoss(){
   var el=document.getElementById('boss-text');if(el)el.textContent=state.boss||'';
 }
@@ -903,7 +713,6 @@ function renderConditionBar(){
   else if(nam)badge('namari','⚠×0.7');
   else if(cho)badge('chozetsu','✨×1.5');
 }
-function updateFooterState(){}
 
 // ── PROGRESS RING ──
 function getTotalLevel(){
@@ -1032,174 +841,7 @@ function doLogin(){
   }
 }
 
-function doSetup(){}
-function switchAccount(){}
 
-// ── ADMIN PIN AUTH ──
-var ADMIN_PIN_KEY='lq_admin_pin';
-function showAdminAuth(){
-  var stored=localStorage.getItem(ADMIN_PIN_KEY);
-  var sub=document.getElementById('admin-auth-sub');
-  if(!stored&&sub)sub.textContent='管理者暗証番号を設定してください（初回）';
-  else if(sub)sub.textContent='暗証番号を入力してください';
-  document.getElementById('admin-auth').classList.remove('hidden');
-}
-function showDashboard(){
-  document.getElementById('admin-auth').classList.add('hidden');
-  document.getElementById('admin-shell').classList.remove('hidden');
-  initAdminDashboard();
-}
-function verifyAdminPin(){
-  var pin=document.getElementById('admin-pin-input').value;
-  var err=document.getElementById('admin-pin-error');
-  var stored=localStorage.getItem(ADMIN_PIN_KEY);
-  if(!/^\d{4}$/.test(pin)){err.textContent='4桁の数字を入力してください';err.classList.remove('hidden');return;}
-  if(!stored){
-    localStorage.setItem(ADMIN_PIN_KEY,pin);
-    sessionStorage.setItem('lq_admin_auth','1');
-    showDashboard();
-  } else if(pin===stored){
-    err.classList.add('hidden');
-    sessionStorage.setItem('lq_admin_auth','1');
-    showDashboard();
-  } else {
-    err.textContent='暗証番号が違います';err.classList.remove('hidden');
-    document.getElementById('admin-pin-input').value='';
-    document.getElementById('admin-pin-input').focus();
-    var card=document.querySelector('#admin-auth .auth-card');
-    if(card){card.style.animation='none';void card.offsetWidth;card.style.animation='auth-shake .4s ease';}
-  }
-}
-
-// ══════════════════════════════════════════
-//  ADMIN DASHBOARD
-// ══════════════════════════════════════════
-var adminProfiles=[];
-var adminInitialized=false;
-function initAdminDashboard(){
-  // 自分のデータを自動ロード
-  loadLocalProfileToAdmin();
-  renderAdminGrid();
-
-  if(adminInitialized)return;
-  adminInitialized=true;
-
-  document.getElementById('admin-import-input').addEventListener('change',function(e){
-    Array.from(e.target.files).forEach(function(file){
-      var reader=new FileReader();
-      reader.onload=function(ev){
-        try{
-          var d=JSON.parse(ev.target.result);
-          // 同名プレイヤーは上書き
-          var idx=adminProfiles.findIndex(function(p){return p.playerName===d.playerName&&p._source!=='local';});
-          if(idx>=0)adminProfiles[idx]=d;else adminProfiles.push(d);
-          renderAdminGrid();
-        }catch(_){alert(file.name+' の読み込みに失敗しました');}
-      };
-      reader.readAsText(file);
-    });
-    e.target.value='';
-  });
-
-  document.getElementById('admin-refresh-btn').addEventListener('click',function(){
-    loadLocalProfileToAdmin();
-    renderAdminGrid();
-  });
-
-  // ドラッグ＆ドロップ
-  var shell=document.getElementById('admin-shell');
-  var hint=document.getElementById('admin-drop-hint');
-  shell.addEventListener('dragover',function(e){e.preventDefault();if(hint)hint.classList.add('drag-over');});
-  shell.addEventListener('dragleave',function(){if(hint)hint.classList.remove('drag-over');});
-  shell.addEventListener('drop',function(e){
-    e.preventDefault();
-    if(hint)hint.classList.remove('drag-over');
-    Array.from(e.dataTransfer.files).forEach(function(file){
-      if(!file.name.endsWith('.json'))return;
-      var reader=new FileReader();
-      reader.onload=function(ev){
-        try{
-          var d=JSON.parse(ev.target.result);
-          var idx=adminProfiles.findIndex(function(p){return p.playerName===d.playerName&&p._source!=='local';});
-          if(idx>=0)adminProfiles[idx]=d;else adminProfiles.push(d);
-          renderAdminGrid();
-        }catch(_){alert(file.name+' の読み込みに失敗しました');}
-      };
-      reader.readAsText(file);
-    });
-  });
-}
-function loadLocalProfileToAdmin(){
-  try{
-    var raw=localStorage.getItem('lifequest');
-    if(!raw)return;
-    var d=JSON.parse(raw);
-    if(!d||!d.playerName)return;
-    d._source='local';
-    var idx=adminProfiles.findIndex(function(p){return p._source==='local';});
-    if(idx>=0)adminProfiles[idx]=d;else adminProfiles.unshift(d);
-  }catch(_){}
-}
-function adminTotalLevel(p){
-  if(!p.stats)return 0;
-  return Object.values(p.stats).reduce(function(s,st){return s+(st.level||1);},0);
-}
-function adminStreak(p){
-  if(!p.days)return 0;
-  var streak=0;
-  for(var i=0;;i++){
-    var d=new Date();d.setDate(d.getDate()-i);
-    var ds=d.toISOString().slice(0,10);
-    var day=p.days[ds];
-    if(day&&day.isOff){continue;}
-    if(day&&day.xp>0){streak++;}else{break;}
-  }
-  return streak;
-}
-function adminLastDate(p){
-  if(!p.days)return null;
-  var dates=Object.keys(p.days).filter(function(ds){var d=p.days[ds];return d&&d.xp>0;});
-  if(!dates.length)return null;
-  return dates.sort().pop();
-}
-function renderAdminGrid(){
-  var grid=document.getElementById('admin-grid');
-  if(adminProfiles.length===0){
-    grid.innerHTML='<div class="admin-empty">データがありません<br><small style="color:#333;font-size:10px;margin-top:8px;display:block">アプリを使用後に「🔄 更新」を押すか<br>参加者のJSONを追加してください</small></div>';
-    return;
-  }
-  grid.innerHTML='';
-  var sorted=adminProfiles.slice().sort(function(a,b){return adminTotalLevel(b)-adminTotalLevel(a);});
-  sorted.forEach(function(p,i){
-    var card=document.createElement('div');
-    card.className='admin-card';
-    var isLocal=p._source==='local';
-    var totalLv=adminTotalLevel(p);
-    var maxLv=STATS.length*20; // 3stat×Lv20
-    var pct=Math.min(100,Math.round(totalLv/maxLv*100));
-    var statChips=STATS.map(function(s){
-      var st=p.stats&&p.stats[s.key];
-      var lv=st?st.level:1;
-      var xp=st?st.xp:0;
-      var color=STAT_COLORS[s.key]||'#555';
-      return '<span class="admin-stat-chip" style="border-color:'+color+'44;color:'+color+'">'+s.key+' Lv'+lv+'</span>';
-    }).join('');
-    var streak=adminStreak(p);
-    var logCount=(p.log&&p.log.length)||0;
-    var lastDate=adminLastDate(p)||'—';
-    var displayName=p.playerName||('Player '+(i+1));
-    var badge=isLocal?'<span style="font-size:9px;background:#1a2a1a;color:#3a8;border:1px solid #3a8;border-radius:4px;padding:1px 5px;margin-left:4px">本端末</span>':'';
-    card.innerHTML=
-      '<div class="admin-card-name">#'+(i+1)+(isLocal?' · このデバイス':'')+'</div>'+
-      '<div style="font-size:18px;font-weight:bold;color:#fff;margin-bottom:6px;display:flex;align-items:center;gap:6px">'+esc(displayName)+badge+'</div>'+
-      '<div class="admin-total-lv">Total Lv. '+totalLv+'</div>'+
-      '<div class="admin-progress-bar"><div class="admin-progress-fill" style="width:'+pct+'%"></div></div>'+
-      '<div class="admin-progress-pct">進捗 '+pct+'%（目安：Lv'+maxLv+'で卒業）</div>'+
-      '<div class="admin-stat-row">'+statChips+'</div>'+
-      '<div class="admin-streak-row"><span>🔥 '+streak+'日連続</span><span>📝 '+logCount+'件</span><span>最終: '+lastDate+'</span></div>';
-    grid.appendChild(card);
-  });
-}
 
 function exportData(){
   try{
@@ -1487,7 +1129,6 @@ function applyQuestResults(stat,aiXp,advice,reportText){
 
   state.log.push({stat:stat,skill:'日次レポート',xp:xp,text:reportText,inGrimoire:true,date:today});
   if(state.log.length>50)state.log=state.log.slice(-50);
-  syncToFirebase();
   save();
   renderAll();
 
@@ -1543,7 +1184,7 @@ function closeStatDetail(){
 }
 
 function renderAll(){
-  renderBoss();renderStats();renderLog();renderConditionBar();
+  renderBoss();renderConditionBar();
   updateAiBadge();
   renderRadarChart();renderProgressRing();renderStreak();renderQuests();renderDailyGoal();
 }
@@ -1551,50 +1192,10 @@ function renderAll(){
 // ══════════════════════════════════════════
 //  XP POPUP & OVERLAY
 // ══════════════════════════════════════════
-function showXpPopup(sk,xp,cm,off){
-  var el=document.createElement('div');el.className='xp-popup';
-  if(off){el.textContent='OFF DAY';el.style.color='#44aaff';}
-  else{
-    var label='+'+xp+' EXP';var dm=parseFloat(cm.toFixed(2));
-    if(dm!==1.0)label+=' ×'+(dm%1===0?dm.toFixed(0):dm.toFixed(2));
-    el.textContent=label;el.style.color=STAT_COLORS[sk];
-  }
-  // Position near radar
-  var radar=document.getElementById('radar-section');
-  if(radar){
-    var rect=radar.getBoundingClientRect();
-    el.style.left=(rect.left+rect.width/2-30)+'px';
-    el.style.top=(rect.top+10)+'px';
-  } else {
-    el.style.left='50%';el.style.top='40%';el.style.transform='translateX(-50%)';
-  }
-  document.body.appendChild(el);
-  setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},1400);
-}
 // ── 振動ヘルパー ──
 function vibe(pattern){try{if(navigator.vibrate)navigator.vibrate(pattern);}catch(_){}}
 
 // ── パーティクル生成 ──
-function spawnParticles(container,color,count,isAbsolute){
-  var cx=isAbsolute?window.innerWidth/2:container.offsetWidth/2;
-  var cy=isAbsolute?window.innerHeight/2:container.offsetHeight/2;
-  for(var i=0;i<count;i++){
-    var p=document.createElement('div');
-    p.className=isAbsolute?'xp-particle':'lu-particle';
-    var angle=Math.random()*Math.PI*2;
-    var dist=80+Math.random()*200;
-    var px=Math.cos(angle)*dist;
-    var py=Math.sin(angle)*dist;
-    var size=6+Math.random()*10;
-    var shapes=['50%','2px','0'];
-    p.style.cssText='width:'+size+'px;height:'+size+'px;background:'+color+
-      ';left:'+(isAbsolute?window.innerWidth/2:cx)+'px;top:'+(isAbsolute?window.innerHeight/2:cy)+'px;'+
-      'border-radius:'+shapes[Math.floor(Math.random()*shapes.length)]+
-      ';--px:'+px+'px;--py:'+py+'px'+
-      ';animation-delay:'+(Math.random()*0.3)+'s;animation-duration:'+(0.7+Math.random()*0.6)+'s';
-    container.appendChild(p);
-  }
-}
 
 // ── XP取得演出 ──
 function showXpBurst(stat,xp){
@@ -1683,16 +1284,6 @@ function showLevelUpEffect(stat,newLevel){
   luScreenTimer=setTimeout(function(){screen.classList.add('hidden');particles.innerHTML='';},3600);
 }
 
-var luTimer=null;
-function flashOverlay(big,sub,color){
-  var ov=document.getElementById('levelup-overlay');
-  var bEl=document.getElementById('levelup-big'),sEl=document.getElementById('levelup-sub');
-  bEl.textContent=big;bEl.style.color=color;bEl.style.textShadow='0 0 32px '+color;
-  sEl.textContent=sub;sEl.style.color=color;
-  ov.classList.remove('show');void ov.offsetWidth;ov.classList.add('show');
-  if(luTimer)clearTimeout(luTimer);
-  luTimer=setTimeout(function(){ov.classList.remove('show');},2400);
-}
 
 // ══════════════════════════════════════════
 //  STATUS DIALOG
@@ -1767,19 +1358,6 @@ function saveSettings(){
 }
 
 // ── BOSS EDIT ──
-function enterBossEdit(){
-  document.getElementById('boss-text').style.display='none';
-  var inp=document.getElementById('boss-edit-input');inp.style.display='block';inp.value=state.boss;inp.focus();inp.select();
-}
-function saveBossEdit(){
-  var inp=document.getElementById('boss-edit-input');var v=inp.value.trim();
-  if(v){state.boss=v;save();}
-  inp.style.display='none';document.getElementById('boss-text').style.display='block';renderBoss();
-}
-
-// ── MODAL ──
-function openModal(){document.getElementById('modal').classList.remove('hidden');setTimeout(function(){document.getElementById('modal-input').focus();},80);}
-function closeModal(){document.getElementById('modal').classList.add('hidden');}
 
 // ── UTIL ──
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -1787,25 +1365,14 @@ function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').repl
 // ══════════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════════
-if(location.href.includes('admin')){
-  document.getElementById('app-shell').style.display='none';
-  document.querySelectorAll('.auth-overlay').forEach(function(el){
-    el.classList.add('hidden');
-    el.style.display='none';
-  });
-  showDashboard();
-} else {
-  load();
-  state.boss='プレインターン卒業';
-  renderAll(); // データが読み込めていればここで正しく表示される
-  showAuth();  // 常にPIN画面を表示（データは裏で描画済み）
-}
+load();
+state.boss='プレインターン卒業';
+renderAll(); // データが読み込めていればここで正しく表示される
+showAuth();  // 常にPIN画面を表示（データは裏で描画済み）
 
 // Events (all null-safe)
 function on(id,ev,fn){var el=document.getElementById(id);if(el)el.addEventListener(ev,fn);}
 on('gear-btn','click',openSettings);
-on('boss-edit-input','blur',saveBossEdit);
-on('boss-edit-input','keydown',function(e){if(e.key==='Enter')saveBossEdit();});
 on('book-btn','click',openGrimoire);
 on('grim-close','click',closeGrimoire);
 on('grim-tabs','click',function(e){
@@ -1817,14 +1384,11 @@ on('grim-tabs','click',function(e){
 });
 on('rpg-ok-btn','click',hideStatusDialog);
 on('meeting-ok-btn','click',function(){var m=document.getElementById('meeting-modal');if(m)m.classList.add('hidden');});
-on('levelup-overlay','click',function(){this.classList.remove('show');});
 on('settings-close-btn','click',closeSettings);
 on('settings-save-btn','click',saveSettings);
 on('settings-overlay','click',function(e){if(e.target===this)closeSettings();});
 on('ai-badge','click',openSettings);
 on('radar-section','click',openStatDetail);
-on('admin-pin-btn','click',verifyAdminPin);
-on('admin-pin-input','keydown',function(e){if(e.key==='Enter')verifyAdminPin();});
 on('sd-close','click',closeStatDetail);
 on('stat-detail-overlay','click',function(e){if(e.target===this)closeStatDetail();});
 on('export-btn','click',exportData);
