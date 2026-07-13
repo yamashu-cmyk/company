@@ -15,7 +15,7 @@
   <title>Life Quest OS — Personal</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
-    :root{--str:#ff4444;--int:#00eeff;--cha:#ff44ff;--vit:#44ff88;--dex:#ffee00;--mind:#9b59b6;--skill:#3498db;--knowhow:#e74c3c;--font-cyber:'Orbitron','Courier New',monospace}
+    :root{--str:#ff4444;--int:#00eeff;--cha:#ff44ff;--vit:#44ff88;--dex:#ffee00;--body:#44ff88;--mind:#3aa0ff;--soul:#b06bd6;--font-cyber:'Orbitron','Courier New',monospace}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
     html,body{height:100%;overflow:hidden}
     body{color:#fff;font-family:'Courier New',Courier,monospace;background:url('../Gemini_Generated_Image_ulplw3ulplw3ulpl.png') center top/cover no-repeat fixed}
@@ -103,7 +103,7 @@
     .log-entry{background:rgba(255,255,255,.03);border:1px solid #111;border-radius:6px;padding:6px 10px;display:flex;flex-direction:column;gap:2px}
     .log-entry-header{display:flex;align-items:center;gap:6px;font-size:9px;font-family:var(--font-cyber)}
     .log-stat{padding:1px 5px;border-radius:3px;border:1px solid currentColor;font-size:8px;font-weight:bold}
-    .log-stat.mind{color:#9b59b6}.log-stat.skill{color:#3498db}.log-stat.knowhow{color:#e74c3c}
+    .log-stat.body{color:var(--body)}.log-stat.mind{color:var(--mind)}.log-stat.soul{color:var(--soul)}
     .log-xp{color:#ffcc00}.log-date{color:#333;margin-left:auto}
     .log-text{font-size:11px;color:#888;line-height:1.4;margin-top:2px;word-break:break-all}
     .log-empty{color:#333;font-size:11px;text-align:center;padding:10px;letter-spacing:1px}
@@ -223,11 +223,11 @@
     .grim-close{background:none;border:none;color:#555;font-size:18px;cursor:pointer;padding:4px;line-height:1;transition:color .2s}.grim-close:hover{color:#fff}
     .grim-tabs{flex-shrink:0;display:flex;padding:0 18px;border-bottom:1px solid #111;overflow-x:auto;scrollbar-width:none}.grim-tabs::-webkit-scrollbar{display:none}
     .gtab{background:none;border:none;border-bottom:2px solid transparent;color:#444;font-family:inherit;font-size:10px;letter-spacing:1px;padding:8px 10px;cursor:pointer;white-space:nowrap;transition:color .2s,border-color .2s}.gtab:hover{color:#888}
-    .gtab.active{color:#fff;border-bottom-color:#fff}.gtab.active.mind{color:var(--mind);border-bottom-color:var(--mind)}.gtab.active.skill{color:var(--skill);border-bottom-color:var(--skill)}.gtab.active.knowhow{color:var(--knowhow);border-bottom-color:var(--knowhow)}
+    .gtab.active{color:#fff;border-bottom-color:#fff}.gtab.active.body{color:var(--body);border-bottom-color:var(--body)}.gtab.active.mind{color:var(--mind);border-bottom-color:var(--mind)}.gtab.active.soul{color:var(--soul);border-bottom-color:var(--soul)}
     .grim-entries{flex:1;overflow-y:auto;padding:0 18px;-webkit-overflow-scrolling:touch}
     .grim-entry{display:flex;gap:10px;padding:12px 0;border-bottom:1px solid #0d0d0d}
     .ge-stat{font-size:10px;font-weight:bold;flex-shrink:0;padding-top:2px;width:50px}
-    .ge-stat.mind{color:var(--mind)}.ge-stat.skill{color:var(--skill)}.ge-stat.knowhow{color:var(--knowhow)}
+    .ge-stat.body{color:var(--body)}.ge-stat.mind{color:var(--mind)}.ge-stat.soul{color:var(--soul)}
     .ge-body{flex:1;min-width:0}.ge-text{font-size:13px;line-height:1.5;color:#ccc}.ge-meta{font-size:10px;color:#333;margin-top:4px}
     .ge-empty{padding:40px 0;text-align:center;color:#333;font-size:13px;line-height:2}
     .grim-footer{flex-shrink:0;padding:12px 18px 16px;border-top:1px solid #111;display:flex;gap:8px}
@@ -386,13 +386,13 @@
   <div class="levelup-sub" id="levelup-sub"></div>
 </div>
 
-<!-- ── MEETING TRIGGER MODAL ── -->
+<!-- ── MILESTONE MODAL ── -->
 <div class="meeting-modal hidden" id="meeting-modal">
   <div class="meeting-card">
     <div class="meeting-icon">🏆</div>
-    <div class="meeting-title">LEVEL 10 達成！</div>
-    <div class="meeting-msg">素晴らしい成長だ！<br>次のステップに進む準備ができた。<br><br>管理者に連絡して<br><strong>戦略会議（面談）</strong>をセットしよう！</div>
-    <button class="meeting-ok-btn" id="meeting-ok-btn">わかった！</button>
+    <div class="meeting-title">MILESTONE</div>
+    <div class="meeting-msg">合計レベル10に到達！<br>ここまでの積み重ね、お見事。<br><br>自分に小さな<strong>ご褒美</strong>を用意して、<br>ここまでの<strong>成長を振り返ろう</strong>。<br>次のステージへ進もう！</div>
+    <button class="meeting-ok-btn" id="meeting-ok-btn">よし、続ける！</button>
   </div>
 </div>
 
@@ -404,9 +404,9 @@
   </div>
   <div class="grim-tabs" id="grim-tabs">
     <button class="gtab active" data-stat="ALL">ALL</button>
+    <button class="gtab body" data-stat="BODY">💪 BODY</button>
     <button class="gtab mind" data-stat="MIND">🧠 MIND</button>
-    <button class="gtab skill" data-stat="SKILL">⚡ SKILL</button>
-    <button class="gtab knowhow" data-stat="KNOWHOW">📚 KNOWHOW</button>
+    <button class="gtab soul" data-stat="SOUL">🧘 SOUL</button>
   </div>
   <div class="grim-entries" id="grim-entries"></div>
   <div class="grim-footer">
@@ -444,7 +444,7 @@
 <div class="auth-overlay" id="auth-overlay">
   <div class="auth-card" id="auth-main">
     <div class="auth-logo">⚔ LIFE QUEST OS</div>
-    <div class="auth-title">プレインターン卒業</div>
+    <div class="auth-title">人生を、攻略せよ。</div>
     <div class="auth-sub" id="auth-main-sub">名前と暗証番号を入力してください</div>
     <!-- ブラウザのオートコンプリートを無効化するダミーフィールド -->
     <input type="text" style="display:none" aria-hidden="true">
@@ -548,43 +548,12 @@
   <footer class="scene-footer">
     <div class="report-label">📋 今日の振り返り<span id="report-goal-hint" style="color:#555;font-size:10px;margin-left:6px">← クエストをタップして目標を選んでください</span></div>
     <textarea class="report-input" id="report-input" rows="2" maxlength="400"
-      placeholder="例: 営業5件訪問し成約率40%。初対面で目線を意識したら相手の話が増えた。"
+      placeholder="例: 朝に20分ランニング。読書で学んだ時間術を1つ試したら集中が続いた。"
       autocomplete="off" spellcheck="false"></textarea>
     <button class="achieve-btn" id="achieve-btn">✅ 今日の記録を提出</button>
   </footer>
 
 </div><!-- /app-shell -->
-
-<!-- ── ADMIN AUTH ── -->
-<div class="auth-overlay hidden" id="admin-auth">
-  <div class="auth-card">
-    <div class="auth-logo">⚔ LIFE QUEST OS</div>
-    <div class="auth-title">管理者ダッシュボード</div>
-    <div class="auth-sub" id="admin-auth-sub">暗証番号を入力してください</div>
-    <input class="auth-input pin-input" id="admin-pin-input" type="password"
-      inputmode="numeric" placeholder="● ● ● ●" maxlength="4" autocomplete="off">
-    <button class="auth-btn" id="admin-pin-btn">入力</button>
-    <div class="auth-error hidden" id="admin-pin-error">暗証番号が違います</div>
-  </div>
-</div>
-
-<!-- ── ADMIN DASHBOARD ── -->
-<div class="admin-shell hidden" id="admin-shell">
-  <div class="admin-header">
-    <span>👥 LIFE QUEST OS — 管理者</span>
-    <div style="display:flex;gap:8px;align-items:center">
-      <button class="admin-import-btn" id="admin-refresh-btn">🔄 更新</button>
-      <label class="admin-import-btn">
-        ＋ 参加者追加
-        <input type="file" id="admin-import-input" accept=".json" multiple style="display:none">
-      </label>
-    </div>
-  </div>
-  <div class="admin-drop-hint" id="admin-drop-hint">参加者から受け取ったJSONをここにドロップ</div>
-  <div class="admin-grid" id="admin-grid">
-    <div class="admin-empty">データを読み込んでいます...</div>
-  </div>
-</div>
 
 <script>
 // ══════════════════════════════════════════
@@ -605,46 +574,47 @@
 // ══════════════════════════════════════════
 //  CONFIG
 // ══════════════════════════════════════════
-var STAT_COLORS = {MIND:'#9b59b6', SKILL:'#3498db', KNOWHOW:'#e74c3c'};
-var STAT_ICONS  = {MIND:'🧠', SKILL:'⚡', KNOWHOW:'📚'};
+var STAT_COLORS = {BODY:'#44ff88', MIND:'#3aa0ff', SOUL:'#b06bd6'};
+var STAT_ICONS  = {BODY:'💪', MIND:'🧠', SOUL:'🧘'};
 var STATS = [
-  {key:'MIND',   cls:'mind',    sub:'マインド'},
-  {key:'SKILL',  cls:'skill',   sub:'スキル'},
-  {key:'KNOWHOW',cls:'knowhow', sub:'ノウハウ'},
+  {key:'BODY', cls:'body', sub:'体'},
+  {key:'MIND', cls:'mind', sub:'知'},
+  {key:'SOUL', cls:'soul', sub:'心'},
 ];
 var BASE_QUEST_XP = 100;
 var QUEST_POOL = {
+  BODY: [
+    '運動・筋トレを20分以上した',
+    '7時間以上しっかり眠った',
+    '水を1.5L以上飲んだ',
+    '階段を使う・一駅歩くなど余分に体を動かした',
+    '就寝1時間前にスマホを手放した',
+    '揚げ物や甘い間食を1回がまんした',
+    '朝に日光を浴びて体をしっかり起こした',
+  ],
   MIND: [
-    '失敗を恐れず新しく試みたことを記録した',
-    '組織の一員として恥じない振る舞いを徹底した',
-    '相手の感情や背景を推測して行動した',
-    '周囲からの指摘を素直に受け入れた',
-    '昨日より前進したポイントを言葉にした',
+    '本・記事を15分以上読んだ',
+    '新しく学んだ知識を1つメモに残した',
+    '勉強・オンライン講座に30分取り組んだ',
+    '学んだことを人やSNSにアウトプットした',
+    '昨日学んだことを復習した',
+    '気になっていた分野を1つ調べて理解した',
+    '手を動かして何か1つ作った・試した',
   ],
-  SKILL: [
-    '相手の目を見て信頼関係を築いた',
-    '相槌を使い分け相手の本音を引き出した',
-    '問いかけで相手の考えを深掘りした',
-    '復唱・要約で認識を合わせた',
-    '姿勢・表情で相手に安心感を与えた',
-  ],
-  KNOWHOW: [
-    'スクリプト・インプット：トークの全体流れとアプローチから着座までの文句を完璧に暗記した',
-    'プラン・マスター：自社の主要プランの月額料金・データ容量・基本仕様をすべて頭に叩き込んだ',
-    'エネミー・リサーチ：主要な他社プランの料金やデメリットを把握し自社との明確な違いを整理した',
-    'マイルール・チェック：遅刻・欠勤連絡のルートや日報の提出期限など組織の基本ルールを正しく記憶した',
-    'キャンペーン・ナレッジ：今週の店舗限定割引や特典の適用条件をミスなく把握した',
-    'FAQデータベース：エリアは大丈夫？解約金は？などの定番の質問と回答を覚えた',
-    'コンプライアンス遵守：契約・案内時に絶対に言ってはいけないNGワードや法的ルールを正確に記憶した',
-    '商材アップデート：最新端末のスペックや最新の5G対応エリアの情報を仕入れた',
-    'ターゲット・アナリティクス：店舗に来る客層の年齢層や時間帯ごとの特徴を把握した',
-    'サクセス・ケーススタディ：先輩が過去に成約させた代表的な成功トークのパターンをインプットした',
+  SOUL: [
+    '5分間の瞑想・深呼吸で心を整えた',
+    '今日感謝できることを3つ書き出した',
+    '机や部屋を1か所きれいに片づけた',
+    '今日の自分を振り返って日記を書いた',
+    'やらないことを1つ決めて守り切った',
+    'SNS・動画をダラダラ見る時間を減らした',
+    '誰かに親切にした・素直に「ありがとう」を伝えた',
   ],
 };
 function getTodayQuests(avoidActions){
   avoidActions=avoidActions||[];
   var dayNum=Math.floor(Date.now()/86400000);
-  return ['MIND','SKILL','KNOWHOW'].map(function(stat){
+  return ['BODY','MIND','SOUL'].map(function(stat){
     var pool=QUEST_POOL[stat];
     var candidates=pool.filter(function(a){return avoidActions.indexOf(a)<0;});
     if(candidates.length===0)candidates=pool.slice();
@@ -665,8 +635,8 @@ var EASY_WORDS = [];
 
 // ── API KEY ──
 var apiKey = '';
-function loadApiKey(){try{apiKey=localStorage.getItem('lq_apikey')||'';}catch(_){}}
-function saveApiKey(k){try{if(k)localStorage.setItem('lq_apikey',k);else localStorage.removeItem('lq_apikey');}catch(_){}}
+function loadApiKey(){try{apiKey=localStorage.getItem('lqp_apikey')||'';}catch(_){}}
+function saveApiKey(k){try{if(k)localStorage.setItem('lqp_apikey',k);else localStorage.removeItem('lqp_apikey');}catch(_){}}
 loadApiKey();
 
 function syncToFirebase(){} // 無効化
@@ -675,14 +645,14 @@ function syncToFirebase(){} // 無効化
 //  STATE
 // ══════════════════════════════════════════
 var TOTAL_LV_MAX = 20; // 合計レベル上限（100%）
-var MEETING_TRIGGER_LV = 10; // 面談トリガー総レベル
+var MEETING_TRIGGER_LV = 10; // マイルストーン演出の総レベル
 
 var state = {
   playerName:'',
   pin:'',
-  boss:'プレインターン卒業', stats:{}, skills:{}, log:[],
+  boss:'なりたい理想の自分', stats:{}, skills:{}, log:[],
   days:{}, chozetsuDate:null, lastDialogDate:null,
-  grimoire:{MIND:[],SKILL:[],KNOWHOW:[]},
+  grimoire:{BODY:[],MIND:[],SOUL:[]},
   quests:[], questDate:null,
   questRefreshCount:0, questRefreshDate:'',
   dailyGoal:null,
@@ -691,23 +661,23 @@ var state = {
 STATS.forEach(function(s){ state.stats[s.key]={level:1,xp:0}; });
 
 // ── マルチアカウント ──
-var ACCOUNTS_KEY='lq_accounts';
+var ACCOUNTS_KEY='lqp_accounts';
 function getAccountsList(){try{return JSON.parse(localStorage.getItem(ACCOUNTS_KEY)||'[]');}catch(_){return[];}}
 function saveAccountsList(list){localStorage.setItem(ACCOUNTS_KEY,JSON.stringify(list));}
-function userKey(name){return 'lq_user_'+name;}
+function userKey(name){return 'lqp_user_'+name;}
 
 function save(){
   if(!state.playerName)return;
   try{
     localStorage.setItem(userKey(state.playerName),JSON.stringify(state));
-    localStorage.setItem('lifequest',JSON.stringify(state)); // 後方互換
+    localStorage.setItem('lqp_state',JSON.stringify(state)); // 後方互換
   }catch(_){}
 }
 
 function loadUserData(d){
   if(d.playerName)     state.playerName=d.playerName;
   if(d.pin)            state.pin=d.pin;
-  state.boss='プレインターン卒業';
+  if(d.boss)           state.boss=d.boss;
   if(d.log)            state.log=d.log;
   if(d.skills)         state.skills=d.skills;
   if(d.days)           state.days=d.days;
@@ -723,12 +693,12 @@ function loadUserData(d){
   if(d.meetingTriggerShown)    state.meetingTriggerShown=d.meetingTriggerShown;
 }
 
-var ACTIVE_USER_KEY='lq_active_user';
+var ACTIVE_USER_KEY='lqp_active_user';
 
 function load(){
   try{
-    // 旧データの移行（lifequest→lq_user_xxx）
-    var oldRaw=localStorage.getItem('lifequest');
+    // 旧データの移行（lqp_state→lqp_user_xxx）
+    var oldRaw=localStorage.getItem('lqp_state');
     if(oldRaw){
       var old=JSON.parse(oldRaw);
       if(old&&old.playerName&&!localStorage.getItem(userKey(old.playerName))){
@@ -752,10 +722,10 @@ function load(){
 
 function loadUserByName(name){
   // stateをリセットしてから指定ユーザーのデータをロード
-  state.playerName='';state.pin='';state.boss='プレインターン卒業';
+  state.playerName='';state.pin='';state.boss='なりたい理想の自分';
   state.stats={};state.skills={};state.log=[];state.days={};
   state.chozetsuDate=null;state.lastDialogDate=null;
-  state.grimoire={MIND:[],SKILL:[],KNOWHOW:[]};
+  state.grimoire={BODY:[],MIND:[],SOUL:[]};
   state.quests=[];state.questDate=null;
   state.questRefreshCount=0;state.questRefreshDate='';state.dailyGoal=null;
   STATS.forEach(function(s){state.stats[s.key]={level:1,xp:0};});
@@ -789,7 +759,7 @@ function getConditionMult(){if(isOffDay())return 0;var m=1.0;if(isNamari())m*=0.
 function toggleOffDay(){
   var d=getDayData(todayStr());d.isOff=!d.isOff;save();
   renderConditionBar();updateFooterState();
-  if(d.isOff)flashOverlay('SAVE POINT','今日は戦略的停滞日','#44aaff');
+  if(d.isOff)flashOverlay('SAVE POINT','今日は休息日','#44aaff');
 }
 
 // ══════════════════════════════════════════
@@ -974,7 +944,6 @@ function showAuth(){
 function hideAuth(){
   document.getElementById('auth-overlay').classList.add('hidden');
   localStorage.setItem(ACTIVE_USER_KEY,state.playerName);
-  state.boss='プレインターン卒業';
   save();
   renderAll();
   setTimeout(showStatusDialog,600);
@@ -1035,172 +1004,6 @@ function doLogin(){
 function doSetup(){}
 function switchAccount(){}
 
-// ── ADMIN PIN AUTH ──
-var ADMIN_PIN_KEY='lq_admin_pin';
-function showAdminAuth(){
-  var stored=localStorage.getItem(ADMIN_PIN_KEY);
-  var sub=document.getElementById('admin-auth-sub');
-  if(!stored&&sub)sub.textContent='管理者暗証番号を設定してください（初回）';
-  else if(sub)sub.textContent='暗証番号を入力してください';
-  document.getElementById('admin-auth').classList.remove('hidden');
-}
-function showDashboard(){
-  document.getElementById('admin-auth').classList.add('hidden');
-  document.getElementById('admin-shell').classList.remove('hidden');
-  initAdminDashboard();
-}
-function verifyAdminPin(){
-  var pin=document.getElementById('admin-pin-input').value;
-  var err=document.getElementById('admin-pin-error');
-  var stored=localStorage.getItem(ADMIN_PIN_KEY);
-  if(!/^\d{4}$/.test(pin)){err.textContent='4桁の数字を入力してください';err.classList.remove('hidden');return;}
-  if(!stored){
-    localStorage.setItem(ADMIN_PIN_KEY,pin);
-    sessionStorage.setItem('lq_admin_auth','1');
-    showDashboard();
-  } else if(pin===stored){
-    err.classList.add('hidden');
-    sessionStorage.setItem('lq_admin_auth','1');
-    showDashboard();
-  } else {
-    err.textContent='暗証番号が違います';err.classList.remove('hidden');
-    document.getElementById('admin-pin-input').value='';
-    document.getElementById('admin-pin-input').focus();
-    var card=document.querySelector('#admin-auth .auth-card');
-    if(card){card.style.animation='none';void card.offsetWidth;card.style.animation='auth-shake .4s ease';}
-  }
-}
-
-// ══════════════════════════════════════════
-//  ADMIN DASHBOARD
-// ══════════════════════════════════════════
-var adminProfiles=[];
-var adminInitialized=false;
-function initAdminDashboard(){
-  // 自分のデータを自動ロード
-  loadLocalProfileToAdmin();
-  renderAdminGrid();
-
-  if(adminInitialized)return;
-  adminInitialized=true;
-
-  document.getElementById('admin-import-input').addEventListener('change',function(e){
-    Array.from(e.target.files).forEach(function(file){
-      var reader=new FileReader();
-      reader.onload=function(ev){
-        try{
-          var d=JSON.parse(ev.target.result);
-          // 同名プレイヤーは上書き
-          var idx=adminProfiles.findIndex(function(p){return p.playerName===d.playerName&&p._source!=='local';});
-          if(idx>=0)adminProfiles[idx]=d;else adminProfiles.push(d);
-          renderAdminGrid();
-        }catch(_){alert(file.name+' の読み込みに失敗しました');}
-      };
-      reader.readAsText(file);
-    });
-    e.target.value='';
-  });
-
-  document.getElementById('admin-refresh-btn').addEventListener('click',function(){
-    loadLocalProfileToAdmin();
-    renderAdminGrid();
-  });
-
-  // ドラッグ＆ドロップ
-  var shell=document.getElementById('admin-shell');
-  var hint=document.getElementById('admin-drop-hint');
-  shell.addEventListener('dragover',function(e){e.preventDefault();if(hint)hint.classList.add('drag-over');});
-  shell.addEventListener('dragleave',function(){if(hint)hint.classList.remove('drag-over');});
-  shell.addEventListener('drop',function(e){
-    e.preventDefault();
-    if(hint)hint.classList.remove('drag-over');
-    Array.from(e.dataTransfer.files).forEach(function(file){
-      if(!file.name.endsWith('.json'))return;
-      var reader=new FileReader();
-      reader.onload=function(ev){
-        try{
-          var d=JSON.parse(ev.target.result);
-          var idx=adminProfiles.findIndex(function(p){return p.playerName===d.playerName&&p._source!=='local';});
-          if(idx>=0)adminProfiles[idx]=d;else adminProfiles.push(d);
-          renderAdminGrid();
-        }catch(_){alert(file.name+' の読み込みに失敗しました');}
-      };
-      reader.readAsText(file);
-    });
-  });
-}
-function loadLocalProfileToAdmin(){
-  try{
-    var raw=localStorage.getItem('lifequest');
-    if(!raw)return;
-    var d=JSON.parse(raw);
-    if(!d||!d.playerName)return;
-    d._source='local';
-    var idx=adminProfiles.findIndex(function(p){return p._source==='local';});
-    if(idx>=0)adminProfiles[idx]=d;else adminProfiles.unshift(d);
-  }catch(_){}
-}
-function adminTotalLevel(p){
-  if(!p.stats)return 0;
-  return Object.values(p.stats).reduce(function(s,st){return s+(st.level||1);},0);
-}
-function adminStreak(p){
-  if(!p.days)return 0;
-  var streak=0;
-  for(var i=0;;i++){
-    var d=new Date();d.setDate(d.getDate()-i);
-    var ds=d.toISOString().slice(0,10);
-    var day=p.days[ds];
-    if(day&&day.isOff){continue;}
-    if(day&&day.xp>0){streak++;}else{break;}
-  }
-  return streak;
-}
-function adminLastDate(p){
-  if(!p.days)return null;
-  var dates=Object.keys(p.days).filter(function(ds){var d=p.days[ds];return d&&d.xp>0;});
-  if(!dates.length)return null;
-  return dates.sort().pop();
-}
-function renderAdminGrid(){
-  var grid=document.getElementById('admin-grid');
-  if(adminProfiles.length===0){
-    grid.innerHTML='<div class="admin-empty">データがありません<br><small style="color:#333;font-size:10px;margin-top:8px;display:block">アプリを使用後に「🔄 更新」を押すか<br>参加者のJSONを追加してください</small></div>';
-    return;
-  }
-  grid.innerHTML='';
-  var sorted=adminProfiles.slice().sort(function(a,b){return adminTotalLevel(b)-adminTotalLevel(a);});
-  sorted.forEach(function(p,i){
-    var card=document.createElement('div');
-    card.className='admin-card';
-    var isLocal=p._source==='local';
-    var totalLv=adminTotalLevel(p);
-    var maxLv=STATS.length*20; // 3stat×Lv20
-    var pct=Math.min(100,Math.round(totalLv/maxLv*100));
-    var statChips=STATS.map(function(s){
-      var st=p.stats&&p.stats[s.key];
-      var lv=st?st.level:1;
-      var xp=st?st.xp:0;
-      var color=STAT_COLORS[s.key]||'#555';
-      return '<span class="admin-stat-chip" style="border-color:'+color+'44;color:'+color+'">'+s.key+' Lv'+lv+'</span>';
-    }).join('');
-    var streak=adminStreak(p);
-    var logCount=(p.log&&p.log.length)||0;
-    var lastDate=adminLastDate(p)||'—';
-    var displayName=p.playerName||('Player '+(i+1));
-    var badge=isLocal?'<span style="font-size:9px;background:#1a2a1a;color:#3a8;border:1px solid #3a8;border-radius:4px;padding:1px 5px;margin-left:4px">本端末</span>':'';
-    card.innerHTML=
-      '<div class="admin-card-name">#'+(i+1)+(isLocal?' · このデバイス':'')+'</div>'+
-      '<div style="font-size:18px;font-weight:bold;color:#fff;margin-bottom:6px;display:flex;align-items:center;gap:6px">'+esc(displayName)+badge+'</div>'+
-      '<div class="admin-total-lv">Total Lv. '+totalLv+'</div>'+
-      '<div class="admin-progress-bar"><div class="admin-progress-fill" style="width:'+pct+'%"></div></div>'+
-      '<div class="admin-progress-pct">進捗 '+pct+'%（目安：Lv'+maxLv+'で卒業）</div>'+
-      '<div class="admin-stat-row">'+statChips+'</div>'+
-      '<div class="admin-streak-row"><span>🔥 '+streak+'日連続</span><span>📝 '+logCount+'件</span><span>最終: '+lastDate+'</span></div>';
-    grid.appendChild(card);
-  });
-}
-
 function exportData(){
   try{
     var blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
@@ -1230,7 +1033,12 @@ function importData(file){
 }
 function resetData(){
   if(!confirm('全データをリセットしますか？\nこの操作は取り消せません。'))return;
-  localStorage.removeItem('lifequest');location.reload();
+  try{
+    if(state.playerName)localStorage.removeItem(userKey(state.playerName));
+    localStorage.removeItem('lqp_state');
+    localStorage.removeItem(ACTIVE_USER_KEY);
+  }catch(_){}
+  location.reload();
 }
 
 // ── RADAR CHART ──
@@ -1414,7 +1222,7 @@ function judgeDailyReport(){
       '振り返りが成長を加速させる。明日につなげよう！',
       '記録する習慣が未来の自分を作る。よくできた！',
       '数字と気づきを書けると成長が見える。次も頑張れ！',
-      '一歩一歩が卒業への道。明日もクエストに挑戦！',
+      '一歩一歩が、なりたい自分への道。明日も続けよう！',
     ];
     var fb=fallbacks[Math.floor(Math.random()*fallbacks.length)];
     applyQuestResults(state.dailyGoal.stat,80,fb,text);
@@ -1424,7 +1232,7 @@ function judgeDailyReport(){
   var goalStat=state.dailyGoal.stat;
   var goalAction=state.dailyGoal.action;
 
-  var prompt='あなたはインターン育成AIです。\n参加者名:'+state.playerName+'\nクエスト('+goalStat+'):'+goalAction+'\n振り返り:"'+text+'"\n\n達成判定とフィードバックをJSONのみで返答:\n{"achieved":true,"xp":80,"advice":"頑張りを褒めて次につながる一言（30〜50文字）"}';
+  var prompt='あなたは自己研鑽を応援するコーチAIです。\nプレイヤー名:'+state.playerName+'\n今日のクエスト('+goalStat+'):'+goalAction+'\n振り返り:"'+text+'"\n\n達成判定とフィードバックをJSONのみで返答:\n{"achieved":true,"xp":80,"advice":"頑張りを認め、次の一歩につながる前向きな一言（30〜50文字）"}';
 
   var btn=document.getElementById('achieve-btn');
   btn.textContent='AI判定中…';btn.disabled=true;
@@ -1452,7 +1260,7 @@ function judgeDailyReport(){
   });
 }
 
-// stat: 'MIND'|'SKILL'|'KNOWHOW', aiXp: AI付与XP(0-150), advice: string|null
+// stat: 'BODY'|'MIND'|'SOUL', aiXp: AI付与XP(0-150), advice: string|null
 function applyQuestResults(stat,aiXp,advice,reportText){
   var streakM=getStreakMult();
   var hasNumbers=/\d/.test(reportText);
@@ -1472,7 +1280,7 @@ function applyQuestResults(stat,aiXp,advice,reportText){
   var didLevelUp=state.stats[stat].level>prevLv;
   var newLevel=state.stats[stat].level;
 
-  // 面談トリガー検出（合計レベルがMEETING_TRIGGER_LV以上かつ未表示）
+  // マイルストーン検出（合計レベルがMEETING_TRIGGER_LV以上かつ未表示）
   var totalLvNow=getTotalLevel();
   var shouldTriggerMeeting=!state.meetingTriggerShown&&totalLvNow>=MEETING_TRIGGER_LV;
 
@@ -1502,7 +1310,7 @@ function showDailyResult(stat,totalXp,advice,didLevelUp,newLevel,triggerMeeting)
   var delay=didLevelUp?5000:2800;
   setTimeout(function(){
     showStatusDialog(advice||null);
-    // 面談トリガーはフィードバックの後に表示
+    // マイルストーン演出はフィードバックの後に表示
     if(triggerMeeting){
       setTimeout(showMeetingTrigger, 1200);
     }
@@ -1787,19 +1595,9 @@ function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').repl
 // ══════════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════════
-if(location.href.includes('admin')){
-  document.getElementById('app-shell').style.display='none';
-  document.querySelectorAll('.auth-overlay').forEach(function(el){
-    el.classList.add('hidden');
-    el.style.display='none';
-  });
-  showDashboard();
-} else {
-  load();
-  state.boss='プレインターン卒業';
-  renderAll(); // データが読み込めていればここで正しく表示される
-  showAuth();  // 常にPIN画面を表示（データは裏で描画済み）
-}
+load();
+renderAll(); // データが読み込めていればここで正しく表示される
+showAuth();  // 常にPIN画面を表示（データは裏で描画済み）
 
 // Events (all null-safe)
 function on(id,ev,fn){var el=document.getElementById(id);if(el)el.addEventListener(ev,fn);}
@@ -1823,8 +1621,6 @@ on('settings-save-btn','click',saveSettings);
 on('settings-overlay','click',function(e){if(e.target===this)closeSettings();});
 on('ai-badge','click',openSettings);
 on('radar-section','click',openStatDetail);
-on('admin-pin-btn','click',verifyAdminPin);
-on('admin-pin-input','keydown',function(e){if(e.key==='Enter')verifyAdminPin();});
 on('sd-close','click',closeStatDetail);
 on('stat-detail-overlay','click',function(e){if(e.target===this)closeStatDetail();});
 on('export-btn','click',exportData);
